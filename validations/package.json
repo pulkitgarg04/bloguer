@@ -1,14 +1,22 @@
 {
   "name": "@pulkitgarg04/bloguer-validations",
   "version": "1.0.0",
+  "description": "A validation library for Bloguer project using Zod",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Pulkit Garg",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
