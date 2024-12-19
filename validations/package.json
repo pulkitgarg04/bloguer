@@ -1,5 +1,5 @@
 {
-  "name": "@pulkitgarg04/bloguer-common",
+  "name": "@pulkitgarg04/bloguer-validations",
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {

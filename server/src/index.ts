@@ -11,6 +11,10 @@ const app = new Hono<{
   };
 }>();
 
+app.get('/', (c) => {
+  return c.text("Hi! Welcome to Bloguer.");
+});
+
 app.use("/*", cors());
 app.route("/api/v1/user", userRouter);
 app.route("/api/v1/blog", blogRouter);
