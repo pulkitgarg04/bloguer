@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "Post" ADD COLUMN     "Date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "category" TEXT NOT NULL DEFAULT 'Uncategorized',
+ADD COLUMN     "views" INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "avatar" TEXT;

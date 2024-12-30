@@ -18,6 +18,7 @@ model User {
   email    String   @unique
   name     String?
   password String
+  avatar   String?
   posts    Post[]
 }
 
@@ -28,4 +29,7 @@ model Post {
   published Boolean  @default(false)
   author    User     @relation(fields: [authorId], references: [id])
   authorId  String
+  category  String   @default("Uncategorized")
+  views     Int      @default(0)
+  Date      DateTime @default(now())
 }
