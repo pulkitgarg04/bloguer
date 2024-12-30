@@ -1,15 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { LogIn } from "lucide-react";
 
-export default function Navbar({ activeTab }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+export default function Navbar({ activeTab }: { activeTab: string }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <nav className="flex justify-between items-center py-5 px-10 border-b-2 bg-white">
-      <div className="text-2xl font-bold text-gray-800">
-        BLOG<span className="text-red-500">UER</span>
-      </div>
+      <Link to="/">
+        <div className="text-2xl font-bold text-gray-800">
+          BLOG<span className="text-red-500">UER</span>
+        </div>
+      </Link>
 
       <ul className="flex gap-8">
         <Link to={"/"}>
@@ -31,7 +53,7 @@ export default function Navbar({ activeTab }) {
                 : "text-gray-700 hover:text-red-500"
             }`}
           >
-            <a href="/blogs">Blogs</a>
+            Blogs
           </li>
         </Link>
         <Link to={"/about"}>
@@ -42,7 +64,7 @@ export default function Navbar({ activeTab }) {
                 : "text-gray-700 hover:text-red-500"
             }`}
           >
-            <a href="/about">About Us</a>
+            About Us
           </li>
         </Link>
         <Link to={"/contact"}>
@@ -53,18 +75,69 @@ export default function Navbar({ activeTab }) {
                 : "text-gray-700 hover:text-red-500"
             }`}
           >
-            <a href="/contact">Contact Us</a>
+            Contact Us
           </li>
         </Link>
       </ul>
 
       <div className="flex items-center">
         {isLoggedIn ? (
-          <div className="rounded-full h-10 w-10 bg-gray-300 flex items-center justify-center text-gray-700 font-bold">
-            A
+          <div className="relative" ref={menuRef}>
+            <div
+              className="inline-flex items-center overflow-hidden rounded-full border bg-gray-200 cursor-pointer"
+              onClick={toggleMenu}
+            >
+              <img
+                src="https://avatar.iran.liara.run/public/44"
+                className="h-10 w-10"
+                alt="Avatar"
+              />
+            </div>
+
+            {menuOpen && (
+              <div
+                className="absolute right-0 z-10 w-52 rounded-md border border-gray-100 bg-white shadow-lg"
+                role="menu"
+              >
+                <div className="p-2">
+                  <a
+                    href="#"
+                    className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                    role="menuitem"
+                  >
+                    Bookmarked Articles
+                  </a>
+
+                  <a
+                    href="#"
+                    className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                    role="menuitem"
+                  >
+                    Write New Article
+                  </a>
+
+                  <a
+                    href="#"
+                    className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                    role="menuitem"
+                  >
+                    My Profile
+                  </a>
+
+                  <button
+                    className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                    role="menuitem"
+                    onClick={() => setIsLoggedIn(!isLoggedIn)}
+                  >
+                    <LogIn size={15} />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
-          <Link to="login">
+          <Link to="/login">
             <button className="flex items-center gap-3 px-4 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800">
               <LogIn size={18} />
               Login

@@ -1,7 +1,7 @@
 import Navbar from "../components/Navbar";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
-import { Twitter, Facebook, Github, Mail, Linkedin } from "lucide-react";
+import { Twitter, Facebook, Mail, Linkedin } from "lucide-react";
 
 const blog = {
   id: 1,
