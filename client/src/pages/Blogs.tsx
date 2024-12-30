@@ -1,5 +1,8 @@
 import Navbar from "../components/Navbar";
+import Newsletter from "../components/Newsletter";
+import Footer from "../components/Footer";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const blogs = [
   {
@@ -136,89 +139,93 @@ export default function Blog() {
       </section>
 
       <section className="mt-16 px-4">
-        <div className="w-full overflow-hidden mb-10 flex justify-center">
-          <img
-            src={blogs[0].featuredImage}
-            alt={blogs[0].title}
-            className="w-1/3 h-80 object-cover rounded-lg shadow-sm"
-          />
-          <div className="p-8 flex flex-col justify-center">
-            <div className="text-sm text-red-500 font-medium flex items-center">
-              <p>
-                {blogs[0].category} • {blogs[0].readTime}
-              </p>
-              <span className="mx-5 bg-red-200 px-2 py-1 rounded-xl text-xs text-red-600">
-                New
-              </span>
-            </div>
-            <h2 className="text-3xl font-semibold mt-2 max-w-96">
-              {blogs[0].title}
-            </h2>
-            <div className="mt-4 flex items-center space-x-4 text-gray-500">
-              <img
-                src={"https://avatar.iran.liara.run/public"}
-                alt={blogs[0].author.name}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-              <div>
-                <p className="font-medium">
-                  {blogs[0].author.name} • {blogs[0].datePosted}
+        <Link to="/blog/page">
+          <div className="w-full overflow-hidden mb-10 flex justify-center">
+            <img
+              src={blogs[0].featuredImage}
+              alt={blogs[0].title}
+              className="w-1/3 h-80 object-cover rounded-lg shadow-sm"
+            />
+            <div className="p-8 flex flex-col justify-center">
+              <div className="text-sm text-red-500 font-medium flex items-center">
+                <p>
+                  {blogs[0].category} • {blogs[0].readTime}
                 </p>
+                <span className="mx-5 bg-red-200 px-2 py-1 rounded-xl text-xs text-red-600">
+                  New
+                </span>
+              </div>
+              <h2 className="text-3xl font-semibold mt-2 max-w-96">
+                {blogs[0].title}
+              </h2>
+              <div className="mt-4 flex items-center space-x-4 text-gray-500">
+                <img
+                  src={"https://avatar.iran.liara.run/public"}
+                  alt={blogs[0].author.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                <div>
+                  <p className="font-medium">
+                    {blogs[0].author.name} • {blogs[0].datePosted}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-10 pb-10">
           {blogs.slice(1).map((blog) => (
-            <div
-              key={blog.id}
-              className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full"
-            >
-              <img
-                src={blog.featuredImage}
-                alt={blog.title}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4 flex flex-col flex-grow">
-                <div className="text-sm text-red-500 font-medium">
-                  {blog.category} • {blog.readTime}
-                </div>
-                <h3 className="text-lg font-semibold mt-2 flex-grow">
-                  {blog.title}
-                </h3>
+            <Link to="/blog/page">
+              <div
+                key={blog.id}
+                className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full"
+              >
+                <img
+                  src={blog.featuredImage}
+                  alt={blog.title}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4 flex flex-col flex-grow">
+                  <div className="text-sm text-red-500 font-medium">
+                    {blog.category} • {blog.readTime}
+                  </div>
+                  <h3 className="text-lg font-semibold mt-2 flex-grow">
+                    {blog.title}
+                  </h3>
 
-                {/* Blog content section */}
-                <p className="mt-4 text-gray-700 text-sm line-clamp-2">
-                  {blog.content}
-                </p>
+                  {/* Blog content section */}
+                  <p className="mt-4 text-gray-700 text-sm line-clamp-2">
+                    {blog.content}
+                  </p>
 
-                <div className="mt-4 flex items-center space-x-4 text-gray-500">
-                  <img
-                    src={"https://avatar.iran.liara.run/public"}
-                    alt={blog.author.name}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                  <div>
-                    <p className="font-medium text-sm">
-                      {blog.author.name} • {blog.datePosted}
-                    </p>
+                  <div className="mt-4 flex items-center space-x-4 text-gray-500">
+                    <img
+                      src={"https://avatar.iran.liara.run/public"}
+                      alt={blog.author.name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="font-medium text-sm">
+                        {blog.author.name} • {blog.datePosted}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
 
       {/* Pagination abhi set karni ha */}
-      <ol className="flex justify-center gap-1 text-xs font-medium">
+      <ol className="flex justify-center items-center gap-2 text-xs font-medium">
         <li>
           <a
             href="#"
-            className="inline-flex size-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900"
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-100 bg-white text-gray-900 hover:bg-gray-100"
           >
-            <span className="sr-only">Prev Page</span>
+            <span className="sr-only">Previous Page</span>
             <ChevronLeft />
           </a>
         </li>
@@ -226,20 +233,22 @@ export default function Blog() {
         <li>
           <a
             href="#"
-            className="block size-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900"
+            className="block w-8 h-8 rounded-md border border-gray-100 bg-white text-center leading-8 text-gray-900 hover:bg-gray-100"
           >
             1
           </a>
         </li>
 
-        <li className="block size-10 text-xl rounded border-red-600 bg-red-600 text-center leading-8 text-white">
-          2
+        <li>
+          <span className="block w-8 h-8 text-xl rounded-md bg-red-600 text-center leading-8 text-white">
+            2
+          </span>
         </li>
 
         <li>
           <a
             href="#"
-            className="block size-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900"
+            className="block w-8 h-8 rounded-md border border-gray-100 bg-white text-center leading-8 text-gray-900 hover:bg-gray-100"
           >
             3
           </a>
@@ -248,7 +257,7 @@ export default function Blog() {
         <li>
           <a
             href="#"
-            className="block size-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900"
+            className="block w-8 h-8 rounded-md border border-gray-100 bg-white text-center leading-8 text-gray-900 hover:bg-gray-100"
           >
             4
           </a>
@@ -257,7 +266,7 @@ export default function Blog() {
         <li>
           <a
             href="#"
-            className="inline-flex size-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180"
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-100 bg-white text-gray-900 hover:bg-gray-100 rtl:rotate-180"
           >
             <span className="sr-only">Next Page</span>
             <ChevronRight />
@@ -265,8 +274,8 @@ export default function Blog() {
         </li>
       </ol>
 
-      Newsletter
-      Footer
+      <Newsletter />
+      <Footer />
     </div>
   );
 }

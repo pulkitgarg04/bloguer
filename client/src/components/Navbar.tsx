@@ -64,13 +64,12 @@ export default function Navbar({ activeTab }) {
             A
           </div>
         ) : (
-          <button
-            className="flex items-center gap-3 px-4 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800"
-            onClick={() => setIsLoggedIn(true)}
-          >
-            <LogIn size={18} />
-            Login
-          </button>
+          <Link to="login">
+            <button className="flex items-center gap-3 px-4 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800">
+              <LogIn size={18} />
+              Login
+            </button>
+          </Link>
         )}
       </div>
     </nav>
