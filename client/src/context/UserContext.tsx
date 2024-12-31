@@ -25,8 +25,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   }, []);
 
   const login = (userData: User) => {
-    localStorage.setItem("user", JSON.stringify(userData));
-    setUser(userData);
+    const { email } = userData;
+    localStorage.setItem("user", JSON.stringify(email));
+    setUser(user);
   };
 
   const logout = () => {

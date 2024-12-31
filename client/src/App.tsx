@@ -1,10 +1,11 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+
 // import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Blog from "./pages/Blogs";
 import BlogPage from "./pages/BlogPage";
-import { Toaster } from "react-hot-toast";
 import EditPost from "./pages/EditPost";
 import WritePost from "./pages/WritePost";
 import Bookmarked from "./pages/Bookmarked";

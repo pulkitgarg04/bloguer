@@ -1,20 +1,15 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useUser } from "../context/UserContext";
 
 export default function Login() {
   const { login } = useUser();
+  const navigate = useNavigate();
 
-  const [formData, setFormData] = useState<{
-    email: string;
-    password: string;
-  }>({
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState<{ email: string; password: string; }>({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,28 +21,60 @@ export default function Login() {
     setShowPassword((prev) => !prev);
   };
 
-  const handleSubmit = () => {
-    const { email, password } = formData;
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      if (!formData.email || !formData.password) {
+        toast.error("Please fill out all fields.");
+        return;
+      }
 
-    if (!email || !password) {
-      toast.error("Please fill out all fields.");
-      return;
-    }
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/login`,
+        formData
+      );
 
-    const dummyUser = { name: 'John Doe', email };
-    login(dummyUser);
+      if (res.status === 200) {
+        const { jwt } = res.data;
+        localStorage.setItem("token", jwt);
+        toast.success("Login Successful!");
+        login(formData);
 
-    toast.success("Signup successful!");
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
+      }
+    } catch (error: unknown) {
+      console.log("Error occurred: ", error);
+    
+      if (axios.isAxiosError(error)) {
+        const errorResponse = error.response?.data;
+    
+        if (error.response?.status === 403) {
+          const message = errorResponse?.message || "Forbidden: Invalid email or password.";
+          toast.error(message);
+          return;
+        }
+    
+        if (Array.isArray(errorResponse) && errorResponse[0]?.message) {
+          toast.error(errorResponse[0].message);
+        } else {
+          toast.error("Invalid Inputs");
+        }
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
+    }    
   };
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 flex font-inter">
       <div className="flex-1 bg-indigo-100 hidden lg:flex items-center justify-center">
-          <img
-            className="h-80"
-            src="https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg"
-            alt="Signup illustration"
-          />
+        <img
+          className="h-80"
+          src="https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg"
+          alt="Signup illustration"
+        />
       </div>
 
       <div className="flex flex-col justify-center items-center flex-1 px-4">
@@ -58,10 +85,14 @@ export default function Login() {
           <h1 className="text-2xl xl:text-3xl font-bold text-center mb-6">
             Login
           </h1>
+          <p className="text-center">
+            Welcome Back to Bloguer Roger! You are just a few steps to login.
+          </p>
 
-          <p className="text-center">Welcome Back to Bloguer Roger! You are just a few steps to login.</p>
-
-          <div className="mx-auto max-w-xs space-y-5">
+          <form
+            onSubmit={handleSubmit}
+            className="mx-auto max-w-xs space-y-5"
+          >
             <label
               htmlFor="email"
               className="relative block rounded-md border border-gray-200 shadow-sm"
@@ -105,7 +136,6 @@ export default function Login() {
 
             <button
               type="submit"
-              onClick={handleSubmit}
               className="bg-gray-800 text-white py-2 rounded-lg flex gap-2 justify-center items-center hover:bg-gray-700 w-full"
             >
               <LogIn size={20} />
@@ -118,7 +148,7 @@ export default function Login() {
                 Signup
               </Link>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>

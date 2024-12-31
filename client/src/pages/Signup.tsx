@@ -1,9 +1,14 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useUser } from "../context/UserContext";
 
 export default function Signup() {
+  // const { signup } = useUser();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState<{
     name: string;
     username: string;
@@ -28,20 +33,62 @@ export default function Signup() {
     setShowPassword((prev) => !prev);
   };
 
-  const handleSubmit = () => {
-    const { name, username, email, password } = formData;
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    if (!name || !username || !email || !password) {
-      toast.error("Please fill out all fields.");
-      return;
+    try {
+      if (
+        !formData.name ||
+        !formData.username ||
+        !formData.email ||
+        !formData.password
+      ) {
+        toast.error("Please fill out all fields.");
+        return;
+      }
+
+      if (!isChecked) {
+        toast.error("You must agree to the terms and privacy policy.");
+        return;
+      }
+
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/signup`,
+        formData
+      );
+
+      if (res.status === 201) {
+        const { jwt } = res.data;
+        localStorage.setItem("token", jwt);
+        toast.success("Signup successful!");
+        // signup(formData);
+
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
+      }
+    } catch (error: unknown) {
+      console.log("Error occurred: ", error);
+
+      if (axios.isAxiosError(error)) {
+        const errorResponse = error.response?.data;
+
+        if (error.response?.status === 403) {
+          const message =
+            errorResponse?.message || "Forbidden: Invalid email or password.";
+          toast.error(message);
+          return;
+        }
+
+        if (Array.isArray(errorResponse) && errorResponse[0]?.message) {
+          toast.error(errorResponse[0].message);
+        } else {
+          toast.error("Invalid Inputs");
+        }
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
     }
-
-    if (!isChecked) {
-      toast.error("You must agree to the terms and privacy policy.");
-      return;
-    }
-
-    toast.success("Signup successful!");
   };
 
   return (
@@ -55,7 +102,9 @@ export default function Signup() {
             Signup
           </h1>
 
-          <p className="text-center">Welcome to Bloguer Roger! You are just a few steps away to signup.</p>
+          <p className="text-center">
+            Welcome to Bloguer Roger! You are just a few steps away to signup.
+          </p>
 
           <div className="mx-auto max-w-xs space-y-4">
             <label
@@ -166,11 +215,11 @@ export default function Signup() {
       </div>
 
       <div className="flex-1 bg-indigo-100 hidden lg:flex items-center justify-center">
-          <img
-            className="h-80"
-            src="https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg"
-            alt="Signup illustration"
-          />
+        <img
+          className="h-80"
+          src="https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg"
+          alt="Signup illustration"
+        />
       </div>
     </div>
   );
