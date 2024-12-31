@@ -100,29 +100,23 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
                 role="menu"
               >
                 <div className="p-2">
-                  <a
-                    href="#"
-                    className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-                    role="menuitem"
-                  >
-                    Bookmarked Articles
-                  </a>
+                  <Link to="/bookmarked">
+                    <div className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700">
+                      Bookmarked Articles
+                    </div>
+                  </Link>
 
-                  <a
-                    href="#"
-                    className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-                    role="menuitem"
-                  >
-                    Write New Article
-                  </a>
+                  <Link to="/write">
+                    <div className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700">
+                      Write Article
+                    </div>
+                  </Link>
 
-                  <a
-                    href="#"
-                    className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-                    role="menuitem"
-                  >
+                  <Link to="/profile">
+                    <div className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700">
                     My Profile
-                  </a>
+                    </div>
+                  </Link>
 
                   <button
                     className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-700 hover:bg-red-50"

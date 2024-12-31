@@ -2,8 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useUser } from "../context/UserContext";
 
 export default function Login() {
+  const { login } = useUser();
+
   const [formData, setFormData] = useState<{
     email: string;
     password: string;
@@ -30,6 +33,9 @@ export default function Login() {
       toast.error("Please fill out all fields.");
       return;
     }
+
+    const dummyUser = { name: 'John Doe', email };
+    login(dummyUser);
 
     toast.success("Signup successful!");
   };
