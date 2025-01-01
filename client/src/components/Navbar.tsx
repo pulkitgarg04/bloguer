@@ -113,7 +113,7 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
                     </div>
                   </Link>
 
-                  <Link to="/profile">
+                  <Link to={`/profile/${user.username}`}>
                     <div className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700">
                     My Profile
                     </div>

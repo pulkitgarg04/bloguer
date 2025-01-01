@@ -28,14 +28,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/blogs" element={<ForYou />} />
-        <Route path="/blog/page" element={<BlogPage />} />
+        <Route path="/:username/:postId" element={<BlogPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
 
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
 
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/:username" element={<Profile />} />
         <Route path="/bookmarked" element={<Bookmarked />} />
         <Route path="/write" element={<WritePost />} />
         <Route path="/edit" element={<EditPost />} />

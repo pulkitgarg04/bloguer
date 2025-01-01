@@ -13,10 +13,10 @@ interface FormatDateFunction {
 
 const formatDate: FormatDateFunction = (dateString) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 };
 
@@ -29,6 +29,8 @@ export default function Blog() {
     readTime: string;
     author: {
       name: string;
+      username: string;
+      avatar: string;
     };
     Date: string;
     content: string;
@@ -40,7 +42,9 @@ export default function Blog() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/bulk`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/bulk`
+        );
         console.log(response.data);
         setBlogs(response.data);
         setLoading(false);
@@ -63,9 +67,12 @@ export default function Blog() {
       <Navbar activeTab="Home" />
 
       <section className="flex flex-col items-center space-y-5 px-4">
-        <h3 className="mt-10 text-3xl font-semibold text-gray-800">Latest Blogs</h3>
+        <h3 className="mt-10 text-3xl font-semibold text-gray-800">
+          Latest Blogs
+        </h3>
         <p className="text-gray-600 text-center">
-          Explore insightful articles, trending topics, and deep dives into the world of blogging.
+          Explore insightful articles, trending topics, and deep dives into the
+          world of blogging.
         </p>
         <div className="flex items-center w-full max-w-lg bg-gray-200 px-4 py-2 rounded-lg shadow-sm">
           <Search className="text-red-500" size={20} />
@@ -78,7 +85,7 @@ export default function Blog() {
       </section>
 
       <section className="mt-16 px-4">
-        <Link to="/blog/page">
+        <Link to={`${blogs[0].author.username}/${blogs[0].id}`}>
           <div className="w-full overflow-hidden mb-10 flex justify-center">
             <img
               src={blogs[0].featuredImage}
@@ -94,10 +101,12 @@ export default function Blog() {
                   New
                 </span>
               </div>
-              <h2 className="text-3xl font-semibold mt-2 max-w-96">{blogs[0].title}</h2>
+              <h2 className="text-3xl font-semibold mt-2 max-w-96">
+                {blogs[0].title}
+              </h2>
               <div className="mt-4 flex items-center space-x-4 text-gray-500">
                 <img
-                  src={"https://avatar.iran.liara.run/public"}
+                  src={blogs[0].author.avatar}
                   alt={blogs[0].author.name}
                   className="w-10 h-10 rounded-full object-cover"
                 />
@@ -113,7 +122,7 @@ export default function Blog() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-10 pb-10">
           {blogs.slice(1).map((blog) => (
-            <Link key={blog.id} to={`/blog/${blog.id}`}>
+            <Link key={blog.id} to={`/${blog.author.username}/${blog.id}`}>
               <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
                 <img
                   src={blog.featuredImage}
@@ -124,17 +133,24 @@ export default function Blog() {
                   <div className="text-sm text-red-500 font-medium">
                     {blog.category} • {blog.readTime || "15Min"}
                   </div>
-                  <h3 className="text-lg font-semibold mt-2 flex-grow">{blog.title}</h3>
-                  <p className="mt-4 text-gray-700 text-sm line-clamp-2">{blog.content}</p>
+                  <h3 className="text-lg font-semibold mt-2 flex-grow">
+                    {blog.title}
+                  </h3>
+                  <p
+                    className="mt-4 text-gray-700 text-sm line-clamp-2"
+                    dangerouslySetInnerHTML={{
+                      __html: blog.content,
+                    }}
+                  />
                   <div className="mt-4 flex items-center space-x-4 text-gray-500">
                     <img
-                      src={"https://avatar.iran.liara.run/public"}
+                      src={blog.author.avatar}
                       alt={blog.author.name}
                       className="w-8 h-8 rounded-full object-cover"
                     />
                     <div>
                       <p className="font-medium text-sm">
-                        {/* {blog.author.name} • {blog.Date.toLocaleDateString()} */}
+                        {blog.author.name} • {formatDate(blog.Date)}
                       </p>
                     </div>
                   </div>
@@ -145,7 +161,6 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* Pagination */}
       <ol className="flex justify-center items-center gap-2 text-xs font-medium">
         <li>
           <a
