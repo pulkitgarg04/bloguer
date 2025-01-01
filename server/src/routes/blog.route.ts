@@ -39,7 +39,7 @@ blogRouter.post("/post", authMiddleware, async (c) => {
         title: body.title,
         content: body.content,
         authorId: userId,
-        featuredImage: `https://bloguer.vercel.app/thumbnails/${body.category}.png`,
+        featuredImage: `/thumbnails/${body.category}.png`,
         category: body.category,
         Date: new Date(),
       },
@@ -102,11 +102,16 @@ blogRouter.get("/bulk", async (c) => {
         author: {
           select: {
             name: true,
+            username: true,
+            avatar: true,
           },
         },
         featuredImage: true,
         category: true,
         Date: true
+      },
+      orderBy: {
+        Date: "desc",
       },
     });
     return c.json(posts);
@@ -125,9 +130,14 @@ blogRouter.get("/:id", async (c) => {
   }).$extends(withAccelerate());
 
   try {
-    const post = await prisma.post.findUnique({
+    const post = await prisma.post.update({
       where: {
         id: id,
+      },
+      data: {
+        views: {
+          increment: 1,
+        },
       },
       select: {
         id: true,
@@ -136,12 +146,46 @@ blogRouter.get("/:id", async (c) => {
         author: {
           select: {
             name: true,
+            username: true,
+            avatar: true,
           },
         },
+        featuredImage: true,
+        category: true,
+        Date: true,
+        views: true
       },
     });
 
-    return c.json(post);
+    const similarPosts = await prisma.post.findMany({
+      where: {
+        category: post?.category,
+        id: {
+          not: post?.id,
+        },
+        published: true,
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        author: {
+          select: {
+            name: true,
+            username: true,
+            avatar: true,
+          },
+        },
+        featuredImage: true,
+        category: true,
+        Date: true,
+      },
+      orderBy: {
+        Date: "desc",
+      },
+    });
+
+    return c.json({ post, similarPosts });
   } catch (error) {
     c.status(411);
     return c.json({

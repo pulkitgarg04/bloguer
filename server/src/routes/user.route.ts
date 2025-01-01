@@ -147,3 +147,59 @@ userRouter.get("/checkAuth", authMiddleware, async (c) => {
     return c.json({ message: "Server error." });
   }
 });
+
+userRouter.get("/profile/:username", async (c) => {
+  const { username } = c.req.param();
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+  
+  try {
+    // console.log("Fetching profile for username:", username);
+    const user = await prisma.user.findUnique({
+      where: {
+        username: username.toLowerCase()
+      },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        email: true,
+        avatar: true,
+      },
+    });
+    
+    // console.log(user);
+
+    if (!user) {
+      c.status(404);
+      return c.json({ message: "User not found." });
+    }
+    
+    console.log(user.id);
+    const posts = await prisma.post.findMany({
+      where: {
+        authorId: user.id,
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        featuredImage: true,
+        category: true,
+        views: true,
+        Date: true,
+      },
+      orderBy: {
+        Date: "desc",
+      },
+    });
+
+    c.status(200);
+    return c.json({user, posts});
+  } catch (e) {
+    console.error(e);
+    c.status(500);
+    return c.json({ message: "Server error while fetching posts." });
+  }
+});
