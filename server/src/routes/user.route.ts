@@ -51,7 +51,6 @@ userRouter.post("/signup", async (c) => {
     }
 
     const hashedPassword = await bcrypt.hash(body.password, 12);
-
     const user = await prisma.user.create({
       data: {
         name: body.name,
@@ -64,19 +63,18 @@ userRouter.post("/signup", async (c) => {
 
     const jwt = await generateJWT(user.id, c.env.JWT_SECRET);
     c.status(201);
-    return c.json({ jwt });
+    return c.json({ jwt, user });
   } catch (e) {
     console.log(e);
     c.status(411);
-
     return c.json({ message: "Server Error" });
   }
 });
 
 userRouter.post("/login", async (c) => {
   const body = await c.req.json();
+  console.log(body);
   const { success, error } = signinInput.safeParse(body);
-
   if (!success) {
     c.status(411);
     return c.json({
@@ -101,8 +99,10 @@ userRouter.post("/login", async (c) => {
     }
 
     const jwt = await generateJWT(user.id, c.env.JWT_SECRET);
+    console.log(jwt);
+    console.log(user);
     c.status(200);
-    return c.json({ jwt });
+    return c.json({ jwt, user });
   } catch (e) {
     console.log(e);
     c.status(411);
@@ -110,14 +110,13 @@ userRouter.post("/login", async (c) => {
   }
 });
 
-userRouter.get("/getUser", authMiddleware, async (c) => {
+userRouter.get("/checkAuth", authMiddleware, async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
 
   try {
     const userId = c.get("userId");
-    console.log(userId);
 
     if (!userId) {
       c.status(401);

@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { LogIn } from "lucide-react";
+import { useAuthStore } from "../store/authStore";
 
 export default function Navbar({ activeTab }: { activeTab: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const { isAuthenticated, user, logout } = useAuthStore();
 
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
@@ -53,7 +54,7 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
                 : "text-gray-700 hover:text-red-500"
             }`}
           >
-            Blogs
+            For You
           </li>
         </Link>
         <Link to={"/about"}>
@@ -81,14 +82,14 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
       </ul>
 
       <div className="flex items-center">
-        {isLoggedIn ? (
+        {isAuthenticated && user ? (
           <div className="relative" ref={menuRef}>
             <div
               className="inline-flex items-center overflow-hidden rounded-full border bg-gray-200 cursor-pointer"
               onClick={toggleMenu}
             >
               <img
-                src="https://avatar.iran.liara.run/public/44"
+                src={user.avatar || "https://avatar.iran.liara.run/public/44"}
                 className="h-10 w-10"
                 alt="Avatar"
               />
@@ -121,7 +122,7 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
                   <button
                     className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-700 hover:bg-red-50"
                     role="menuitem"
-                    onClick={() => setIsLoggedIn(!isLoggedIn)}
+                    onClick={() => logout()}
                   >
                     <LogIn size={15} />
                     Logout

@@ -3,10 +3,8 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { useUser } from "../context/UserContext";
 
 export default function Signup() {
-  // const { signup } = useUser();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<{

@@ -1,66 +1,204 @@
 import Navbar from "../components/Navbar";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { toast } from "react-hot-toast";
+import Footer from "../components/Footer";
+import { Link } from "react-router-dom";
+import { useAuthStore } from "../store/authStore";
 
-interface User {
-  avatar: string | undefined;
-  email: string | null;
-  name: string | null;
-  username: string | null;
-}
+const blogs = [
+  {
+    id: 1,
+    title:
+      "Discover expert tips, trends, and stories to inspire and empower your blogging journey!",
+    content:
+      "Blogging is one of the most rewarding and challenging activities one can embark on. In this blog, we explore various expert tips, techniques, and trends to help you stand out in the crowded digital world. Learn how to craft compelling content, develop your personal brand, and stay updated with the latest industry news.",
+    category: "Blogging",
+    readTime: "15 min read",
+    author: {
+      name: "Pulkit Garg",
+      image: "/author1.jpg",
+    },
+    datePosted: "Dec 30, 2024",
+    featuredImage:
+      "https://blog.snappa.com/wp-content/uploads/2017/04/featured-images-fb.png",
+  },
+  {
+    id: 2,
+    title: "Exploring the Art of Storytelling",
+    content:
+      "Storytelling is a powerful tool that every writer should master. In this article, we dive deep into the art of crafting stories that captivate your audience. We cover narrative structures, character development, and how to evoke emotion through your writing.",
+    category: "Writing",
+    readTime: "10 min read",
+    author: {
+      name: "Pulkit Garg",
+      image: "/author2.jpg",
+    },
+    datePosted: "Dec 28, 2024",
+    featuredImage:
+      "https://blog.snappa.com/wp-content/uploads/2017/04/featured-images-fb.png",
+  },
+  {
+    id: 3,
+    title: "How to Create Engaging Blog Content",
+    content:
+      "Creating engaging content is key to maintaining your audience’s interest. In this blog, we provide strategies on how to keep your readers hooked from the first paragraph to the last. Learn the importance of storytelling, the use of visuals, and how to optimize your content for SEO.",
+    category: "Marketing",
+    readTime: "12 min read",
+    author: {
+      name: "Pulkit Garg",
+      image: "/author3.jpg",
+    },
+    datePosted: "Dec 25, 2024",
+    featuredImage:
+      "https://blog.snappa.com/wp-content/uploads/2017/04/featured-images-fb.png",
+  },
+  {
+    id: 4,
+    title: "Mastering SEO: Tips and Best Practices for Content Optimization",
+    content:
+      "Search Engine Optimization (SEO) is essential for any blogger who wants to grow their audience. This post covers the best practices for SEO, including keyword research, on-page SEO techniques, and how to measure the effectiveness of your SEO efforts. Learn how to make your content discoverable and relevant on search engines.",
+    category: "SEO",
+    readTime: "8 min read",
+    author: {
+      name: "Pulkit Garg",
+      image: "/author4.jpg",
+    },
+    datePosted: "Dec 20, 2024",
+    featuredImage:
+      "https://visualmodo.com/wp-content/uploads/2017/11/Featured-Image-Usage-Guide-And-Importance-6.jpg",
+  },
+  {
+    id: 5,
+    title: "Building a Personal Brand as a Blogger",
+    content:
+      "A personal brand can differentiate you from others in the blogging world. This blog discusses how to create and promote your personal brand, how to connect with your target audience, and why authenticity is key to success in blogging.",
+    category: "Branding",
+    readTime: "10 min read",
+    author: {
+      name: "Pulkit Garg",
+      image: "/author2.jpg",
+    },
+    datePosted: "Dec 18, 2024",
+    featuredImage:
+      "https://blog.snappa.com/wp-content/uploads/2017/04/featured-images-fb.png",
+  },
+  {
+    id: 6,
+    title: "Maximizing Social Media for Bloggers",
+    content:
+      "Social media is an essential tool for bloggers to promote their content and connect with their audience. In this blog, we explore how bloggers can use different social media platforms like Twitter, Instagram, and LinkedIn to boost their visibility and grow their audience.",
+    category: "Social Media",
+    readTime: "12 min read",
+    author: {
+      name: "Pulkit Garg",
+      image: "/author3.jpg",
+    },
+    datePosted: "Dec 15, 2024",
+    featuredImage:
+      "https://blog.snappa.com/wp-content/uploads/2017/04/featured-images-fb.png",
+  },
+  {
+    id: 7,
+    title: "The Role of Visuals in Blogging",
+    content:
+      "Images, infographics, and videos can help improve engagement with your blog posts. In this blog, we discuss how to effectively use visuals in your content, the benefits they bring, and how to create or source high-quality visuals.",
+    category: "Design",
+    readTime: "9 min read",
+    author: {
+      name: "Pulkit Garg",
+      image: "/author4.jpg",
+    },
+    datePosted: "Dec 10, 2024",
+    featuredImage:
+      "https://visualmodo.com/wp-content/uploads/2017/11/Featured-Image-Usage-Guide-And-Importance-6.jpg",
+  },
+];
 
 export default function Profile() {
-  const [user, setUser] = useState<User>({
-    avatar: undefined,
-    email: null,
-    name: null,
-    username: null
-  });
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          toast.error("Unauthorized: Missing or invalid token.");
-          return;
-        }
-
-        const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/getUser`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        setUser(response.data);
-      } catch (e: unknown) {
-        toast.error(e instanceof Error ? e.message : "Server Error");
-      }
-    };
-
-    fetchUserData();
-  }, []);
+  const { user } = useAuthStore();
+  const blogsAvaliable = true;
 
   return (
     <div className="min-h-screen font-inter">
       <Navbar activeTab="Home" />
-      <div>
-        <h1>User Profile</h1>
-        <img src={user.avatar} alt="User Avatar" width={100} height={100} />
-        <p>
-          <strong>Name:</strong> {user.name}
-        </p>
-        <p>
-          <strong>Username:</strong> {user.username}
-        </p>
-        <p>
-          <strong>Email:</strong> {user.email}
-        </p>
-      </div>
+      {user ? (
+        <div className="flex overflow-auto">
+          <div className="w-full">
+            <h3 className="text-2xl font-semibold text-center my-10">
+              {user.name}'s Blogs
+            </h3>
+            <div>
+              {blogsAvaliable ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-10 pb-10">
+                  {blogs.slice(1).map((blog) => (
+                    <Link to="/blog/page">
+                      <div
+                        key={blog.id}
+                        className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full"
+                      >
+                        <img
+                          src={blog.featuredImage}
+                          alt={blog.title}
+                          className="w-full h-48 object-cover"
+                        />
+                        <div className="p-4 flex flex-col flex-grow">
+                          <div className="text-sm text-red-500 font-medium">
+                            {blog.category} • {blog.readTime}
+                          </div>
+                          <h3 className="text-lg font-semibold mt-2 flex-grow">
+                            {blog.title}
+                          </h3>
+
+                          {/* Blog content section */}
+                          <p className="mt-4 text-gray-700 text-sm line-clamp-2">
+                            {blog.content}
+                          </p>
+
+                          <div className="mt-4 flex items-center space-x-4 text-gray-500">
+                            <img
+                              src={"https://avatar.iran.liara.run/public"}
+                              alt={blog.author.name}
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                            <div>
+                              <p className="font-medium text-sm">
+                                {blog.author.name} • {blog.datePosted}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p>No Blogs Available</p>
+              )}
+            </div>
+          </div>
+          <div className="w-96 border-l-2 min-h-screen p-5 flex flex-col items-center">
+            <img
+              src={user.avatar}
+              alt="User Avatar"
+              width={100}
+              height={100}
+              className="py-4"
+            />
+            <div className="text-center">
+              <p className="font-semibold text-xl">{user.name}</p>
+              <p>@{user.username}</p>
+            </div>
+            <div className="py-5">
+              <p>99 Followers</p>
+            </div>
+            <button className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-3xl my-2">
+              Follow
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p>Loading...</p>
+      )}
+
+      <Footer />
     </div>
   );
 }

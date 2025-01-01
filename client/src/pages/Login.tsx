@@ -3,13 +3,17 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { useUser } from "../context/UserContext";
+import { useAuthStore } from "../store/authStore";
 
 export default function Login() {
-  const { login } = useUser();
+  const { login, isAuthenticated, isLoading } = useAuthStore();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState<{ email: string; password: string; }>({ email: "", password: "" });
+  const [formData, setFormData] = useState<{
+    email: string;
+    password: string;
+  }>({ email: "", password: "" });
+
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,22 +27,17 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!formData.email || !formData.password) {
+      toast.error("Please fill out all fields.");
+      return;
+    }
+
     try {
-      if (!formData.email || !formData.password) {
-        toast.error("Please fill out all fields.");
-        return;
-      }
-
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/login`,
-        formData
-      );
-
-      if (res.status === 200) {
-        const { jwt } = res.data;
-        localStorage.setItem("token", jwt);
+      const loginSuccess = await login(formData.email, formData.password);
+      if (loginSuccess) {
+        toast.dismiss();
         toast.success("Login Successful!");
-        login(formData);
 
         setTimeout(() => {
           navigate("/");
@@ -46,16 +45,17 @@ export default function Login() {
       }
     } catch (error: unknown) {
       console.log("Error occurred: ", error);
-    
+
       if (axios.isAxiosError(error)) {
         const errorResponse = error.response?.data;
-    
+
         if (error.response?.status === 403) {
-          const message = errorResponse?.message || "Forbidden: Invalid email or password.";
+          const message =
+            errorResponse?.message || "Forbidden: Invalid email or password.";
           toast.error(message);
           return;
         }
-    
+
         if (Array.isArray(errorResponse) && errorResponse[0]?.message) {
           toast.error(errorResponse[0].message);
         } else {
@@ -64,7 +64,7 @@ export default function Login() {
       } else {
         toast.error("An unexpected error occurred.");
       }
-    }    
+    }
   };
 
   return (
@@ -89,10 +89,7 @@ export default function Login() {
             Welcome Back to Bloguer Roger! You are just a few steps to login.
           </p>
 
-          <form
-            onSubmit={handleSubmit}
-            className="mx-auto max-w-xs space-y-5"
-          >
+          <form onSubmit={handleSubmit} className="mx-auto max-w-xs space-y-5">
             <label
               htmlFor="email"
               className="relative block rounded-md border border-gray-200 shadow-sm"
@@ -136,10 +133,15 @@ export default function Login() {
 
             <button
               type="submit"
-              className="bg-gray-800 text-white py-2 rounded-lg flex gap-2 justify-center items-center hover:bg-gray-700 w-full"
+              disabled={isLoading}
+              className={`py-2 rounded-lg flex gap-2 justify-center items-center w-full ${
+                isLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gray-800 text-white hover:bg-gray-700"
+              }`}
             >
               <LogIn size={20} />
-              <p>Login</p>
+              <p>{isLoading ? "Loading..." : "Login"}</p>
             </button>
 
             <div className="text-sm text-center">

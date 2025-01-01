@@ -15,7 +15,20 @@ app.get('/', (c) => {
   return c.text("Hi! Welcome to Bloguer.");
 });
 
-app.use("/*", cors());
+app.use(
+  "/*",
+  cors({
+    origin: (origin) => {
+      if (origin === "http://localhost:5173") {
+        return origin;
+      }
+      return null;
+    },
+    allowMethods: ["GET", "POST", "PUT", "DELETE"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 app.route("/api/v1/user", userRouter);
 app.route("/api/v1/blog", blogRouter);
 

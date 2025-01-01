@@ -1,10 +1,11 @@
+import { useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
-// import Home from "./pages/Home";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Blog from "./pages/Blogs";
+import ForYou from "./pages/ForYou";
 import BlogPage from "./pages/BlogPage";
 import EditPost from "./pages/EditPost";
 import WritePost from "./pages/WritePost";
@@ -13,30 +14,34 @@ import Profile from "./pages/Profile";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 
-import { UserProvider } from "./context/UserContext";
+import { useAuthStore } from "./store/authStore";
 
 function App() {
+  const { checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
   return (
-    <UserProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Blog />} />
-          <Route path="/blogs" element={<Blog />} />
-          <Route path="/blog/page" element={<BlogPage />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/blogs" element={<ForYou />} />
+        <Route path="/blog/page" element={<BlogPage />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
 
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
 
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/bookmarked" element={<Bookmarked />} />
-          <Route path="/write" element={<WritePost />} />
-          <Route path="/edit" element={<EditPost />} />
-        </Routes>
-        <Toaster />
-      </BrowserRouter>
-    </UserProvider>
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/bookmarked" element={<Bookmarked />} />
+        <Route path="/write" element={<WritePost />} />
+        <Route path="/edit" element={<EditPost />} />
+      </Routes>
+      <Toaster />
+    </BrowserRouter>
   );
 }
 
