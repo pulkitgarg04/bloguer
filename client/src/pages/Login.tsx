@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import { useAuthStore } from "../store/authStore";
 
 export default function Login() {
-  const { login, isAuthenticated, isLoading } = useAuthStore();
+  const { login, isLoading } = useAuthStore();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<{

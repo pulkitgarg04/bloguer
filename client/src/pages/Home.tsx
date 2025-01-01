@@ -1,133 +1,72 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
 import Navbar from "../components/Navbar";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
-const blogs = [
-  {
-    id: 1,
-    title:
-      "Discover expert tips, trends, and stories to inspire and empower your blogging journey!",
-    content:
-      "Blogging is one of the most rewarding and challenging activities one can embark on. In this blog, we explore various expert tips, techniques, and trends to help you stand out in the crowded digital world. Learn how to craft compelling content, develop your personal brand, and stay updated with the latest industry news.",
-    category: "Blogging",
-    readTime: "15 min read",
-    author: {
-      name: "Pulkit Garg",
-      image: "/author1.jpg",
-    },
-    datePosted: "Dec 30, 2024",
-    featuredImage:
-      "https://blog.snappa.com/wp-content/uploads/2017/04/featured-images-fb.png",
-  },
-  {
-    id: 2,
-    title: "Exploring the Art of Storytelling",
-    content:
-      "Storytelling is a powerful tool that every writer should master. In this article, we dive deep into the art of crafting stories that captivate your audience. We cover narrative structures, character development, and how to evoke emotion through your writing.",
-    category: "Writing",
-    readTime: "10 min read",
-    author: {
-      name: "Pulkit Garg",
-      image: "/author2.jpg",
-    },
-    datePosted: "Dec 28, 2024",
-    featuredImage:
-      "https://blog.snappa.com/wp-content/uploads/2017/04/featured-images-fb.png",
-  },
-  {
-    id: 3,
-    title: "How to Create Engaging Blog Content",
-    content:
-      "Creating engaging content is key to maintaining your audience’s interest. In this blog, we provide strategies on how to keep your readers hooked from the first paragraph to the last. Learn the importance of storytelling, the use of visuals, and how to optimize your content for SEO.",
-    category: "Marketing",
-    readTime: "12 min read",
-    author: {
-      name: "Pulkit Garg",
-      image: "/author3.jpg",
-    },
-    datePosted: "Dec 25, 2024",
-    featuredImage:
-      "https://blog.snappa.com/wp-content/uploads/2017/04/featured-images-fb.png",
-  },
-  {
-    id: 4,
-    title: "Mastering SEO: Tips and Best Practices for Content Optimization",
-    content:
-      "Search Engine Optimization (SEO) is essential for any blogger who wants to grow their audience. This post covers the best practices for SEO, including keyword research, on-page SEO techniques, and how to measure the effectiveness of your SEO efforts. Learn how to make your content discoverable and relevant on search engines.",
-    category: "SEO",
-    readTime: "8 min read",
-    author: {
-      name: "Pulkit Garg",
-      image: "/author4.jpg",
-    },
-    datePosted: "Dec 20, 2024",
-    featuredImage:
-      "https://visualmodo.com/wp-content/uploads/2017/11/Featured-Image-Usage-Guide-And-Importance-6.jpg",
-  },
-  {
-    id: 5,
-    title: "Building a Personal Brand as a Blogger",
-    content:
-      "A personal brand can differentiate you from others in the blogging world. This blog discusses how to create and promote your personal brand, how to connect with your target audience, and why authenticity is key to success in blogging.",
-    category: "Branding",
-    readTime: "10 min read",
-    author: {
-      name: "Pulkit Garg",
-      image: "/author2.jpg",
-    },
-    datePosted: "Dec 18, 2024",
-    featuredImage:
-      "https://blog.snappa.com/wp-content/uploads/2017/04/featured-images-fb.png",
-  },
-  {
-    id: 6,
-    title: "Maximizing Social Media for Bloggers",
-    content:
-      "Social media is an essential tool for bloggers to promote their content and connect with their audience. In this blog, we explore how bloggers can use different social media platforms like Twitter, Instagram, and LinkedIn to boost their visibility and grow their audience.",
-    category: "Social Media",
-    readTime: "12 min read",
-    author: {
-      name: "Pulkit Garg",
-      image: "/author3.jpg",
-    },
-    datePosted: "Dec 15, 2024",
-    featuredImage:
-      "https://blog.snappa.com/wp-content/uploads/2017/04/featured-images-fb.png",
-  },
-  {
-    id: 7,
-    title: "The Role of Visuals in Blogging",
-    content:
-      "Images, infographics, and videos can help improve engagement with your blog posts. In this blog, we discuss how to effectively use visuals in your content, the benefits they bring, and how to create or source high-quality visuals.",
-    category: "Design",
-    readTime: "9 min read",
-    author: {
-      name: "Pulkit Garg",
-      image: "/author4.jpg",
-    },
-    datePosted: "Dec 10, 2024",
-    featuredImage:
-      "https://visualmodo.com/wp-content/uploads/2017/11/Featured-Image-Usage-Guide-And-Importance-6.jpg",
-  },
-];
+interface FormatDateFunction {
+  (dateString: string): string;
+}
+
+const formatDate: FormatDateFunction = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
 
 export default function Blog() {
+  interface Blog {
+    id: string;
+    featuredImage: string;
+    title: string;
+    category: string;
+    readTime: string;
+    author: {
+      name: string;
+    };
+    Date: string;
+    content: string;
+  }
+
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/bulk`);
+        console.log(response.data);
+        setBlogs(response.data);
+        setLoading(false);
+      } catch (err) {
+        toast.error("Error fetching blogs");
+        console.log("Error: ", err);
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen font-inter bg-gray-50">
       <Navbar activeTab="Home" />
 
       <section className="flex flex-col items-center space-y-5 px-4">
-        <h3 className="mt-10 text-3xl font-semibold text-gray-800">
-          Latest Blogs
-        </h3>
-
+        <h3 className="mt-10 text-3xl font-semibold text-gray-800">Latest Blogs</h3>
         <p className="text-gray-600 text-center">
-          Explore insightful articles, trending topics, and deep dives into the
-          world of blogging.
+          Explore insightful articles, trending topics, and deep dives into the world of blogging.
         </p>
-
         <div className="flex items-center w-full max-w-lg bg-gray-200 px-4 py-2 rounded-lg shadow-sm">
           <Search className="text-red-500" size={20} />
           <input
@@ -149,15 +88,13 @@ export default function Blog() {
             <div className="p-8 flex flex-col justify-center">
               <div className="text-sm text-red-500 font-medium flex items-center">
                 <p>
-                  {blogs[0].category} • {blogs[0].readTime}
+                  {blogs[0].category} • {blogs[0].readTime || "15 Min"}
                 </p>
                 <span className="mx-5 bg-red-200 px-2 py-1 rounded-xl text-xs text-red-600">
                   New
                 </span>
               </div>
-              <h2 className="text-3xl font-semibold mt-2 max-w-96">
-                {blogs[0].title}
-              </h2>
+              <h2 className="text-3xl font-semibold mt-2 max-w-96">{blogs[0].title}</h2>
               <div className="mt-4 flex items-center space-x-4 text-gray-500">
                 <img
                   src={"https://avatar.iran.liara.run/public"}
@@ -166,7 +103,7 @@ export default function Blog() {
                 />
                 <div>
                   <p className="font-medium">
-                    {blogs[0].author.name} • {blogs[0].datePosted}
+                    {blogs[0].author.name} • {formatDate(blogs[0].Date)}
                   </p>
                 </div>
               </div>
@@ -176,11 +113,8 @@ export default function Blog() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-10 pb-10">
           {blogs.slice(1).map((blog) => (
-            <Link to="/blog/page">
-              <div
-                key={blog.id}
-                className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full"
-              >
+            <Link key={blog.id} to={`/blog/${blog.id}`}>
+              <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
                 <img
                   src={blog.featuredImage}
                   alt={blog.title}
@@ -188,17 +122,10 @@ export default function Blog() {
                 />
                 <div className="p-4 flex flex-col flex-grow">
                   <div className="text-sm text-red-500 font-medium">
-                    {blog.category} • {blog.readTime}
+                    {blog.category} • {blog.readTime || "15Min"}
                   </div>
-                  <h3 className="text-lg font-semibold mt-2 flex-grow">
-                    {blog.title}
-                  </h3>
-
-                  {/* Blog content section */}
-                  <p className="mt-4 text-gray-700 text-sm line-clamp-2">
-                    {blog.content}
-                  </p>
-
+                  <h3 className="text-lg font-semibold mt-2 flex-grow">{blog.title}</h3>
+                  <p className="mt-4 text-gray-700 text-sm line-clamp-2">{blog.content}</p>
                   <div className="mt-4 flex items-center space-x-4 text-gray-500">
                     <img
                       src={"https://avatar.iran.liara.run/public"}
@@ -207,7 +134,7 @@ export default function Blog() {
                     />
                     <div>
                       <p className="font-medium text-sm">
-                        {blog.author.name} • {blog.datePosted}
+                        {/* {blog.author.name} • {blog.Date.toLocaleDateString()} */}
                       </p>
                     </div>
                   </div>
@@ -218,7 +145,7 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* Pagination abhi set karni ha */}
+      {/* Pagination */}
       <ol className="flex justify-center items-center gap-2 text-xs font-medium">
         <li>
           <a
@@ -229,7 +156,7 @@ export default function Blog() {
             <ChevronLeft />
           </a>
         </li>
-
+        {/* Pagination numbers */}
         <li>
           <a
             href="#"
@@ -238,13 +165,12 @@ export default function Blog() {
             1
           </a>
         </li>
-
         <li>
           <span className="block w-8 h-8 text-xl rounded-md bg-red-600 text-center leading-8 text-white">
             2
           </span>
         </li>
-
+        {/* More pages */}
         <li>
           <a
             href="#"
@@ -253,7 +179,6 @@ export default function Blog() {
             3
           </a>
         </li>
-
         <li>
           <a
             href="#"
@@ -262,7 +187,6 @@ export default function Blog() {
             4
           </a>
         </li>
-
         <li>
           <a
             href="#"

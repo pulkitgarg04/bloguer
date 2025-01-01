@@ -12,6 +12,7 @@ const app = new Hono<{
 }>();
 
 app.get('/', (c) => {
+  console.log(c.req.url);
   return c.text("Hi! Welcome to Bloguer.");
 });
 
@@ -29,6 +30,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.route("/api/v1/user", userRouter);
 app.route("/api/v1/blog", blogRouter);
 
