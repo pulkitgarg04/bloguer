@@ -292,12 +292,14 @@ export default function Profile() {
                 />
                 <div className="p-4 flex flex-col flex-grow">
                   <div className="flex gap-2 items-center">
-                    <Link to={`/edit/${user?.username}/${blog.id}`}>
-                      <button className="flex gap-1 items-center bg-red-200 px-2 py-1 rounded-xl text-xs text-red-600">
-                        <PenLine size={15} />
-                        Edit
-                      </button>
-                    </Link>
+                    {user && user.username === username && (
+                      <Link to={`/edit/${user?.username}/${blog.id}`}>
+                        <button className="flex gap-1 items-center bg-red-200 px-2 py-1 rounded-xl text-xs text-red-600">
+                          <PenLine size={15} />
+                          Edit
+                        </button>
+                      </Link>
+                    )}
                     <p className="text-sm text-red-500 font-medium">
                       {blog.category} • {blog.readTime || "Read Time N/A"}
                     </p>
