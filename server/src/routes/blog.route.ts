@@ -65,33 +65,44 @@ blogRouter.post("/post", authMiddleware, async (c) => {
 blogRouter.put("/post", authMiddleware, async (c) => {
   const body = await c.req.json();
 
-  const { success } = updateBlogInput.safeParse(body);
-  if (!success) {
-    c.status(411);
-    return c.json({
-      message: "Inputs are Incorrect",
-    });
-  }
+  // Validate input
+  // const { success } = updateBlogInput.safeParse(body);
+  // if (!success) {
+  //   c.status(411);
+  //   return c.json({
+  //     message: "Inputs are Incorrect",
+  //   });
+  // }
 
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  const post = await prisma.post.update({
-    where: {
-      id: body.id,
-    },
-    data: {
-      title: body.title,
-      content: body.content,
-    },
-  });
+  try {
+    const post = await prisma.post.update({
+      where: {
+        id: body.postId,
+      },
+      data: {
+        title: body.title,
+        content: body.content,
+        category: body.category,
+      },
+    });
 
-  return c.json({
-    messaage: "Updated the blog",
-    id: post.id,
-  });
+    return c.json({
+      message: "Blog updated successfully",
+      id: post.id,
+    });
+  } catch (err) {
+    console.error("Error updating blog:", err);
+    c.status(500);
+    return c.json({
+      message: "Failed to update blog post",
+    });
+  }
 });
+
 
 blogRouter.get("/bulk", async (c) => {
   const prisma = new PrismaClient({

@@ -1,7 +1,7 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Link, useParams } from "react-router-dom";
-import { MapPin, Calendar1 } from "lucide-react";
+import { MapPin, Calendar1, PenLine } from "lucide-react";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuthStore } from "../store/authStore";
@@ -64,14 +64,14 @@ export default function Profile() {
     bio: "",
     JoinedDate: "",
     location: "",
-    followers: []
+    followers: [],
   });
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const userId = user?.id;
-  
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -247,11 +247,7 @@ export default function Profile() {
           </div>
 
           <div className="flex flex-col space-y-4">
-            {user && username === user.username ? (
-              <button className="bg-gray-800 rounded-lg text-white p-2">
-                Edit Profile
-              </button>
-            ) : (
+            {user && username !== user.username && (
               <button
                 className="bg-gray-800 rounded-lg text-white p-2"
                 onClick={handleFollowToggle}
@@ -285,41 +281,49 @@ export default function Profile() {
         {blogs && blogs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-20 pb-10">
             {blogs.map((blog) => (
-              <Link to={`/${userData.username}/${blog.id}`} key={blog.id}>
-                <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
-                  <img
-                    src={
-                      blog.featuredImage ||
-                      "https://default-placeholder.com/600x400.png"
-                    }
-                    alt={blog.title}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="p-4 flex flex-col flex-grow">
-                    <div className="text-sm text-red-500 font-medium">
+              <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
+                <img
+                  src={
+                    blog.featuredImage ||
+                    "https://default-placeholder.com/600x400.png"
+                  }
+                  alt={blog.title}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4 flex flex-col flex-grow">
+                  <div className="flex gap-2 items-center">
+                    <Link to={`/edit/${user?.username}/${blog.id}`}>
+                      <button className="flex gap-1 items-center bg-red-200 px-2 py-1 rounded-xl text-xs text-red-600">
+                        <PenLine size={15} />
+                        Edit
+                      </button>
+                    </Link>
+                    <p className="text-sm text-red-500 font-medium">
                       {blog.category} • {blog.readTime || "Read Time N/A"}
-                    </div>
+                    </p>
+                  </div>
+                  <Link to={`/${userData.username}/${blog.id}`} key={blog.id}>
                     <h3 className="text-lg font-semibold mt-2 flex-grow line-clamp-2">
                       {blog.title}
                     </h3>
-                    <div className="mt-4 flex items-center space-x-4 text-gray-500">
-                      <img
-                        src={
-                          userData.avatar ||
-                          "https://default-avatar.com/avatar.png"
-                        }
-                        alt={userData.name}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                      <div>
-                        <p className="font-medium text-sm">
-                          {userData.name} • {formatDate(blog.Date)}
-                        </p>
-                      </div>
+                  </Link>
+                  <div className="mt-4 flex items-center space-x-4 text-gray-500">
+                    <img
+                      src={
+                        userData.avatar ||
+                        "https://default-avatar.com/avatar.png"
+                      }
+                      alt={userData.name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="font-medium text-sm">
+                        {userData.name} • {formatDate(blog.Date)}
+                      </p>
                     </div>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         ) : (

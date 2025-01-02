@@ -38,7 +38,7 @@ function App() {
         <Route path="/profile/:username" element={<Profile />} />
         <Route path="/bookmarked" element={<Bookmarked />} />
         <Route path="/write" element={<WritePost />} />
-        <Route path="/edit" element={<EditPost />} />
+        <Route path="/edit/:username/:postId" element={<EditPost />} />
       </Routes>
       <Toaster />
     </BrowserRouter>
