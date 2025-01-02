@@ -86,6 +86,7 @@ export default function BlogPage() {
     };
 
     fetchBlogData();
+
   }, [postId]);
 
   useEffect(() => {
@@ -308,7 +309,7 @@ export default function BlogPage() {
           </span>
         </span>
 
-        {similarBlogs && (
+        {similarBlogs && (similarBlogs.length > 0) ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-32 py-10">
             {similarBlogs.map((similarPost) => (
               <Link
@@ -353,6 +354,8 @@ export default function BlogPage() {
               </Link>
             ))}
           </div>
+        ) : (
+          <div className="text-center text-xl p-10">No Similar Posts Available for this post</div>
         )}
       </section>
 

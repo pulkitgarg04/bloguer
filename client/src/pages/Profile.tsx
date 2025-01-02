@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { MapPin, Calendar1 } from "lucide-react";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useAuthStore } from "../store/authStore";
 
 type FormatDateFunction = (dateString: string) => string;
 
@@ -18,6 +19,7 @@ const formatDate: FormatDateFunction = (dateString) => {
 
 export default function Profile() {
   const { username } = useParams();
+  const { user } = useAuthStore();
 
   interface User {
     id: string;
@@ -45,8 +47,21 @@ export default function Profile() {
   }
 
   const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [userData, setUserData] = useState<User | null>(null);
+  const [userData, setUserData] = useState<User>({
+    id: "",
+    name: "",
+    username: "",
+    email: "",
+    avatar: "",
+    bio: "",
+    JoinedDate: "",
+    location: ""
+  });
   const [loading, setLoading] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const userId = user?.id;
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -56,6 +71,14 @@ export default function Profile() {
         );
         setBlogs(response.data.posts);
         setUserData(response.data.user);
+
+        const countResponse = await axios.get(
+          `${
+            import.meta.env.VITE_BACKEND_URL
+          }/api/v1/user/followersFollowingCount/${username}`
+        );
+        setFollowersCount(countResponse.data.followersCount);
+        setFollowingCount(countResponse.data.followingCount);
       } catch (error) {
         console.error("Error fetching profile data:", error);
       } finally {
@@ -132,7 +155,6 @@ export default function Profile() {
     );
   }
 
-
   if (!userData) {
     return (
       <div className="min-h-screen font-inter">
@@ -141,6 +163,40 @@ export default function Profile() {
       </div>
     );
   }
+
+  const handleFollowToggle = async () => {
+    try {
+      const action = isFollowing ? "unfollow" : "follow";
+      const token = localStorage.getItem("token");
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/followOrUnfollow`,
+        {
+          userId,
+          usernameToFollow: username,
+          action
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+  
+      if (response.status === 200) {
+        setIsFollowing(!isFollowing);  // Toggle the following state
+  
+        // Fetch updated follower and following counts
+        const countResponse = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/followersFollowingCount/${username}`
+        );
+        setFollowersCount(countResponse.data.followersCount);
+        setFollowingCount(countResponse.data.followingCount);
+      }
+    } catch (error) {
+      console.error("Error toggling follow status:", error);
+    }
+  };  
 
   return (
     <div className="min-h-screen font-inter">
@@ -176,16 +232,31 @@ export default function Profile() {
           </div>
 
           <div className="flex flex-col space-y-4">
-            <button className="bg-gray-800 rounded-lg text-white p-2">
-              Follow
-            </button>
+            {user && username === user.username ? (
+              <button
+                className="bg-gray-800 rounded-lg text-white p-2"
+              >
+                Edit Profile
+              </button>
+            ) : (
+              <button
+                className="bg-gray-800 rounded-lg text-white p-2"
+                onClick={handleFollowToggle}
+              >
+                {isFollowing ? "Unfollow" : "Follow"}
+              </button>
+            )}
             <div className="flex justify-center items-center gap-4">
               <div className="bg-indigo-200 py-3 rounded-xl px-7">
-                <p className="text-xl text-indigo-800 font-medium">{"1M"}</p>
+                <p className="text-xl text-indigo-800 font-medium">
+                  {followersCount}
+                </p>
                 <p className="text-sm">Followers</p>
               </div>
               <div className="bg-green-200 py-3 rounded-xl px-7">
-                <p className="text-xl text-green-800 font-medium">{"70"}</p>
+                <p className="text-xl text-green-800 font-medium">
+                  {followingCount}
+                </p>
                 <p className="text-sm">Following</p>
               </div>
             </div>
@@ -229,8 +300,7 @@ export default function Profile() {
                       />
                       <div>
                         <p className="font-medium text-sm">
-                          {userData.name} •{" "}
-                          {formatDate(blog.Date)}
+                          {userData.name} • {formatDate(blog.Date)}
                         </p>
                       </div>
                     </div>

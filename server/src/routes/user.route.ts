@@ -74,7 +74,7 @@ userRouter.post("/signup", async (c) => {
 
 userRouter.post("/login", async (c) => {
   const body = await c.req.json();
-  console.log(body);
+  // console.log(body);
   const { success, error } = signinInput.safeParse(body);
   if (!success) {
     c.status(411);
@@ -100,8 +100,8 @@ userRouter.post("/login", async (c) => {
     }
 
     const jwt = await generateJWT(user.id, c.env.JWT_SECRET);
-    console.log(jwt);
-    console.log(user);
+    // console.log(jwt);
+    // console.log(user);
     c.status(200);
     return c.json({ jwt, user });
   } catch (e) {
@@ -178,7 +178,7 @@ userRouter.get("/profile/:username", async (c) => {
       return c.json({ message: "User not found." });
     }
     
-    console.log(user.id);
+    // console.log(user.id);
     const posts = await prisma.post.findMany({
       where: {
         authorId: user.id,
@@ -204,5 +204,114 @@ userRouter.get("/profile/:username", async (c) => {
     console.error(e);
     c.status(500);
     return c.json({ message: "Server error while fetching posts." });
+  }
+});
+
+userRouter.get("/followersFollowingCount/:username", async (c) => {
+  const { username } = c.req.param();
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        username: username.toLowerCase(),
+      },
+      include: {
+        followers: true,
+        following: true,
+      },
+    });
+
+    if (!user) {
+      c.status(404);
+      return c.json({ message: "User not found." });
+    }
+
+    const followersCount = user.followers.length;
+    const followingCount = user.following.length;
+
+    // console.log("Followers Count: ", followersCount);
+    // console.log("Following Count: ", followingCount);
+
+    c.status(200);
+    return c.json({ followersCount, followingCount });
+  } catch (e) {
+    console.error(e);
+    c.status(500);
+    return c.json({ message: "Error fetching followers and following count." });
+  }
+});
+
+userRouter.post("/followOrUnfollow", authMiddleware, async (c) => {
+  const userId = c.get("userId");
+  const { usernameToFollow, action } = await c.req.json();
+
+  if (!userId || !usernameToFollow || !action) {
+    return c.json({ message: "Missing required parameters" }, 400);
+  }
+
+  // console.log("usernameToFollow: ", usernameToFollow);
+  // console.log("action: ", action);
+  // console.log("userId: ", userId);
+
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  try {
+    const userToFollow = await prisma.user.findUnique({
+      where: { username: usernameToFollow.toLowerCase() }
+    });
+
+    if (!userToFollow) {
+      return c.json({ message: "User to follow not found" }, 404);
+    }
+
+    if (action === "follow") {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          following: {
+            connect: { id: userToFollow.id },
+          },
+        },
+      });
+
+      await prisma.user.update({
+        where: { id: userToFollow.id },
+        data: {
+          followers: {
+            connect: { id: userId },
+          },
+        },
+      });
+    } else if (action === "unfollow") {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          following: {
+            disconnect: { id: userToFollow.id },
+          },
+        },
+      });
+
+      await prisma.user.update({
+        where: { id: userToFollow.id },
+        data: {
+          followers: {
+            disconnect: { id: userId },
+          },
+        },
+      });
+    } else {
+      return c.json({ message: "Invalid action" }, 400);
+    }
+
+    return c.json({ message: `Successfully ${action}ed` }, 200);
+  } catch (error) {
+    console.error("Error in follow/unfollow", error);
+    return c.json({ message: "Server error" }, 500);
   }
 });

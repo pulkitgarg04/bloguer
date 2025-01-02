@@ -2,6 +2,7 @@ import { verify } from "hono/jwt";
 
 export default async function authMiddleware(c: any, next: () => void) {
   const authorizationHeader = c.req.header("authorization") || "";
+  console.log("authorizationHeader: ", authorizationHeader)
   const token = authorizationHeader.split(" ")[1];
   try {
     const user = await verify(token, c.env.JWT_SECRET);

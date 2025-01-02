@@ -20,7 +20,7 @@ app.use(
   "/*",
   cors({
     origin: (origin) => {
-      if (origin === "https://bloguer.vercel.app") {
+      if (origin === "http://localhost:5173" || "https://bloguer.vercel.app") {
         return origin;
       }
       return null;

@@ -6,6 +6,10 @@ export default function Newsletter() {
   const [email, setEmail] = useState("");
 
   const handleSubscribe = () => {
+    if(email === "") {
+      toast.error("Please enter your email to subscribe to the newsletter!");
+      return;
+    }
     setEmail("");
     toast.success("You are subscribed to Bloguer's Newsletter");
   };

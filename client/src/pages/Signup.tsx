@@ -3,8 +3,10 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useAuthStore } from "../store/authStore";
 
 export default function Signup() {
+  const { signup, isLoading } = useAuthStore();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<{
@@ -50,14 +52,15 @@ export default function Signup() {
         return;
       }
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/signup`,
-        formData
+      const signupSuccess = await signup(
+        formData.email,
+        formData.password,
+        formData.name,
+        formData.username
       );
 
-      if (res.status === 201) {
-        const { jwt } = res.data;
-        localStorage.setItem("token", jwt);
+      if (signupSuccess) {
+        toast.dismiss();
         toast.success("Signup successful!");
         // signup(formData);
 
@@ -196,10 +199,15 @@ export default function Signup() {
 
               <button
                 type="submit"
-                className="bg-gray-800 text-white py-2 rounded-lg flex gap-2 justify-center items-center hover:bg-gray-700 w-full"
+                disabled={isLoading}
+                className={`py-2 rounded-lg flex gap-2 justify-center items-center w-full ${
+                  isLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-gray-800 text-white hover:bg-gray-700"
+                }`}
               >
                 <LogIn size={20} />
-                <p>Create Account</p>
+                <p>{isLoading ? "Creating..." : "Create Account"}</p>
               </button>
 
               <div className="text-sm text-center">

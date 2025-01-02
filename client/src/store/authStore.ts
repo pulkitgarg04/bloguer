@@ -49,13 +49,16 @@ export const useAuthStore = create<AuthState>((set) => ({
         password,
       });
 
-      localStorage.setItem("token", response.data.jwt);
+      const { jwt } = response.data;
+      localStorage.setItem("token", jwt);
+
       set({
         user: response.data.user,
         isAuthenticated: true,
         isLoading: false,
         error: null,
       });
+
       return true;
     } catch (error) {
       const errorMessage = handleError(error);
