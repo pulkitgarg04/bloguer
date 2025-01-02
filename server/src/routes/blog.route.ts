@@ -171,13 +171,87 @@ blogRouter.get("/bulk", async (c) => {
       currentPage: parseInt(page),
     });
   } catch (error) {
-    return c.json({
-      message: "Something went wrong",
-      error: (error as any).message,
-    }, 500);
+    return c.json(
+      {
+        message: "Something went wrong",
+        error: (error as any).message,
+      },
+      500
+    );
   }
 });
 
+blogRouter.get("/getPopularBlogs", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  try {
+    const popularPosts = await prisma.post.findMany({
+      where: { published: true },
+      orderBy: { views: "desc" },
+      take: 6,
+      include: {
+        author: true,
+      },
+    });
+
+    return c.json({ popularPosts });
+  } catch (error) {
+    console.error("Error in fetching blogs: ", error);
+    c.status(500);
+    return c.json({ error: "Failed to fetch blogs." });
+  }
+});
+
+blogRouter.get("/getFollowingBlogs", async (c) => {
+  const userId = c.req.query("userId");
+  if (!userId) {
+    c.status(400);
+    return c.json({ error: "userId is required" });
+  }
+
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  try {
+    const followingBlogs = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        following: {
+          include: {
+            posts: {
+              where: { published: true },
+              select: {
+                id: true,
+                title: true,
+                content: true,
+                author: {
+                  select: {
+                    name: true,
+                    username: true,
+                    avatar: true,
+                  },
+                },
+                readTime: true,
+                featuredImage: true,
+                category: true,
+                Date: true,
+              },
+              orderBy: { Date: "desc" },
+            },
+          },
+        },
+      },
+    });
+    return c.json({ followingBlogs: followingBlogs?.following || [] });
+  } catch (error) {
+    console.error("Error fetching following blogs:", error);
+    c.status(500);
+    return c.json({ error: "Failed to fetch following blogs." });
+  }
+});
 
 blogRouter.get("/:id", async (c) => {
   const id = c.req.param("id");
@@ -312,7 +386,7 @@ blogRouter.get("/bookmarks/:userId", async (c) => {
                 name: true,
                 avatar: true,
                 username: true,
-              }
+              },
             },
             Date: true,
           },

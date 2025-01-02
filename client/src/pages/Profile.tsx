@@ -21,6 +21,13 @@ export default function Profile() {
   const { username } = useParams();
   const { user } = useAuthStore();
 
+  interface Follower {
+    id: string;
+    name: string;
+    username: string;
+    avatar?: string;
+  }
+
   interface User {
     id: string;
     name: string;
@@ -30,6 +37,7 @@ export default function Profile() {
     bio?: string;
     JoinedDate?: string;
     location?: string;
+    followers: Follower[];
   }
 
   interface Blog {
@@ -55,14 +63,15 @@ export default function Profile() {
     avatar: "",
     bio: "",
     JoinedDate: "",
-    location: ""
+    location: "",
+    followers: []
   });
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const userId = user?.id;
-
+  
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -71,6 +80,11 @@ export default function Profile() {
         );
         setBlogs(response.data.posts);
         setUserData(response.data.user);
+
+        const isUserFollowing = response.data.user.followers.some(
+          (follower: Follower) => follower.id === userId
+        );
+        setIsFollowing(isUserFollowing);
 
         const countResponse = await axios.get(
           `${
@@ -89,7 +103,7 @@ export default function Profile() {
     if (username) {
       fetchUserProfile();
     }
-  }, [username]);
+  }, [username, userId]);
 
   if (loading) {
     return (
@@ -174,21 +188,22 @@ export default function Profile() {
         {
           userId,
           usernameToFollow: username,
-          action
+          action,
         },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        },
+        }
       );
-  
+
       if (response.status === 200) {
-        setIsFollowing(!isFollowing);  // Toggle the following state
-  
-        // Fetch updated follower and following counts
+        setIsFollowing(!isFollowing);
+
         const countResponse = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/followersFollowingCount/${username}`
+          `${
+            import.meta.env.VITE_BACKEND_URL
+          }/api/v1/user/followersFollowingCount/${username}`
         );
         setFollowersCount(countResponse.data.followersCount);
         setFollowingCount(countResponse.data.followingCount);
@@ -196,7 +211,7 @@ export default function Profile() {
     } catch (error) {
       console.error("Error toggling follow status:", error);
     }
-  };  
+  };
 
   return (
     <div className="min-h-screen font-inter">
@@ -233,9 +248,7 @@ export default function Profile() {
 
           <div className="flex flex-col space-y-4">
             {user && username === user.username ? (
-              <button
-                className="bg-gray-800 rounded-lg text-white p-2"
-              >
+              <button className="bg-gray-800 rounded-lg text-white p-2">
                 Edit Profile
               </button>
             ) : (

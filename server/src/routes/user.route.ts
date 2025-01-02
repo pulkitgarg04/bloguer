@@ -168,6 +168,9 @@ userRouter.get("/profile/:username", async (c) => {
         email: true,
         avatar: true,
         JoinedDate: true,
+        location: true,
+        bio: true,
+        followers: true
       },
     });
     
@@ -231,7 +234,7 @@ userRouter.get("/followersFollowingCount/:username", async (c) => {
 
     const followersCount = user.followers.length;
     const followingCount = user.following.length;
-
+    const followers = user.followers;
     // console.log("Followers Count: ", followersCount);
     // console.log("Following Count: ", followingCount);
 
