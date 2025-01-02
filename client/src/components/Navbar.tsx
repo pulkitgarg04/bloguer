@@ -6,7 +6,7 @@ import { useAuthStore } from "../store/authStore";
 export default function Navbar({ activeTab }: { activeTab: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { isAuthenticated, user, logout, isLoading } = useAuthStore();
 
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
@@ -82,7 +82,9 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
       </ul>
 
       <div className="flex items-center">
-        {isAuthenticated && user ? (
+        {isLoading ? (
+          <div className="h-10 w-10 bg-gray-300 rounded-full animate-pulse" />
+        ) : isAuthenticated && user ? (
           <div className="relative" ref={menuRef}>
             <div
               className="inline-flex items-center overflow-hidden rounded-full border bg-gray-200 cursor-pointer"
@@ -115,7 +117,7 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
 
                   <Link to={`/profile/${user.username}`}>
                     <div className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700">
-                    My Profile
+                      My Profile
                     </div>
                   </Link>
 
@@ -132,6 +134,7 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
             )}
           </div>
         ) : (
+          // Login button if not authenticated
           <Link to="/login">
             <button className="flex items-center gap-3 px-4 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800">
               <LogIn size={18} />

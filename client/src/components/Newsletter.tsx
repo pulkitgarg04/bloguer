@@ -1,6 +1,15 @@
 import { Mails } from "lucide-react";
+import { useState } from "react";
+import { toast } from "react-hot-toast";
 
 export default function Newsletter() {
+  const [email, setEmail] = useState("");
+
+  const handleSubscribe = () => {
+    setEmail("");
+    toast.success("You are subscribed to Bloguer's Newsletter");
+  };
+
   return (
     <section className="flex justify-center items-center py-20">
       <div className="bg-red-200 rounded-xl p-5 w-full max-w-4xl flex justify-around items-center">
@@ -17,10 +26,15 @@ export default function Newsletter() {
                 name="email"
                 id="email"
                 placeholder="Your email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="p-2 w-full rounded-r-lg focus:outline-none"
               />
             </div>
-            <button className="ml-4 bg-red-500 text-white font-medium py-2 px-6 rounded-lg hover:bg-red-600 transition duration-200 h-full">
+            <button
+              className="ml-4 bg-red-500 text-white font-medium py-2 px-6 rounded-lg hover:bg-red-600 transition duration-200 h-full"
+              onClick={handleSubscribe}
+            >
               Subscribe
             </button>
           </div>

@@ -11,6 +11,7 @@ export default function WritePost() {
   const [content, setContent] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [category, setCategory] = useState<string>("Uncategorized");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -27,6 +28,7 @@ export default function WritePost() {
     };
 
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
 
       const response = await axios.post(
@@ -49,6 +51,8 @@ export default function WritePost() {
     } catch (error) {
       console.error("Error publishing article:", error);
       toast.error("An error occurred while publishing the article.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -101,12 +105,29 @@ export default function WritePost() {
             <option value="Education" className="bg-white">
               Education
             </option>
+            <option value="Internet" className="bg-white">
+              Internet
+            </option>
+            <option value="Programming" className="bg-white">
+              Programming
+            </option>
+            <option value="Self-Help" className="bg-white">
+              Self-Help
+            </option>
+            <option value="Lifestyle" className="bg-white">
+              Lifestyle
+            </option>
           </select>
           <button
-            className="bg-gray-800 text-white py-2 px-4 rounded-md"
+            className={`py-2 px-4 rounded-md ${
+              loading
+                ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                : "bg-gray-800 text-white hover:bg-gray-700"
+            }`}
             onClick={handlePublish}
+            disabled={loading}
           >
-            Publish
+            {loading ? "Publishing..." : "Publish"}
           </button>
         </div>
 

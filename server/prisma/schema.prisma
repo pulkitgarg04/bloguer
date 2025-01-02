@@ -14,16 +14,19 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  name      String?
-  username  String?    @unique
-  password  String
-  avatar    String?
-  posts     Post[]
-  bookmarks Bookmark[]
-  following User[]     @relation("User Follows")
-  followers User[]     @relation("User Follows")
+  id         String     @id @default(uuid())
+  email      String     @unique
+  name       String?
+  username   String?    @unique
+  bio        String?    @default("Hi There, I am using Bloguer!")
+  location   String?    @default("Earth")
+  password   String
+  avatar     String?
+  JoinedDate DateTime?  @default(now())
+  posts      Post[]
+  bookmarks  Bookmark[]
+  following  User[]     @relation("User Follows")
+  followers  User[]     @relation("User Follows")
 }
 
 model Post {
@@ -31,6 +34,7 @@ model Post {
   title         String
   content       String
   featuredImage String?
+  readTime      String?
   published     Boolean    @default(true)
   author        User       @relation(fields: [authorId], references: [id])
   authorId      String
@@ -42,8 +46,8 @@ model Post {
 
 model Bookmark {
   id     String @id @default(uuid())
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
-  post   Post   @relation(fields: [postId], references: [id])
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId String
 }

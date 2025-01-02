@@ -57,7 +57,8 @@ userRouter.post("/signup", async (c) => {
         username: body.username,
         email: body.email,
         password: hashedPassword,
-        avatar: `https://avatar.iran.liara.run/username?username=${body.name}`
+        avatar: `https://avatar.iran.liara.run/username?username=${body.name}`,
+        JoinedDate: new Date(),
       },
     });
 
@@ -166,6 +167,7 @@ userRouter.get("/profile/:username", async (c) => {
         username: true,
         email: true,
         avatar: true,
+        JoinedDate: true,
       },
     });
     
@@ -186,6 +188,7 @@ userRouter.get("/profile/:username", async (c) => {
         title: true,
         content: true,
         featuredImage: true,
+        readTime: true,
         category: true,
         views: true,
         Date: true,

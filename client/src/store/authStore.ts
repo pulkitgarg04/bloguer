@@ -96,12 +96,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   checkAuth: async () => {
+    set({ isLoading: true });
     const token = localStorage.getItem("token");
   
     if (!token) {
       set({
         isAuthenticated: false,
         isCheckingAuth: false,
+        isLoading: false,
         user: null,
         error: null,
       });
@@ -121,6 +123,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         user: response.data || null,
         isAuthenticated: true,
         isCheckingAuth: false,
+        isLoading: false,
       });
     } catch (error) {
       const errorMessage = handleError(error);
@@ -128,6 +131,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         error: errorMessage,
         isCheckingAuth: false,
         isAuthenticated: false,
+        isLoading: false,
         user: null,
       });
     }

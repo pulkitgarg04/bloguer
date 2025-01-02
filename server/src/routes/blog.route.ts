@@ -34,6 +34,13 @@ blogRouter.post("/post", authMiddleware, async (c) => {
       datasourceUrl: c.env?.DATABASE_URL,
     }).$extends(withAccelerate());
 
+    function calculateReadingTime(content: string) {
+      const wordsPerMinute = 200;
+      const words = content.split(/\s+/).length;
+      const minutes = Math.ceil(words / wordsPerMinute);
+      return `${minutes} Min Read`;
+    }
+
     const post = await prisma.post.create({
       data: {
         title: body.title,
@@ -41,6 +48,7 @@ blogRouter.post("/post", authMiddleware, async (c) => {
         authorId: userId,
         featuredImage: `/thumbnails/${body.category}.png`,
         category: body.category,
+        readTime: calculateReadingTime(body.content),
         Date: new Date(),
       },
     });
@@ -90,10 +98,47 @@ blogRouter.get("/bulk", async (c) => {
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
+  const { page = "1", limit = "10", search = "" } = c.req.query();
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
   try {
+    const totalCount = await prisma.post.count({
+      where: {
+        published: true,
+        OR: [
+          {
+            title: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            content: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        ],
+      },
+    });
+
     const posts = await prisma.post.findMany({
       where: {
         published: true,
+        OR: [
+          {
+            title: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            content: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        ],
       },
       select: {
         id: true,
@@ -106,22 +151,33 @@ blogRouter.get("/bulk", async (c) => {
             avatar: true,
           },
         },
+        readTime: true,
         featuredImage: true,
         category: true,
-        Date: true
+        Date: true,
       },
+      skip,
+      take: parseInt(limit),
       orderBy: {
         Date: "desc",
       },
     });
-    return c.json(posts);
+
+    const totalPages = Math.ceil(totalCount / parseInt(limit));
+
+    return c.json({
+      blogs: posts,
+      totalPages,
+      currentPage: parseInt(page),
+    });
   } catch (error) {
     return c.json({
       message: "Something went wrong",
-      error: error,
-    });
+      error: (error as any).message,
+    }, 500);
   }
 });
+
 
 blogRouter.get("/:id", async (c) => {
   const id = c.req.param("id");
@@ -150,10 +206,11 @@ blogRouter.get("/:id", async (c) => {
             avatar: true,
           },
         },
+        readTime: true,
         featuredImage: true,
         category: true,
         Date: true,
-        views: true
+        views: true,
       },
     });
 
@@ -176,6 +233,7 @@ blogRouter.get("/:id", async (c) => {
             avatar: true,
           },
         },
+        readTime: true,
         featuredImage: true,
         category: true,
         Date: true,
@@ -183,6 +241,7 @@ blogRouter.get("/:id", async (c) => {
       orderBy: {
         Date: "desc",
       },
+      take: 3,
     });
 
     return c.json({ post, similarPosts });
@@ -191,5 +250,87 @@ blogRouter.get("/:id", async (c) => {
     return c.json({
       message: "An error occurred while fetching the blog post",
     });
+  }
+});
+
+blogRouter.post("/bookmark", async (c) => {
+  const { userId, postId } = await c.req.json();
+
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  try {
+    const existingBookmark = await prisma.bookmark.findFirst({
+      where: { userId, postId },
+    });
+
+    if (existingBookmark) {
+      await prisma.bookmark.delete({
+        where: { id: existingBookmark.id },
+      });
+
+      c.status(200);
+      return c.json({ message: "Bookmark removed" });
+    } else {
+      await prisma.bookmark.create({
+        data: { userId, postId },
+      });
+
+      c.status(201);
+      return c.json({ message: "Bookmark added" });
+    }
+  } catch (error) {
+    console.error(error);
+    c.status(500);
+    return c.json({ error: "Failed to toggle bookmark" });
+  }
+});
+
+blogRouter.get("/bookmarks/:userId", async (c) => {
+  const userId = c.req.param("userId");
+  // console.log(userId);
+
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  try {
+    const bookmarks = await prisma.bookmark.findMany({
+      where: { userId },
+      select: {
+        post: {
+          select: {
+            id: true,
+            title: true,
+            featuredImage: true,
+            category: true,
+            readTime: true,
+            authorId: true,
+            author: {
+              select: {
+                name: true,
+                avatar: true,
+                username: true,
+              }
+            },
+            Date: true,
+          },
+        },
+      },
+    });
+
+    if (!bookmarks.length) {
+      c.status(200);
+      return c.json({ message: "No bookmarked blogs found." });
+    }
+
+    const posts = bookmarks.map((bookmark) => bookmark.post);
+    c.status(200);
+    return c.json({ posts });
+  } catch (error) {
+    console.error(error);
+    c.status(500);
+    return c.json({ error: "Failed to fetch bookmarked blogs." });
   }
 });
