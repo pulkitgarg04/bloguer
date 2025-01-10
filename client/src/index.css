@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 .prose h1 {
-  @apply text-3xl font-bold text-gray-900 -mb-4;
+    @apply text-3xl font-bold text-gray-900 -mb-4;
 }
 .prose h2 {
-  @apply text-2xl font-semibold text-gray-800;
+    @apply text-2xl font-semibold text-gray-800;
 }
 .prose h3 {
-  @apply text-xl font-medium text-gray-700;
+    @apply text-xl font-medium text-gray-700;
 }
