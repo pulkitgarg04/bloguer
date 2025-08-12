@@ -12,6 +12,7 @@ export default function WritePost() {
     const [title, setTitle] = useState<string>('');
     const [category, setCategory] = useState<string>('Uncategorized');
     const [loading, setLoading] = useState(false);
+    const [generateLoading, setGenerateLoading] = useState(false);
 
     const navigate = useNavigate();
 
@@ -22,9 +23,9 @@ export default function WritePost() {
         }
 
         const formData = {
-            title: title,
-            content: content,
-            category: category,
+            title,
+            content,
+            category,
         };
 
         try {
@@ -56,6 +57,59 @@ export default function WritePost() {
         }
     };
 
+    const handleGenerateAI = async () => {
+        if (!title) {
+            toast.error(
+                'Please enter a title first — AI needs a title to generate an article.'
+            );
+            return;
+        }
+
+        if (
+            content &&
+            !confirm(
+                'Existing content will be replaced with AI-generated content. Continue?'
+            )
+        ) {
+            return;
+        }
+
+        try {
+            setGenerateLoading(true);
+            const token = localStorage.getItem('token');
+
+            const res = await axios.post(
+                `${import.meta.env.VITE_BACKEND_URL}/api/v1/ai/generate-article`,
+                { title, category },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (res?.data?.success && res.data.content) {
+                setContent(res.data.content);
+                toast.success('AI-generated article inserted. Edit as needed.');
+            } else {
+                const msg = res?.data?.message || 'Failed to generate article.';
+                toast.error(msg);
+            }
+        } catch (err: any) {
+            console.error('AI generation error:', err);
+            if (err?.response?.data?.message) {
+                toast.error(err.response.data.message);
+            } else if (err?.code === 'ECONNABORTED') {
+                toast.error('Generation timed out. Try again.');
+            } else {
+                toast.error('Error generating article. Try again in a moment.');
+            }
+        } finally {
+            setGenerateLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen font-inter">
             <Navbar activeTab="Home" />
@@ -79,6 +133,7 @@ export default function WritePost() {
                         maxLength={100}
                         placeholder="Enter article title"
                     />
+
                     <select
                         name="category"
                         id="category"
@@ -120,6 +175,24 @@ export default function WritePost() {
                             Lifestyle
                         </option>
                     </select>
+
+                    <button
+                        onClick={handleGenerateAI}
+                        disabled={generateLoading}
+                        className={`inline-flex items-center whitespace-nowrap py-2 px-4 rounded-md ${
+                            generateLoading
+                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                : 'bg-gray-800 text-white hover:bg-gray-700'
+                        }`}
+                        title="Write with AI"
+                    >
+                        <span className="pointer-events-none">
+                            {generateLoading
+                                ? 'Generating...'
+                                : 'Write with AI'}
+                        </span>
+                    </button>
+
                     <button
                         className={`py-2 px-4 rounded-md ${
                             loading

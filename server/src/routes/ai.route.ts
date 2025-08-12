@@ -26,19 +26,16 @@ aiRouter.post('/generate-article', authMiddleware, async (c) => {
         const body = await c.req.json();
         const { title, category } = body;
 
-        // Validate input
         if (!title || !category) {
             c.status(400);
             return c.json({ message: 'Title and category are required.' });
         }
 
-        // Check if API key is configured
         if (!c.env.GEMINI_API_KEY) {
             c.status(500);
             return c.json({ message: 'AI service is not configured.' });
         }
 
-        // Initialize Gemini AI
         const genAI = new GoogleGenerativeAI(c.env.GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
@@ -59,7 +56,6 @@ Please format the response as clean HTML that can be directly used in a rich tex
         const response = await result.response;
         const generatedContent = response.text();
 
-        // Clean up the response and ensure it's properly formatted
         const cleanedContent = generatedContent
             .replace(/```html/g, '')
             .replace(/```/g, '')
@@ -75,7 +71,6 @@ Please format the response as clean HTML that can be directly used in a rich tex
     } catch (error: any) {
         console.error('Error generating article:', error);
         
-        // Handle specific error types
         if (error.message?.includes('overloaded') || error.message?.includes('503')) {
             c.status(503);
             return c.json({ 
