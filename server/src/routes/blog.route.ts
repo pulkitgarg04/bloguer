@@ -46,7 +46,7 @@ blogRouter.post('/post', authMiddleware, async (c) => {
                 title: body.title,
                 content: body.content,
                 authorId: userId,
-                featuredImage: `/thumbnails/${body.category}.png`,
+                featuredImage: `/thumbnails/${body.category}.webp`,
                 category: body.category,
                 readTime: calculateReadingTime(body.content),
                 Date: new Date(),

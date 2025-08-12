@@ -60,10 +60,21 @@ DATABASE_URL=your_postgresql_connection_string
 JWT_SECRET=your_jwt_secret
 ```
 
+#### For Backend:
+```env
+DATABASE_URL=your_postgresql_connection_string  
+JWT_SECRET=your_jwt_secret
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
 #### For Frontend:
 ```env
-VITE_BACKEND_URL=https://your-cloudflare-worker-url  
+VITE_BACKEND_URL=https://your-cloudflare-worker-url
 ```
+
+**Note**: To use the AI-powered article writing feature, you'll need to:
+1. Get a Google Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Add it to your server's `wrangler.toml` file as `GEMINI_API_KEY`
 
 ### Tech Stack
 #### Frontend
@@ -81,9 +92,11 @@ VITE_BACKEND_URL=https://your-cloudflare-worker-url
 - **Prisma**: ORM for seamless database integration with PostgreSQL.
 - **JWT (JSON Web Tokens)**: For secure user authentication and session management.
 - **Cloudflare Workers**: Serverless platform for deploying the backend globally.
+- **Google Gemini AI**: For AI-powered article content generation (secure backend integration).
 
 ### Features
 - **Blog Management**: Create, edit, and delete blog posts.
+- **AI-Powered Writing**: Generate article content using Google Gemini AI based on title and category.
 - **User Authentication**: Secure login and signup with JWT.
 - **Rich Text Editor**: Enables dynamic content creation.
 - **Serverless Architecture**: Ensures speed and scalability with Cloudflare Workers.
