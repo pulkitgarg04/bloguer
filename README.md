@@ -8,8 +8,7 @@
   </a>
 </p> -->
 
-### Introduction
-**Bloguer** is a modern, serverless blogging platform designed to provide a seamless experience for creating, managing, and sharing blog content. Built with the latest technologies, Bloguer emphasizes speed, scalability, and a developer-friendly ecosystem.
+**Bloguer** is a modern blogging platform designed to provide a seamless experience for creating, managing, and sharing blog content. Built with the latest technologies, Bloguer emphasizes speed, scalability, and a developer-friendly ecosystem.
 
 The platform supports rich text formatting, image uploads, user authentication, and dynamic content delivery, ensuring a superior blogging experience.
 
@@ -41,35 +40,32 @@ npm install
 
 3. Set up Environment Variables for required variables and setup.
 
-4. Deploy the server:
+4. Run the server:
 ```bash
-wrangler publish  
+# In server shell
+npm run dev
 ```
 
 5. Run the frontend locally:
 ```bash
+# In client shell
 npm run dev  
 ```
 
 ### Environment Variables
-The project relies on several environment variables. Create a .env file in both the server and client directories with the following variables:
+The project relies on several environment variables. Create a .env file in the client directory with the following variables:
 
-#### For Backend:
+#### For Client:
 ```env
-DATABASE_URL=your_postgresql_connection_string  
-JWT_SECRET=your_jwt_secret
+VITE_BACKEND_URL=https://your-cloudflare-worker-url
 ```
 
-#### For Backend:
+#### For Server:
+- Add the environment variables to the `wrangler.toml` file.
 ```env
 DATABASE_URL=your_postgresql_connection_string  
 JWT_SECRET=your_jwt_secret
 GEMINI_API_KEY=your_gemini_api_key_here
-```
-
-#### For Frontend:
-```env
-VITE_BACKEND_URL=https://your-cloudflare-worker-url
 ```
 
 **Note**: To use the AI-powered article writing feature, you'll need to:
@@ -92,17 +88,22 @@ VITE_BACKEND_URL=https://your-cloudflare-worker-url
 - **Prisma**: ORM for seamless database integration with PostgreSQL.
 - **JWT (JSON Web Tokens)**: For secure user authentication and session management.
 - **Cloudflare Workers**: Serverless platform for deploying the backend globally.
-- **Google Gemini AI**: For AI-powered article content generation (secure backend integration).
+- **Generative AI**: For AI-powered article content generation (secure backend integration).
 
 ### Features
 - **Blog Management**: Create, edit, and delete blog posts.
-- **AI-Powered Writing**: Generate article content using Google Gemini AI based on title and category.
+- **AI-Powered Writing**: Generate article content using Generative AI based on title and category.
 - **User Authentication**: Secure login and signup with JWT.
 - **Rich Text Editor**: Enables dynamic content creation.
 - **Serverless Architecture**: Ensures speed and scalability with Cloudflare Workers.
 
+### Changelog
+Refer to [CHANGELOG](CHANGELOG.md) for version history and updates.
+
 ### Contributing
-Contributions to Bloguer are welcome and appreciated! Feel free to fork the repository, submit issues, or create pull requests to suggest new features or fix bugs.
+We appreciate your interest in contributing to Bloguer! Your contributions help us improve and grow. Please feel free to submit pull requests, report issues, or suggest new features. Your feedback and participation are highly valued as we continue to develop and enhance the platform.
+
+For detailed guidelines on how to contribute, please see our [CONTRIBUTING](CONTRIBUTING.md) file.
 
 ### License
-This project is licensed under the MIT License - see the LICENSE.md file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
