@@ -4,7 +4,7 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 
-import { userRouter, blogRouter, aiRouter } from './routes/index.route';
+import { userRouter, blogRouter, aiRouter, commentRouter } from './routes/index.route';
 
 const app = express();
 
@@ -33,6 +33,7 @@ app.get('/', (req, res) => {
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/blog', blogRouter);
 app.use('/api/v1/ai', aiRouter);
+app.use('/api/v1/comment', commentRouter);
 
 const PORT = process.env.PORT || 4000;
 if (require.main === module) {

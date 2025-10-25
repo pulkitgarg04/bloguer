@@ -24,6 +24,7 @@ model User {
   avatar     String?
   JoinedDate DateTime?  @default(now())
   posts      Post[]
+  comments   Comment[]
   bookmarks  Bookmark[]
   following  User[]     @relation("User Follows")
   followers  User[]     @relation("User Follows")
@@ -42,6 +43,7 @@ model Post {
   views         Int        @default(0)
   Date          DateTime   @default(now())
   bookmarks     Bookmark[]
+  comments      Comment[]
 }
 
 model Bookmark {
@@ -50,4 +52,14 @@ model Bookmark {
   userId String
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId String
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  createdAt DateTime @default(now())
 }

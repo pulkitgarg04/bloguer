@@ -17,7 +17,7 @@ aiRouter.post('/generate-article', authMiddleware, async (req: Request, res: Res
     if (!process.env.GEMINI_API_KEY) return res.status(500).json({ message: 'AI service is not configured.' });
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `Write a comprehensive, engaging blog article with the title "${title}" in the category "${category}". 
 
