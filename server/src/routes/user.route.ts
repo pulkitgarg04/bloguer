@@ -1,53 +1,35 @@
-import { Hono } from 'hono';
-import { sign, decode } from 'hono/jwt';
-import { PrismaClient } from '@prisma/client/edge';
+import { Router, Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
 import { withAccelerate } from '@prisma/extension-accelerate';
 import bcrypt from 'bcryptjs';
 import { signinInput, signupInput } from '@pulkitgarg04/bloguer-validations';
 import authMiddleware from '../middlewares/authMiddleware';
+import jwt from 'jsonwebtoken';
 
-export const userRouter = new Hono<{
-    Bindings: {
-        DATABASE_URL: string;
-        JWT_SECRET: string;
-    };
-    Variables: {
-        userId: string;
-    };
-}>();
+export const userRouter = Router();
 
-const generateJWT = (id: string, jwtSecret: string) => {
-    return sign(
-        {
-            id,
-        },
-        jwtSecret
-    );
+const generateJWT = (id: string) => {
+    const secret = process.env.JWT_SECRET || '';
+    return jwt.sign({ id }, secret);
 };
 
-userRouter.post('/signup', async (c) => {
-    const body = await c.req.json();
+userRouter.post('/signup', async (req: Request, res: Response) => {
+    const body = req.body;
 
     const { success, error } = signupInput.safeParse(body);
     if (!success) {
-        c.status(403);
-        return c.json({
-            message: error.message,
-        });
+        return res.status(403).json({ message: error.message });
     }
 
-    const prisma = new PrismaClient({
-        datasourceUrl: c.env.DATABASE_URL,
-    }).$extends(withAccelerate());
+    const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL }).$extends(
+        withAccelerate()
+    );
 
     try {
-        const existingUser = await prisma.user.findUnique({
-            where: { email: body.email },
-        });
+        const existingUser = await prisma.user.findUnique({ where: { email: body.email } });
 
         if (existingUser) {
-            c.status(409);
-            return c.json({ message: 'User already exists.' });
+            return res.status(409).json({ message: 'User already exists.' });
         }
 
         const hashedPassword = await bcrypt.hash(body.password, 12);
@@ -62,105 +44,76 @@ userRouter.post('/signup', async (c) => {
             },
         });
 
-        const jwt = await generateJWT(user.id, c.env.JWT_SECRET);
-        c.status(201);
-        return c.json({ jwt, user });
+        const token = generateJWT(user.id);
+        return res.status(201).json({ jwt: token, user });
     } catch (e) {
-        console.log(e);
-        c.status(411);
-        return c.json({ message: 'Server Error' });
+        console.error(e);
+        return res.status(500).json({ message: 'Server Error' });
     }
 });
 
-userRouter.post('/login', async (c) => {
-    const body = await c.req.json();
-    // console.log(body);
+userRouter.post('/login', async (req: Request, res: Response) => {
+    const body = req.body;
     const { success, error } = signinInput.safeParse(body);
     if (!success) {
-        c.status(411);
-        return c.json({
-            message: error.message,
-        });
+        return res.status(411).json({ message: error.message });
     }
 
-    const prisma = new PrismaClient({
-        datasourceUrl: c.env.DATABASE_URL,
-    }).$extends(withAccelerate());
+    const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL }).$extends(
+        withAccelerate()
+    );
 
     try {
-        const user = await prisma.user.findFirst({
-            where: {
-                email: body.email,
-            },
-        });
+        const user = await prisma.user.findFirst({ where: { email: body.email } });
 
         if (!user || !(await bcrypt.compare(body.password, user.password))) {
-            c.status(403);
-            return c.json({ message: 'Incorrect credentials' });
+            return res.status(403).json({ message: 'Incorrect credentials' });
         }
 
-        const jwt = await generateJWT(user.id, c.env.JWT_SECRET);
-        // console.log(jwt);
-        // console.log(user);
-        c.status(200);
-        return c.json({ jwt, user });
+        const token = generateJWT(user.id);
+        return res.status(200).json({ jwt: token, user });
     } catch (e) {
-        console.log(e);
-        c.status(411);
-        return c.json({ message: 'Server error' });
+        console.error(e);
+        return res.status(500).json({ message: 'Server error' });
     }
 });
 
-userRouter.get('/checkAuth', authMiddleware, async (c) => {
-    const prisma = new PrismaClient({
-        datasourceUrl: c.env.DATABASE_URL,
-    }).$extends(withAccelerate());
+userRouter.get('/checkAuth', authMiddleware, async (req: Request, res: Response) => {
+    const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL }).$extends(
+        withAccelerate()
+    );
 
     try {
-        const userId = c.get('userId');
-
+        const userId = (req as any).userId;
         if (!userId) {
-            c.status(401);
-            return c.json({ message: 'Unauthorized. No user ID found.' });
+            return res.status(401).json({ message: 'Unauthorized. No user ID found.' });
         }
 
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            select: {
-                id: true,
-                name: true,
-                username: true,
-                email: true,
-                avatar: true,
-            },
+            select: { id: true, name: true, username: true, email: true, avatar: true },
         });
 
         if (!user) {
-            c.status(404);
-            return c.json({ message: 'User not found.' });
+            return res.status(404).json({ message: 'User not found.' });
         }
 
-        c.status(200);
-        return c.json(user);
+        return res.status(200).json(user);
     } catch (e) {
         console.error(e);
-        c.status(500);
-        return c.json({ message: 'Server error.' });
+        return res.status(500).json({ message: 'Server error.' });
     }
 });
 
-userRouter.get('/profile/:username', async (c) => {
-    const { username } = c.req.param();
-    const prisma = new PrismaClient({
-        datasourceUrl: c.env.DATABASE_URL,
-    }).$extends(withAccelerate());
+userRouter.get('/profile/:username', async (req: Request, res: Response) => {
+    const { username } = req.params;
+    const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL }).$extends(
+        withAccelerate()
+    );
 
     try {
-        // console.log("Fetching profile for username:", username);
         const user = await prisma.user.findUnique({
-            where: {
-                username: username.toLowerCase(),
-            },
+            where: { username: username.toLowerCase() },
             select: {
                 id: true,
                 name: true,
@@ -174,149 +127,76 @@ userRouter.get('/profile/:username', async (c) => {
             },
         });
 
-        // console.log(user);
-
         if (!user) {
-            c.status(404);
-            return c.json({ message: 'User not found.' });
+            return res.status(404).json({ message: 'User not found.' });
         }
 
-        // console.log(user.id);
         const posts = await prisma.post.findMany({
-            where: {
-                authorId: user.id,
-            },
-            select: {
-                id: true,
-                title: true,
-                content: true,
-                featuredImage: true,
-                readTime: true,
-                category: true,
-                views: true,
-                Date: true,
-            },
-            orderBy: {
-                Date: 'desc',
-            },
+            where: { authorId: user.id },
+            select: { id: true, title: true, content: true, featuredImage: true, readTime: true, category: true, views: true, Date: true },
+            orderBy: { Date: 'desc' },
         });
 
-        c.status(200);
-        return c.json({ user, posts });
+        return res.status(200).json({ user, posts });
     } catch (e) {
         console.error(e);
-        c.status(500);
-        return c.json({ message: 'Server error while fetching posts.' });
+        return res.status(500).json({ message: 'Server error while fetching posts.' });
     }
 });
 
-userRouter.get('/followersFollowingCount/:username', async (c) => {
-    const { username } = c.req.param();
-    const prisma = new PrismaClient({
-        datasourceUrl: c.env.DATABASE_URL,
-    }).$extends(withAccelerate());
+userRouter.get('/followersFollowingCount/:username', async (req: Request, res: Response) => {
+    const { username } = req.params;
+    const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL }).$extends(
+        withAccelerate()
+    );
 
     try {
-        const user = await prisma.user.findUnique({
-            where: {
-                username: username.toLowerCase(),
-            },
-            include: {
-                followers: true,
-                following: true,
-            },
-        });
+        const user = await prisma.user.findUnique({ where: { username: username.toLowerCase() }, include: { followers: true, following: true } });
 
         if (!user) {
-            c.status(404);
-            return c.json({ message: 'User not found.' });
+            return res.status(404).json({ message: 'User not found.' });
         }
 
         const followersCount = user.followers.length;
         const followingCount = user.following.length;
-        const followers = user.followers;
-        // console.log("Followers Count: ", followersCount);
-        // console.log("Following Count: ", followingCount);
 
-        c.status(200);
-        return c.json({ followersCount, followingCount });
+        return res.status(200).json({ followersCount, followingCount });
     } catch (e) {
         console.error(e);
-        c.status(500);
-        return c.json({
-            message: 'Error fetching followers and following count.',
-        });
+        return res.status(500).json({ message: 'Error fetching followers and following count.' });
     }
 });
 
-userRouter.post('/followOrUnfollow', authMiddleware, async (c) => {
-    const userId = c.get('userId');
-    const { usernameToFollow, action } = await c.req.json();
+userRouter.post('/followOrUnfollow', authMiddleware, async (req: Request, res: Response) => {
+    const userId = (req as any).userId;
+    const { usernameToFollow, action } = req.body;
 
     if (!userId || !usernameToFollow || !action) {
-        return c.json({ message: 'Missing required parameters' }, 400);
+        return res.status(400).json({ message: 'Missing required parameters' });
     }
 
-    // console.log("usernameToFollow: ", usernameToFollow);
-    // console.log("action: ", action);
-    // console.log("userId: ", userId);
-
-    const prisma = new PrismaClient({
-        datasourceUrl: c.env.DATABASE_URL,
-    }).$extends(withAccelerate());
+    const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL }).$extends(withAccelerate());
 
     try {
-        const userToFollow = await prisma.user.findUnique({
-            where: { username: usernameToFollow.toLowerCase() },
-        });
+        const userToFollow = await prisma.user.findUnique({ where: { username: usernameToFollow.toLowerCase() } });
 
         if (!userToFollow) {
-            return c.json({ message: 'User to follow not found' }, 404);
+            return res.status(404).json({ message: 'User to follow not found' });
         }
 
         if (action === 'follow') {
-            await prisma.user.update({
-                where: { id: userId },
-                data: {
-                    following: {
-                        connect: { id: userToFollow.id },
-                    },
-                },
-            });
-
-            await prisma.user.update({
-                where: { id: userToFollow.id },
-                data: {
-                    followers: {
-                        connect: { id: userId },
-                    },
-                },
-            });
+            await prisma.user.update({ where: { id: userId }, data: { following: { connect: { id: userToFollow.id } } } });
+            await prisma.user.update({ where: { id: userToFollow.id }, data: { followers: { connect: { id: userId } } } });
         } else if (action === 'unfollow') {
-            await prisma.user.update({
-                where: { id: userId },
-                data: {
-                    following: {
-                        disconnect: { id: userToFollow.id },
-                    },
-                },
-            });
-
-            await prisma.user.update({
-                where: { id: userToFollow.id },
-                data: {
-                    followers: {
-                        disconnect: { id: userId },
-                    },
-                },
-            });
+            await prisma.user.update({ where: { id: userId }, data: { following: { disconnect: { id: userToFollow.id } } } });
+            await prisma.user.update({ where: { id: userToFollow.id }, data: { followers: { disconnect: { id: userId } } } });
         } else {
-            return c.json({ message: 'Invalid action' }, 400);
+            return res.status(400).json({ message: 'Invalid action' });
         }
 
-        return c.json({ message: `Successfully ${action}ed` }, 200);
+        return res.status(200).json({ message: `Successfully ${action}ed` });
     } catch (error) {
         console.error('Error in follow/unfollow', error);
-        return c.json({ message: 'Server error' }, 500);
+        return res.status(500).json({ message: 'Server error' });
     }
 });

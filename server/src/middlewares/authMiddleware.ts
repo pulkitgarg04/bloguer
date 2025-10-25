@@ -1,31 +1,29 @@
-import { verify } from 'hono/jwt';
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
 
-export default async function authMiddleware(c: any, next: () => void) {
-    const authorizationHeader = c.req.header('authorization') || '';
-    // console.log("authorizationHeader: ", authorizationHeader);
+export default async function authMiddleware(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    const authorizationHeader = req.header('authorization') || '';
     if (!authorizationHeader.startsWith('Bearer ')) {
-        c.status(400);
-        return c.json({ message: 'Token missing or malformed' });
+        return res.status(400).json({ message: 'Token missing or malformed' });
     }
     const token = authorizationHeader.split(' ')[1];
     try {
-        const user = await verify(token, c.env.JWT_SECRET);
-        // console.log("user in middleware", user);
+        const secret = process.env.JWT_SECRET || '';
+        const user = jwt.verify(token, secret) as any;
         if (user) {
-            c.set('userId', user.id);
-            await next();
+            (req as any).userId = user.id;
+            return next();
         }
+        return res.status(401).json({ message: 'Unauthorized' });
     } catch (error: any) {
-        if (error.name === 'JwtTokenInvalid') {
-            c.status(403);
-            return c.json({
-                message: 'You are not Authorized',
-            });
+        if (error && error.name === 'JsonWebTokenError') {
+            return res.status(403).json({ message: 'You are not Authorized' });
         }
-        console.log('Error: ', error);
-        c.status(400);
-        return c.json({
-            message: 'Internal Server Error ' + error,
-        });
+        console.error('Error in auth middleware: ', error);
+        return res.status(400).json({ message: 'Internal Server Error ' + error });
     }
 }

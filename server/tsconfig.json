@@ -1,13 +1,14 @@
 {
     "compilerOptions": {
-        "target": "ESNext",
-        "module": "ESNext",
-        "moduleResolution": "Bundler",
+        "target": "ES2022",
+        "module": "CommonJS",
+        "moduleResolution": "Node",
         "strict": true,
         "skipLibCheck": true,
-        "lib": ["ESNext"],
-        "types": ["@cloudflare/workers-types/2023-07-01"],
-        "jsx": "react-jsx",
-        "jsxImportSource": "hono/jsx"
-    }
+        "lib": ["ES2022"],
+        "types": ["node"],
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "include": ["src/**/*.ts"]
 }

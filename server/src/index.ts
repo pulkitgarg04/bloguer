@@ -1,44 +1,44 @@
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
+import dotenv from 'dotenv';
+dotenv.config();
 
-import { blogRouter } from './routes/blog.route';
-import { userRouter } from './routes/user.route';
-import { aiRouter } from './routes/ai.route';
+import express from 'express';
+import cors from 'cors';
 
-const app = new Hono<{
-    Bindings: {
-        DATABASE_URL: string;
-        JWT_SECRET: string;
-        GEMINI_API_KEY: string;
-    };
-}>();
+import { userRouter, blogRouter, aiRouter } from './routes/index.route';
 
-app.get('/', (c) => {
-    console.log(c.req.url);
-    return c.text('Hi! Welcome to Bloguer.');
-});
+const app = express();
+
+const allowedOrigins = ['http://localhost:5173', 'https://bloguer.vercel.app'];
 
 app.use(
-    '/*',
     cors({
-        origin: (origin) => {
-            const allowedOrigins = [
-                'http://localhost:5173',
-                'https://bloguer.vercel.app',
-            ];
-            if (origin && allowedOrigins.includes(origin)) {
-                return origin;
-            }
-            return null;
+        origin: (origin, callback) => {
+            if (!origin) return callback(null, true);
+            if (allowedOrigins.includes(origin)) return callback(null, true);
+            return callback(null, false);
         },
-        allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
-        allowHeaders: ['Content-Type', 'Authorization'],
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
     })
 );
 
-app.route('/api/v1/user', userRouter);
-app.route('/api/v1/blog', blogRouter);
-app.route('/api/v1/ai', aiRouter);
+app.use(express.json());
+
+app.get('/', (req, res) => {
+    console.log(req.url);
+    res.send('Hi! Welcome to Bloguer.');
+});
+
+app.use('/api/v1/user', userRouter);
+app.use('/api/v1/blog', blogRouter);
+app.use('/api/v1/ai', aiRouter);
+
+const PORT = process.env.PORT || 4000;
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server listening on port ${PORT}`);
+    });
+}
 
 export default app;

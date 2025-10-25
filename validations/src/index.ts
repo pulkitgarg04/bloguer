@@ -1,50 +1,43 @@
-import z from "zod";
+import { z } from 'zod';
 
 export const signupInput = z.object({
-    username: z.string().refine((value) => value.trim() !== "", {
-        message: "Username cannot be empty or contain only spaces.",
-    }),
-    email: z.string().email(),
+    username: z
+        .string()
+        .min(1, { message: 'Username cannot be empty or contain only spaces.' })
+        .transform((s) => s.trim()),
+    email: z.string().email({ message: 'Invalid email address.' }),
     password: z
         .string()
-        .min(8, "Password must be at least 8 characters long.")
-        .regex(/[A-Z]/, "Password must include at least one uppercase letter.")
-        .regex(/[a-z]/, "Password must include at least one lowercase letter.")
-        .regex(/\d/, "Password must include at least one number.")
-        .regex(/[@$!%*?&]/, "Password must include at least one special character."),
-    name: z.string().min(2, "Name must be at least 2 characters long."),
+        .min(8, { message: 'Password must be at least 8 characters long.' })
+        .regex(/[A-Z]/, { message: 'Password must include at least one uppercase letter.' })
+        .regex(/[a-z]/, { message: 'Password must include at least one lowercase letter.' })
+        .regex(/\d/, { message: 'Password must include at least one number.' })
+        .regex(/[@$!%*?&]/, { message: 'Password must include at least one special character.' }),
+    name: z.string().min(2, { message: 'Name must be at least 2 characters long.' }),
 });
 
-export type SignupInput = z.infer<typeof signupInput>
+export type SignupInput = z.infer<typeof signupInput>;
 
 export const signinInput = z.object({
-    email: z.string().email(),
-    password: z.string().min(8),
+    email: z.string().email({ message: 'Invalid email address.' }),
+    password: z.string().min(8, { message: 'Password must be at least 8 characters long.' }),
 });
 
-export type SigninInput = z.infer<typeof signinInput>
+export type SigninInput = z.infer<typeof signinInput>;
 
 export const createBlogInput = z.object({
-    title: z
-        .string()
-        .min(5, "Title must be at least 5 characters long.")
-        .max(100, "Title cannot exceed 100 characters."),
-    content: z
-        .string()
-        .min(20, "Content must be at least 20 characters long."),
+    title: z.string().min(5, { message: 'Title must be at least 5 characters long.' }).max(100, { message: 'Title cannot exceed 100 characters.' }),
+    content: z.string().min(20, { message: 'Content must be at least 20 characters long.' }),
+    category: z.string().min(1, { message: 'Category is required.' }),
 });
 
-export type CreateBlogInput = z.infer<typeof createBlogInput>
+export type CreateBlogInput = z.infer<typeof createBlogInput>;
 
 export const updateBlogInput = z.object({
-    id: z.number().int("ID must be an integer."),
-    title: z
-        .string()
-        .min(5, "Title must be at least 5 characters long.")
-        .max(100, "Title cannot exceed 100 characters."),
-    content: z
-        .string()
-        .min(20, "Content must be at least 20 characters long."),
+    postId: z.string().min(1, { message: 'postId is required.' }),
+    title: z.string().min(5, { message: 'Title must be at least 5 characters long.' }).max(100, { message: 'Title cannot exceed 100 characters.' }),
+    content: z.string().min(20, { message: 'Content must be at least 20 characters long.' }),
+    category: z.string().min(1, { message: 'Category is required.' }).optional(),
 });
 
-export type UpdateBlogInput = z.infer<typeof updateBlogInput>
+export type UpdateBlogInput = z.infer<typeof updateBlogInput>;
