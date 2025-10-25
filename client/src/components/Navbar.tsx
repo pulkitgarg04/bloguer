@@ -121,6 +121,12 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
                                         </div>
                                     </Link>
 
+                                    <Link to="/analytics">
+                                        <div className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700">
+                                            Analytics
+                                        </div>
+                                    </Link>
+
                                     <Link to={`/profile/${user.username}`}>
                                         <div className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700">
                                             My Profile
@@ -140,7 +146,6 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
                         )}
                     </div>
                 ) : (
-                    // Login button if not authenticated
                     <Link to="/login">
                         <button className="flex items-center gap-3 px-4 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800">
                             <LogIn size={18} />

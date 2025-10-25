@@ -13,6 +13,7 @@ import Bookmarked from './pages/Bookmarked';
 import Profile from './pages/Profile';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Analytics from './pages/Analytics';
 
 import { useAuthStore } from './store/authStore';
 
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/bookmarked" element={<Bookmarked />} />
                 <Route path="/write" element={<WritePost />} />
                 <Route path="/edit/:username/:postId" element={<EditPost />} />
+                <Route path="/analytics" element={<Analytics />} />
             </Routes>
             <Toaster />
         </BrowserRouter>

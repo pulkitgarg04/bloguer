@@ -44,6 +44,8 @@ model Post {
   Date          DateTime   @default(now())
   bookmarks     Bookmark[]
   comments      Comment[]
+  viewsLog      PostView[]
+  shares        PostShare[]
 }
 
 model Bookmark {
@@ -61,5 +63,30 @@ model Comment {
   authorId  String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    String
+  createdAt DateTime @default(now())
+}
+
+model PostView {
+  id         String   @id @default(uuid())
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId     String
+  userId     String?
+  ip         String?
+  userAgent  String?
+  referrer   String?
+  visitorId  String?
+  country    String?
+  source     String?
+  isReturning Boolean? @default(false)
+  durationSec Int?
+  scrollDepth Int?
+  createdAt  DateTime @default(now())
+}
+
+model PostShare {
+  id        String   @id @default(uuid())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  platform  String
   createdAt DateTime @default(now())
 }
