@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Newsletter from '../components/Newsletter';
+import BlogCard from '../components/BlogCard';
 import Skeleton from '../components/Skeleton';
 import { useAuthStore } from '../store/authStore';
 
@@ -31,20 +31,6 @@ interface PopularBlogsResponse {
 interface FollowingBlogsResponse {
     followingBlogs: { posts: Post[] }[];
 }
-
-interface FormatDateFunction {
-    (dateString: string): string;
-}
-
-const formatDate: FormatDateFunction = (dateString) => {
-    const date = new Date(dateString);
-
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-};
 
 const ForYou: React.FC = () => {
     const { user, isAuthenticated } = useAuthStore();
@@ -125,47 +111,16 @@ const ForYou: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-10 pb-10">
                         {popularPosts.map((post) => (
-                            <Link
+                            <BlogCard
                                 key={post.id}
-                                to={`/${post.author?.username || 'unknown'}/${post.id}`}
-                            >
-                                <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
-                                    <img
-                                        src={post.featuredImage}
-                                        alt={post.title}
-                                        className="w-full h-48 object-cover"
-                                    />
-                                    <div className="p-4 flex flex-col flex-grow">
-                                        <div className="text-sm text-red-500 font-medium">
-                                            {post.category} •{' '}
-                                            {post.readTime || 'Read Time N/A'}
-                                        </div>
-                                        <h3 className="text-lg font-semibold mt-2 flex-grow">
-                                            {post.title}
-                                        </h3>
-                                        <div className="mt-4 flex items-center space-x-4 text-gray-500">
-                                            <img
-                                                src={
-                                                    post.author?.avatar ||
-                                                    'default-avatar.png'
-                                                }
-                                                alt={
-                                                    post.author?.name ||
-                                                    'Unknown Author'
-                                                }
-                                                className="w-8 h-8 rounded-full object-cover"
-                                            />
-                                            <div>
-                                                <p className="font-medium text-sm">
-                                                    {post.author?.name ||
-                                                        'Unknown'}{' '}
-                                                    • {formatDate(post.Date)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Link>
+                                id={post.id}
+                                title={post.title}
+                                category={post.category}
+                                readTime={post.readTime || undefined}
+                                featuredImage={post.featuredImage}
+                                author={post.author}
+                                date={post.Date}
+                            />
                         ))}
                     </div>
                 </div>
@@ -177,49 +132,16 @@ const ForYou: React.FC = () => {
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-16 pb-10">
                             {followingBlogs.map((post) => (
-                                <Link
+                                <BlogCard
                                     key={post.id}
-                                    to={`/${post.author?.username || 'unknown'}/${post.id}`}
-                                >
-                                    <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
-                                        <img
-                                            src={post.featuredImage}
-                                            alt={post.title}
-                                            className="w-full h-48 object-cover"
-                                        />
-                                        <div className="p-4 flex flex-col flex-grow">
-                                            <div className="text-sm text-red-500 font-medium">
-                                                {post.category} •{' '}
-                                                {post.readTime ||
-                                                    'Read Time N/A'}
-                                            </div>
-                                            <h3 className="text-lg font-semibold mt-2 flex-grow">
-                                                {post.title}
-                                            </h3>
-                                            <div className="mt-4 flex items-center space-x-4 text-gray-500">
-                                                <img
-                                                    src={
-                                                        post.author?.avatar ||
-                                                        'default-avatar.png'
-                                                    }
-                                                    alt={
-                                                        post.author?.name ||
-                                                        'Unknown Author'
-                                                    }
-                                                    className="w-8 h-8 rounded-full object-cover"
-                                                />
-                                                <div>
-                                                    <p className="font-medium text-sm">
-                                                        {post.author?.name ||
-                                                            'Unknown'}{' '}
-                                                        •{' '}
-                                                        {formatDate(post.Date)}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Link>
+                                    id={post.id}
+                                    title={post.title}
+                                    category={post.category}
+                                    readTime={post.readTime || undefined}
+                                    featuredImage={post.featuredImage}
+                                    author={post.author}
+                                    date={post.Date}
+                                />
                             ))}
                         </div>
                     </div>

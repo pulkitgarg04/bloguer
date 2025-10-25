@@ -8,6 +8,7 @@ import {
     getPostService,
     analyticsOverviewService,
     analyticsPostService,
+    analyticsGeoService,
 } from '../services/blog.service';
 
 export const BlogController = {
@@ -159,6 +160,20 @@ export const BlogController = {
             return res
                 .status(500)
                 .json({ message: 'Failed to load post analytics' });
+        }
+    },
+
+    analyticsGeo: async (req: Request, res: Response) => {
+        try {
+            const userId = (req as any).userId as string | undefined;
+            if (!userId)
+                return res.status(401).json({ message: 'Unauthorized' });
+            const data = await analyticsGeoService(userId);
+            return res.json(data);
+        } catch (error) {
+            return res
+                .status(500)
+                .json({ message: 'Failed to load geo analytics' });
         }
     },
 };

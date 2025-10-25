@@ -3,24 +3,10 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Newsletter from '../components/Newsletter';
 import Footer from '../components/Footer';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
+import BlogCard from '../components/BlogCard';
 import Skeleton from '../components/Skeleton';
-
-interface FormatDateFunction {
-    (dateString: string): string;
-}
-
-const formatDate: FormatDateFunction = (dateString) => {
-    const date = new Date(dateString);
-
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-};
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 export default function Blog() {
     interface Blog {
@@ -116,44 +102,17 @@ export default function Blog() {
                     {searchTerm === '' &&
                         currentPage === 1 &&
                         blogs.length > 0 && (
-                            <Link
-                                to={`${blogs[0].author.username}/${blogs[0].id}`}
-                            >
-                                <div className="w-full overflow-hidden mb-10 flex justify-center">
-                                    <img
-                                        src={blogs[0].featuredImage}
-                                        alt={blogs[0].title}
-                                        className="w-1/3 h-80 object-cover rounded-lg shadow-sm"
-                                    />
-                                    <div className="p-8 flex flex-col justify-center">
-                                        <div className="text-sm text-red-500 font-medium flex items-center">
-                                            <p>
-                                                {blogs[0].category} •{' '}
-                                                {blogs[0].readTime || '15 Min'}
-                                            </p>
-                                            <span className="mx-5 bg-red-200 px-2 py-1 rounded-xl text-xs text-red-600">
-                                                Latest
-                                            </span>
-                                        </div>
-                                        <h2 className="text-3xl font-semibold mt-2 max-w-96">
-                                            {blogs[0].title}
-                                        </h2>
-                                        <div className="mt-4 flex items-center space-x-4 text-gray-500">
-                                            <img
-                                                src={blogs[0].author.avatar}
-                                                alt={blogs[0].author.name}
-                                                className="w-10 h-10 rounded-full object-cover"
-                                            />
-                                            <div>
-                                                <p className="font-medium">
-                                                    {blogs[0].author.name} •{' '}
-                                                    {formatDate(blogs[0].Date)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Link>
+                            <BlogCard
+                                id={blogs[0].id}
+                                title={blogs[0].title}
+                                category={blogs[0].category}
+                                readTime={blogs[0].readTime}
+                                featuredImage={blogs[0].featuredImage}
+                                author={blogs[0].author}
+                                date={blogs[0].Date}
+                                variant="featured"
+                                showLatestBadge={true}
+                            />
                         )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-10 pb-10">
@@ -162,41 +121,16 @@ export default function Blog() {
                                 searchTerm === '' && currentPage === 1 ? 1 : 0
                             )
                             .map((blog) => (
-                                <Link
+                                <BlogCard
                                     key={blog.id}
-                                    to={`/${blog.author.username}/${blog.id}`}
-                                >
-                                    <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
-                                        <img
-                                            src={blog.featuredImage}
-                                            alt={blog.title}
-                                            className="w-full h-48 object-cover"
-                                        />
-                                        <div className="p-4 flex flex-col flex-grow">
-                                            <div className="text-sm text-red-500 font-medium">
-                                                {blog.category} •{' '}
-                                                {blog.readTime ||
-                                                    'Read Time N/A'}
-                                            </div>
-                                            <h3 className="text-lg font-semibold mt-2 flex-grow">
-                                                {blog.title}
-                                            </h3>
-                                            <div className="mt-4 flex items-center space-x-4 text-gray-500">
-                                                <img
-                                                    src={blog.author.avatar}
-                                                    alt={blog.author.name}
-                                                    className="w-8 h-8 rounded-full object-cover"
-                                                />
-                                                <div>
-                                                    <p className="font-medium text-sm">
-                                                        {blog.author.name} •{' '}
-                                                        {formatDate(blog.Date)}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Link>
+                                    id={blog.id}
+                                    title={blog.title}
+                                    category={blog.category}
+                                    readTime={blog.readTime}
+                                    featuredImage={blog.featuredImage}
+                                    author={blog.author}
+                                    date={blog.Date}
+                                />
                             ))}
                     </div>
                 </section>

@@ -3,8 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Newsletter from '../components/Newsletter';
-import { useAuthStore } from '../store/authStore';
 import Footer from '../components/Footer';
+import CommentCard from '../components/CommentCard';
+import CommentForm from '../components/CommentForm';
+import { useAuthStore } from '../store/authStore';
 import {
     Twitter,
     Facebook,
@@ -83,12 +85,6 @@ export default function BlogPage() {
 
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [comments, setComments] = useState<Comment[]>([]);
-    const [newComment, setNewComment] = useState('');
-    const [editingCommentId, setEditingCommentId] = useState<string | null>(
-        null
-    );
-    const [editingContent, setEditingContent] = useState('');
-    const [isSavingEdit, setIsSavingEdit] = useState(false);
     const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
     const { user } = useAuthStore();
 
@@ -200,20 +196,21 @@ export default function BlogPage() {
         }
     };
 
-    const handleAddComment = async () => {
-        if (!user) return toast.error('You need to be logged in to comment.');
-        if (!newComment.trim()) return toast.error('Comment cannot be empty');
+    const handleAddComment = async (content: string) => {
+        if (!user) {
+            toast.error('You need to be logged in to comment.');
+            return;
+        }
 
         try {
             const token = localStorage.getItem('token');
             const resp = await axios.post(
                 `${import.meta.env.VITE_BACKEND_URL}/api/v1/comment`,
-                { postId, content: newComment },
+                { postId, content },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             const created = resp.data.comment;
             setComments((prev) => [created, ...prev]);
-            setNewComment('');
             toast.success('Comment added');
         } catch (err) {
             console.error('Failed to add comment', err);
@@ -221,53 +218,41 @@ export default function BlogPage() {
         }
     };
 
-    const startEditComment = (comment: Comment) => {
-        setEditingCommentId(comment.id);
-        setEditingContent(comment.content);
-    };
-
-    const cancelEditComment = () => {
-        setEditingCommentId(null);
-        setEditingContent('');
-    };
-
-    const saveEditComment = async () => {
-        if (!editingCommentId) return;
-        if (!user) return toast.error('You need to be logged in.');
-        if (!editingContent.trim())
-            return toast.error('Comment cannot be empty');
+    const handleEditComment = async (id: string, content: string) => {
+        if (!user) return;
 
         try {
-            setIsSavingEdit(true);
             const token = localStorage.getItem('token');
             const resp = await axios.put(
-                `${import.meta.env.VITE_BACKEND_URL}/api/v1/comment/${editingCommentId}`,
-                { content: editingContent },
+                `${import.meta.env.VITE_BACKEND_URL}/api/v1/comment/${id}`,
+                { content },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            const updated: Comment = resp.data.comment;
+            const updated = resp.data.comment;
             setComments((prev) =>
                 prev.map((c) =>
                     c.id === updated.id ? { ...c, content: updated.content } : c
                 )
             );
-            setEditingCommentId(null);
-            setEditingContent('');
             toast.success('Comment updated');
         } catch (err) {
             console.error('Failed to update comment', err);
             toast.error('Failed to update comment');
-        } finally {
-            setIsSavingEdit(false);
         }
     };
 
-    const deleteComment = async (id: string) => {
-        if (!user) return toast.error('You need to be logged in.');
+    const handleDeleteComment = async (id: string) => {
+        if (!user) {
+            toast.error('You need to be logged in.');
+            return;
+        }
+
         const confirmDelete = window.confirm(
             'Delete this comment? This cannot be undone.'
         );
+
         if (!confirmDelete) return;
+
         try {
             setIsDeletingId(id);
             const token = localStorage.getItem('token');
@@ -276,11 +261,6 @@ export default function BlogPage() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setComments((prev) => prev.filter((c) => c.id !== id));
-            // if was editing this one, reset state
-            if (editingCommentId === id) {
-                setEditingCommentId(null);
-                setEditingContent('');
-            }
             toast.success('Comment deleted');
         } catch (err) {
             console.error('Failed to delete comment', err);
@@ -578,70 +558,7 @@ export default function BlogPage() {
             <section className="max-w-3xl mx-auto px-4 py-6">
                 <h3 className="text-xl font-semibold mb-4">Comments</h3>
 
-                <div className="mb-6 bg-gray-50 p-4 rounded-lg">
-                    {user ? (
-                        <div className="flex gap-4">
-                            <img
-                                src={user.avatar}
-                                alt={user.name}
-                                className="w-12 h-12 rounded-full object-cover"
-                            />
-
-                            <div className="flex-1">
-                                <textarea
-                                    value={newComment}
-                                    onChange={(e) =>
-                                        setNewComment(e.target.value)
-                                    }
-                                    className="w-full p-3 border border-gray-200 rounded-lg bg-white resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                    placeholder="Share your thoughts..."
-                                    rows={4}
-                                />
-
-                                <div className="flex items-center justify-between mt-2">
-                                    <p className="text-sm text-gray-500">
-                                        {newComment.length}/500
-                                    </p>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => setNewComment('')}
-                                            className="text-sm px-3 py-1 rounded-md border border-gray-200 bg-white hover:bg-gray-100"
-                                        >
-                                            Clear
-                                        </button>
-
-                                        <button
-                                            onClick={handleAddComment}
-                                            disabled={
-                                                !newComment.trim() ||
-                                                newComment.length > 500
-                                            }
-                                            className={`text-sm px-4 py-2 rounded-md text-white ${
-                                                !newComment.trim() ||
-                                                newComment.length > 500
-                                                    ? 'bg-red-300 cursor-not-allowed'
-                                                    : 'bg-red-500 hover:bg-red-600 transition duration-200'
-                                            }`}
-                                        >
-                                            Post Comment
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <p className="mb-4 text-gray-600">
-                            Please{' '}
-                            <Link
-                                to="/login"
-                                className="text-blue-600 font-medium"
-                            >
-                                login
-                            </Link>{' '}
-                            to post a comment.
-                        </p>
-                    )}
-                </div>
+                <CommentForm user={user} onSubmit={handleAddComment} />
 
                 <div className="space-y-4">
                     {comments.length === 0 ? (
@@ -657,134 +574,20 @@ export default function BlogPage() {
                                 blog &&
                                 user.username === blog.author.username
                             );
-                            const isEditing = editingCommentId === c.id;
+
                             return (
-                                <div
+                                <CommentCard
                                     key={c.id}
-                                    className="bg-white border border-gray-100 shadow-sm p-4 rounded-lg"
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <img
-                                            src={c.author.avatar || ''}
-                                            alt={c.author.name}
-                                            className="w-10 h-10 rounded-full object-cover"
-                                        />
-
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <p className="font-medium text-gray-800">
-                                                        {c.author.name}{' '}
-                                                        <span className="text-sm text-gray-500 ml-2">
-                                                            @{c.author.username}
-                                                        </span>
-                                                    </p>
-                                                    <p className="text-xs text-gray-400">
-                                                        {new Date(
-                                                            c.createdAt
-                                                        ).toLocaleString()}
-                                                    </p>
-                                                </div>
-                                                {(isOwner || isPostAuthor) &&
-                                                    !isEditing && (
-                                                        <div className="flex gap-2">
-                                                            {isOwner && (
-                                                                <button
-                                                                    onClick={() =>
-                                                                        startEditComment(
-                                                                            c
-                                                                        )
-                                                                    }
-                                                                    className="text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-100"
-                                                                >
-                                                                    Edit
-                                                                </button>
-                                                            )}
-                                                            <button
-                                                                onClick={() =>
-                                                                    deleteComment(
-                                                                        c.id
-                                                                    )
-                                                                }
-                                                                disabled={
-                                                                    isDeletingId ===
-                                                                    c.id
-                                                                }
-                                                                className={`text-xs px-2 py-1 rounded border ${
-                                                                    isDeletingId ===
-                                                                    c.id
-                                                                        ? 'border-red-200 text-red-300 cursor-not-allowed'
-                                                                        : 'border-red-300 text-red-600 hover:bg-red-50'
-                                                                }`}
-                                                            >
-                                                                Delete
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                            </div>
-
-                                            {!isEditing ? (
-                                                <p className="mt-3 text-gray-700 whitespace-pre-line">
-                                                    {c.content}
-                                                </p>
-                                            ) : (
-                                                <div className="mt-3">
-                                                    <textarea
-                                                        value={editingContent}
-                                                        onChange={(e) =>
-                                                            setEditingContent(
-                                                                e.target.value
-                                                            )
-                                                        }
-                                                        rows={3}
-                                                        className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                                    />
-                                                    <div className="mt-2 flex items-center justify-between">
-                                                        <span className="text-xs text-gray-500">
-                                                            {
-                                                                editingContent.length
-                                                            }
-                                                            /500
-                                                        </span>
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                onClick={
-                                                                    cancelEditComment
-                                                                }
-                                                                className="text-xs px-3 py-1 rounded border border-gray-200 hover:bg-gray-100"
-                                                            >
-                                                                Cancel
-                                                            </button>
-                                                            <button
-                                                                onClick={
-                                                                    saveEditComment
-                                                                }
-                                                                disabled={
-                                                                    !editingContent.trim() ||
-                                                                    editingContent.length >
-                                                                        500 ||
-                                                                    isSavingEdit
-                                                                }
-                                                                className={`text-xs px-3 py-1 rounded text-white ${
-                                                                    !editingContent.trim() ||
-                                                                    editingContent.length >
-                                                                        500 ||
-                                                                    isSavingEdit
-                                                                        ? 'bg-blue-300 cursor-not-allowed'
-                                                                        : 'bg-blue-600 hover:bg-blue-700'
-                                                                }`}
-                                                            >
-                                                                {isSavingEdit
-                                                                    ? 'Saving...'
-                                                                    : 'Save'}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
+                                    id={c.id}
+                                    content={c.content}
+                                    author={c.author}
+                                    createdAt={c.createdAt}
+                                    isOwner={!!isOwner}
+                                    isPostAuthor={isPostAuthor}
+                                    onEdit={handleEditComment}
+                                    onDelete={handleDeleteComment}
+                                    isDeleting={isDeletingId === c.id}
+                                />
                             );
                         })
                     )}

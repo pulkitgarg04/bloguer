@@ -15,6 +15,11 @@ blogRouter.get(
     BlogController.analyticsOverview
 );
 blogRouter.get(
+    '/analytics/geo',
+    authMiddleware,
+    BlogController.analyticsGeo
+);
+blogRouter.get(
     '/analytics/post/:postId',
     authMiddleware,
     BlogController.analyticsPost

@@ -249,6 +249,44 @@ export async function analyticsOverviewService(userId: string) {
     return { items };
 }
 
+export async function analyticsGeoService(userId: string) {
+    const posts = await (
+        await import('../repositories/prisma')
+    ).default.post.findMany({
+        where: { authorId: userId },
+        select: { id: true },
+    });
+    const postIds = posts.map((p) => p.id);
+
+    if (postIds.length === 0) {
+        return { countries: [] };
+    }
+
+    const events = await (
+        await import('../repositories/prisma')
+    ).default.postView.findMany({
+        where: { postId: { in: postIds } },
+        select: { country: true },
+    });
+
+    const countryCounts = new Map<string, number>();
+
+    events.forEach((ev: any) => {
+        if (ev.country) {
+            countryCounts.set(
+                ev.country,
+                (countryCounts.get(ev.country) || 0) + 1
+            );
+        }
+    });
+
+    const countries = Array.from(countryCounts.entries()).map(
+        ([country, count]) => ({ country, count })
+    );
+
+    return { countries };
+}
+
 export async function analyticsPostService(userId: string, postId: string) {
     const post = await findPostById(postId);
     if (!post) return null;
