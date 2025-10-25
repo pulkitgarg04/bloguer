@@ -4,7 +4,13 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 
-import { userRouter, blogRouter, aiRouter, commentRouter } from './routes/index.route';
+import {
+    userRouter,
+    blogRouter,
+    aiRouter,
+    commentRouter,
+    healthRouter,
+} from './routes/index.route';
 
 const app = express();
 
@@ -30,6 +36,7 @@ app.get('/', (req, res) => {
     res.send('Hi! Welcome to Bloguer.');
 });
 
+app.use('/api/v1/health', healthRouter);
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/blog', blogRouter);
 app.use('/api/v1/ai', aiRouter);

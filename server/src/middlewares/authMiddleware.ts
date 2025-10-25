@@ -24,6 +24,8 @@ export default async function authMiddleware(
             return res.status(403).json({ message: 'You are not Authorized' });
         }
         console.error('Error in auth middleware: ', error);
-        return res.status(400).json({ message: 'Internal Server Error ' + error });
+        return res
+            .status(400)
+            .json({ message: 'Internal Server Error ' + error });
     }
 }

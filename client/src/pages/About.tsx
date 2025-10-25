@@ -13,13 +13,13 @@ export default function About() {
                             <div className="pt-24 lg:justify-center sm:justify-end justify-start items-start gap-2.5 flex">
                                 <img
                                     className="rounded-xl object-cover"
-                                    src="https://aftershoot.com/wp-content/uploads/2024/08/Cover-2-1.jpg"
+                                    src="/about/blogging-2.webp"
                                     alt="About Us"
                                 />
                             </div>
                             <img
                                 className="sm:ml-0 ml-auto rounded-xl object-cover"
-                                src="https://www.dominios.mx/wp-content/uploads/2022/04/blogging-estrategia.png"
+                                src="/about/blogging.webp"
                                 alt="Our Mission"
                             />
                         </div>

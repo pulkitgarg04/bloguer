@@ -14,6 +14,7 @@ interface FormatDateFunction {
 
 const formatDate: FormatDateFunction = (dateString) => {
     const date = new Date(dateString);
+
     return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -34,7 +35,7 @@ export default function Blog() {
             avatar: string;
         };
         Date: string;
-        content: string;
+        content?: string;
     }
 
     const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -58,6 +59,7 @@ export default function Blog() {
                         },
                     }
                 );
+
                 console.log(response.data);
                 setTotalPages(response.data.totalPages);
                 setBlogs(response.data.blogs);
@@ -179,12 +181,6 @@ export default function Blog() {
                                             <h3 className="text-lg font-semibold mt-2 flex-grow">
                                                 {blog.title}
                                             </h3>
-                                            <p
-                                                className="mt-4 text-gray-700 text-sm line-clamp-2"
-                                                dangerouslySetInnerHTML={{
-                                                    __html: blog.content,
-                                                }}
-                                            />
                                             <div className="mt-4 flex items-center space-x-4 text-gray-500">
                                                 <img
                                                     src={blog.author.avatar}

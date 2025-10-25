@@ -1,6 +1,7 @@
 import { blogRouter } from './blog.route';
 import { userRouter } from './user.route';
 import { aiRouter } from './ai.route';
-import commentRouter from './comment.route';
+import { healthRouter } from './health.route';
+import { commentRouter } from './comment.route';
 
-export { blogRouter, userRouter, aiRouter, commentRouter };
+export { blogRouter, userRouter, aiRouter, healthRouter, commentRouter };

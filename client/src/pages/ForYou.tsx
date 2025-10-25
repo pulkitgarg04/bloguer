@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Newsletter from '../components/Newsletter';
+import Skeleton from '../components/Skeleton';
 import { useAuthStore } from '../store/authStore';
 
 interface Author {
@@ -15,7 +16,7 @@ interface Author {
 interface Post {
     id: string;
     title: string;
-    content: string;
+    content?: string;
     featuredImage: string;
     category: string;
     readTime: string | null;
@@ -37,31 +38,12 @@ interface FormatDateFunction {
 
 const formatDate: FormatDateFunction = (dateString) => {
     const date = new Date(dateString);
+
     return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
     });
-};
-
-const SkeletonCard: React.FC = () => {
-    return (
-        <div className="bg-gray-200 shadow-md rounded-lg overflow-hidden animate-pulse flex flex-col h-full">
-            <div className="w-96 h-48 bg-gray-300"></div>
-            <div className="p-4 flex flex-col flex-grow space-y-4">
-                <div className="h-4 bg-gray-300 rounded w-1/3"></div>
-                <div className="h-6 bg-gray-300 rounded w-2/3"></div>
-                <div className="h-4 bg-gray-300 rounded w-full"></div>
-                <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                <div className="mt-auto flex items-center space-x-4">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-                    <div className="flex flex-col space-y-2">
-                        <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
 };
 
 const ForYou: React.FC = () => {
@@ -76,7 +58,7 @@ const ForYou: React.FC = () => {
                 const response = await axios.get<PopularBlogsResponse>(
                     `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/getPopularBlogs`
                 );
-                // console.log("Popular Blogs: ", response.data);
+
                 setPopularPosts(response.data.popularPosts);
             } catch (error) {
                 console.error('Error fetching popular blogs:', error);
@@ -91,10 +73,10 @@ const ForYou: React.FC = () => {
                         `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/getFollowingBlogs`,
                         { params: { userId } }
                     );
-                    console.log(response.data.followingBlogs);
                     const blogs = response.data.followingBlogs.flatMap(
                         (blog) => blog.posts
                     );
+
                     setFollowingBlogs(blogs);
                 }
             } catch (error) {
@@ -104,36 +86,35 @@ const ForYou: React.FC = () => {
 
         const fetchData = async () => {
             setLoading(true);
-            await fetchPopularBlogs();
-            if (isAuthenticated) {
-                await fetchFollowingBlogs();
+
+            try {
+                await fetchPopularBlogs();
+
+                if (user) {
+                    await fetchFollowingBlogs();
+                }
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchData();
-        setLoading(false);
-    }, [user, isAuthenticated]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.id]);
 
     if (loading) {
         return (
-            <div className="min-h-screen font-inter">
+            <div className="min-h-screen font-inter bg-gray-50">
                 <Navbar activeTab="Blogs" />
-                <section className="flex flex-col items-center space-y-5 px-5">
-                    <h3 className="text-2xl font-semibold text-gray-800 text-center my-10">
-                        Loading...
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-10 pb-10">
-                        {Array.from({ length: 6 }).map((_, index) => (
-                            <SkeletonCard key={index} />
-                        ))}
-                    </div>
-                </section>
+                <Skeleton />
+                <Newsletter />
+                <Footer />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen font-inter">
+    <div className="min-h-screen font-inter bg-gray-50">
             <Navbar activeTab="Blogs" />
 
             <section className="flex flex-col items-center space-y-5 px-5">
@@ -162,12 +143,6 @@ const ForYou: React.FC = () => {
                                         <h3 className="text-lg font-semibold mt-2 flex-grow">
                                             {post.title}
                                         </h3>
-                                        <p
-                                            className="mt-4 text-gray-700 text-sm line-clamp-2"
-                                            dangerouslySetInnerHTML={{
-                                                __html: post.content,
-                                            }}
-                                        />
                                         <div className="mt-4 flex items-center space-x-4 text-gray-500">
                                             <img
                                                 src={
@@ -221,12 +196,6 @@ const ForYou: React.FC = () => {
                                             <h3 className="text-lg font-semibold mt-2 flex-grow">
                                                 {post.title}
                                             </h3>
-                                            <p
-                                                className="mt-4 text-gray-700 text-sm line-clamp-2"
-                                                dangerouslySetInnerHTML={{
-                                                    __html: post.content,
-                                                }}
-                                            />
                                             <div className="mt-4 flex items-center space-x-4 text-gray-500">
                                                 <img
                                                     src={

@@ -98,7 +98,10 @@ export default function WritePost() {
             }
         } catch (err: unknown) {
             console.error('AI generation error:', err);
-            const e = err as { response?: { data?: { message?: string } }; code?: string };
+            const e = err as {
+                response?: { data?: { message?: string } };
+                code?: string;
+            };
             if (e?.response?.data?.message) {
                 toast.error(e.response.data.message);
             } else if (e?.code === 'ECONNABORTED') {

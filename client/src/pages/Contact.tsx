@@ -14,7 +14,7 @@ export default function Contact() {
                             <div className="group w-full h-full">
                                 <div className="relative h-full">
                                     <img
-                                        src="https://pagedone.io/asset/uploads/1696488602.png"
+                                        src="/about/desk.webp"
                                         alt="Contact Us"
                                         className="w-full h-3/4 lg:rounded-l-2xl rounded-2xl bg-blend-multiply bg-red-700 object-cover"
                                     />
