@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { toast } from 'react-hot-toast';
+import { getVisitorId } from '../utils/visitor';
 
 interface FormatDateFunction {
     (dateString: string): string;
@@ -92,8 +93,10 @@ export default function BlogPage() {
     useEffect(() => {
         const fetchBlogData = async () => {
             try {
+                const vid = getVisitorId();
                 const response = await axios.get(
-                    `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/${postId}`
+                    `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/${postId}`,
+                    { headers: { 'x-visitor-id': vid } }
                 );
                 const data = await response.data;
                 setBlog(data.post);
@@ -113,6 +116,37 @@ export default function BlogPage() {
         };
 
         fetchBlogData();
+    }, [postId]);
+
+    // Engagement tracking: time-on-page and max scroll depth
+    useEffect(() => {
+        const start = Date.now();
+        let maxScroll = 0;
+        const onScroll = () => {
+            const scrolled = window.scrollY + window.innerHeight;
+            const total = document.documentElement.scrollHeight;
+            const depth = Math.min(100, Math.round((scrolled / total) * 100));
+            if (depth > maxScroll) maxScroll = depth;
+        };
+        window.addEventListener('scroll', onScroll);
+        const send = () => {
+            const durationSec = Math.round((Date.now() - start) / 1000);
+            const vid = getVisitorId();
+            if (!postId) return;
+            axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/analytics/engagement`, {
+                postId,
+                visitorId: vid,
+                durationSec,
+                scrollDepth: maxScroll,
+            }).catch(() => {/* ignore */});
+        };
+        const onHide = () => { send(); };
+        document.addEventListener('visibilitychange', onHide);
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+            document.removeEventListener('visibilitychange', onHide);
+            send();
+        };
     }, [postId]);
 
     useEffect(() => {
@@ -376,6 +410,9 @@ export default function BlogPage() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title="Share on Facebook"
+                                onClick={() => {
+                                    axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/analytics/share`, { postId, platform: 'facebook' }).catch(()=>{});
+                                }}
                             >
                                 <Facebook
                                     className="text-black bg-white rounded-full p-1 cursor-pointer hover:bg-gray-200"
@@ -389,6 +426,9 @@ export default function BlogPage() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title="Share on Twitter"
+                                onClick={() => {
+                                    axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/analytics/share`, { postId, platform: 'twitter' }).catch(()=>{});
+                                }}
                             >
                                 <Twitter
                                     className="text-black bg-white rounded-full p-1 cursor-pointer hover:bg-gray-200"
@@ -404,6 +444,9 @@ export default function BlogPage() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title="Share via Email"
+                                onClick={() => {
+                                    axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/analytics/share`, { postId, platform: 'email' }).catch(()=>{});
+                                }}
                             >
                                 <Mail
                                     className="text-black bg-white rounded-full p-1 cursor-pointer hover:bg-gray-200"
@@ -417,6 +460,9 @@ export default function BlogPage() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title="Share on LinkedIn"
+                                onClick={() => {
+                                    axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/analytics/share`, { postId, platform: 'linkedin' }).catch(()=>{});
+                                }}
                             >
                                 <Linkedin
                                     className="text-black bg-white rounded-full p-1 cursor-pointer hover:bg-gray-200"

@@ -96,11 +96,12 @@ export default function WritePost() {
                 const msg = res?.data?.message || 'Failed to generate article.';
                 toast.error(msg);
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('AI generation error:', err);
-            if (err?.response?.data?.message) {
-                toast.error(err.response.data.message);
-            } else if (err?.code === 'ECONNABORTED') {
+            const e = err as { response?: { data?: { message?: string } }; code?: string };
+            if (e?.response?.data?.message) {
+                toast.error(e.response.data.message);
+            } else if (e?.code === 'ECONNABORTED') {
                 toast.error('Generation timed out. Try again.');
             } else {
                 toast.error('Error generating article. Try again in a moment.');
