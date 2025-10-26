@@ -3,6 +3,7 @@ import { lookupCountry } from '../utils/geo';
 import {
     createPost,
     updatePost,
+    deletePost,
     countPublishedPosts,
     findPublishedPosts,
     findPopularPosts,
@@ -66,6 +67,25 @@ export async function updatePostService(
     await delCache('blog:popular');
     await delPattern('blog:following:*');
     return post;
+}
+
+export async function deletePostService(postId: string, userId: string) {
+    const post = await findPostById(postId);
+    if (!post) {
+        throw new Error('Post not found');
+    }
+    if ((post as any).authorId !== userId) {
+        throw new Error('Unauthorized to delete this post');
+    }
+
+    await deletePost(postId);
+
+    await delCache(`blog:post:${postId}`);
+    await delPattern('blog:bulk:*');
+    await delCache('blog:popular');
+    await delPattern('blog:following:*');
+
+    return { success: true };
 }
 
 export async function bulkService(page: number, limit: number, search: string) {

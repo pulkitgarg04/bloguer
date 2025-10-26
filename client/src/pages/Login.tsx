@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -54,26 +53,9 @@ export default function Login() {
                 }, 1000);
             }
         } catch (error: unknown) {
-            console.log('Error occurred: ', error);
-
-            if (axios.isAxiosError(error)) {
-                const errorResponse = error.response?.data;
-
-                if (error.response?.status === 403) {
-                    const message =
-                        errorResponse?.message ||
-                        'Forbidden: Invalid email or password.';
-
-                    toast.error(message);
-
-                    return;
-                }
-
-                if (Array.isArray(errorResponse) && errorResponse[0]?.message) {
-                    toast.error(errorResponse[0].message);
-                } else {
-                    toast.error('Invalid Inputs');
-                }
+            // The authStore already extracts and throws the backend error message
+            if (error instanceof Error) {
+                toast.error(error.message);
             } else {
                 toast.error('An unexpected error occurred.');
             }
@@ -81,14 +63,33 @@ export default function Login() {
     };
 
     useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        const token = params.get('token');
+        const handleOAuthCallback = async () => {
+            const params = new URLSearchParams(location.search);
+            const token = params.get('token');
+            const error = params.get('error');
 
-        if (token) {
-            localStorage.setItem('token', token);
-            checkAuth();
-            navigate('/');
-        }
+            if (error) {
+                toast.error(`Google sign-in failed: ${error}`);
+                navigate('/login', { replace: true });
+
+                return;
+            }
+
+            if (token) {
+                localStorage.setItem('token', token);
+                
+                // Call checkAuth and wait for it to complete
+                await checkAuth();
+                
+                // Give a tiny delay to ensure state propagates
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                toast.success('Login Successful!');
+                navigate('/', { replace: true });
+            }
+        };
+
+        handleOAuthCallback();
     }, [location.search, checkAuth, navigate]);
 
     return (

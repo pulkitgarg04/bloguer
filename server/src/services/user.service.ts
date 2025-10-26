@@ -26,7 +26,10 @@ export function generateJWT(id: string) {
 
 export async function signupService(body: any) {
     const parsed = signupInput.safeParse(body);
-    if (!parsed.success) return { error: parsed.error.message };
+    if (!parsed.success) {
+        const firstError = parsed.error.issues[0];
+        return { error: firstError.message };
+    }
 
     const existing = await findUserByEmail(body.email);
     if (existing) return { conflict: 'User already exists.' };
@@ -41,11 +44,10 @@ export async function signupService(body: any) {
         JoinedDate: new Date(),
     });
 
-    // Email verification token (24h)
     const verifyToken = crypto.randomBytes(32).toString('hex');
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await setVerificationToken((user as any).id, verifyToken, expires);
-    // Fire and forget (don't block signup)
+
     sendVerificationEmail(body.email, body.name, verifyToken).catch(() => {});
 
     const jwtToken = generateJWT(user.id);
@@ -54,7 +56,10 @@ export async function signupService(body: any) {
 
 export async function loginService(body: any) {
     const parsed = signinInput.safeParse(body);
-    if (!parsed.success) return { error: parsed.error.message };
+    if (!parsed.success) {
+        const firstError = parsed.error.issues[0];
+        return { error: firstError.message };
+    }
 
     const user = await findUserByEmail(body.email);
     if (!user || !(await bcrypt.compare(body.password, (user as any).password)))

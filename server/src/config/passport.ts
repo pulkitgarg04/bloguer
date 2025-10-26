@@ -35,11 +35,11 @@ passport.use(
                     user = await createUserFromGoogle({
                         name: profile.displayName || email.split('@')[0],
                         email,
-                        avatar: profile.photos && profile.photos[0]?.value,
+                        avatar: `https://avatar.iran.liara.run/username?username=${encodeURIComponent(profile.displayName || email.split('@')[0])}`,
                         googleId,
                     });
                 }
-                // Attach JWT in user object for callback handler convenience
+
                 const token = generateJWT((user as any).id);
                 return done(null, { ...(user as any), jwt: token });
             } catch (err) {

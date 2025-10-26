@@ -24,6 +24,10 @@ export async function updatePost(
     return prisma.post.update({ where: { id: postId }, data });
 }
 
+export async function deletePost(postId: string) {
+    return prisma.post.delete({ where: { id: postId } });
+}
+
 export async function countPublishedPosts(search: string) {
     return prisma.post.count({
         where: {

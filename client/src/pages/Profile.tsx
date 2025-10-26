@@ -1,15 +1,17 @@
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Link, useParams } from 'react-router-dom';
-import { MapPin, Calendar1, PenLine } from 'lucide-react';
+import { MapPin, Calendar1, PenLine, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
+import { toast } from 'react-hot-toast';
 
 type FormatDateFunction = (dateString: string) => string;
 
 const formatDate: FormatDateFunction = (dateString) => {
     const date = new Date(dateString);
+
     return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -78,12 +80,14 @@ export default function Profile() {
                 const response = await axios.get(
                     `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/profile/${username}`
                 );
+
                 setBlogs(response.data.posts);
                 setUserData(response.data.user);
 
                 const isUserFollowing = response.data.user.followers.some(
                     (follower: Follower) => follower.id === userId
                 );
+
                 setIsFollowing(isUserFollowing);
 
                 const countResponse = await axios.get(
@@ -91,6 +95,7 @@ export default function Profile() {
                         import.meta.env.VITE_BACKEND_URL
                     }/api/v1/user/followersFollowingCount/${username}`
                 );
+
                 setFollowersCount(countResponse.data.followersCount);
                 setFollowingCount(countResponse.data.followingCount);
             } catch (error) {
@@ -208,11 +213,43 @@ export default function Profile() {
                         import.meta.env.VITE_BACKEND_URL
                     }/api/v1/user/followersFollowingCount/${username}`
                 );
+
                 setFollowersCount(countResponse.data.followersCount);
                 setFollowingCount(countResponse.data.followingCount);
             }
         } catch (error) {
             console.error('Error toggling follow status:', error);
+        }
+    };
+
+    const handleDeleteBlog = async (blogId: string) => {
+        if (!window.confirm('Are you sure you want to delete this blog post?')) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.delete(
+                `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/post/${blogId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (response.status === 200) {
+                toast.success('Blog deleted successfully!');
+                // Remove the deleted blog from the state
+                setBlogs(blogs.filter((blog) => blog.id !== blogId));
+            }
+        } catch (error: unknown) {
+            console.error('Error deleting blog:', error);
+            const errorMessage =
+                (error as { response?: { data?: { message?: string } } })
+                    .response?.data?.message || 'Failed to delete blog';
+
+            toast.error(errorMessage);
         }
     };
 
@@ -303,14 +340,25 @@ export default function Profile() {
                                 <div className="p-4 flex flex-col flex-grow">
                                     <div className="flex gap-2 items-center">
                                         {user && user.username === username && (
-                                            <Link
-                                                to={`/edit/${user?.username}/${blog.id}`}
-                                            >
-                                                <button className="flex gap-1 items-center bg-red-200 px-2 py-1 rounded-xl text-xs text-red-600">
-                                                    <PenLine size={15} />
-                                                    Edit
+                                            <>
+                                                <Link
+                                                    to={`/edit/${user?.username}/${blog.id}`}
+                                                >
+                                                    <button className="flex gap-1 items-center bg-blue-200 px-2 py-1 rounded-xl text-xs text-blue-600 hover:bg-blue-300">
+                                                        <PenLine size={15} />
+                                                        Edit
+                                                    </button>
+                                                </Link>
+                                                <button
+                                                    onClick={() =>
+                                                        handleDeleteBlog(blog.id)
+                                                    }
+                                                    className="flex gap-1 items-center bg-red-200 px-2 py-1 rounded-xl text-xs text-red-600 hover:bg-red-300"
+                                                >
+                                                    <Trash2 size={15} />
+                                                    Delete
                                                 </button>
-                                            </Link>
+                                            </>
                                         )}
                                         <p className="text-sm text-red-500 font-medium">
                                             {blog.category} •{' '}

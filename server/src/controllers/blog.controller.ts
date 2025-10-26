@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import {
     createPostService,
     updatePostService,
+    deletePostService,
     bulkService,
     popularService,
     followingService,
@@ -51,6 +52,33 @@ export const BlogController = {
             return res
                 .status(500)
                 .json({ message: 'Failed to update blog post' });
+        }
+    },
+
+    delete: async (req: Request, res: Response) => {
+        try {
+            const userId = (req as any).userId as string | undefined;
+            if (!userId)
+                return res
+                    .status(401)
+                    .json({ message: 'Unauthorized. No user ID found.' });
+            
+            const { postId } = req.params;
+            if (!postId)
+                return res.status(400).json({ message: 'postId is required' });
+            
+            await deletePostService(postId, userId);
+            return res.json({ message: 'Blog deleted successfully' });
+        } catch (err: any) {
+            if (err.message === 'Post not found') {
+                return res.status(404).json({ message: 'Post not found' });
+            }
+            if (err.message === 'Unauthorized to delete this post') {
+                return res.status(403).json({ message: 'Unauthorized to delete this post' });
+            }
+            return res
+                .status(500)
+                .json({ message: 'Failed to delete blog post' });
         }
     },
 

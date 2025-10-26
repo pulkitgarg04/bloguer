@@ -6,6 +6,7 @@ export const blogRouter = Router();
 
 blogRouter.post('/post', authMiddleware, BlogController.create);
 blogRouter.put('/post', authMiddleware, BlogController.update);
+blogRouter.delete('/post/:postId', authMiddleware, BlogController.delete);
 blogRouter.get('/bulk', BlogController.bulk);
 blogRouter.get('/getPopularBlogs', BlogController.popular);
 blogRouter.get('/getFollowingBlogs', BlogController.following);
@@ -14,11 +15,7 @@ blogRouter.get(
     authMiddleware,
     BlogController.analyticsOverview
 );
-blogRouter.get(
-    '/analytics/geo',
-    authMiddleware,
-    BlogController.analyticsGeo
-);
+blogRouter.get('/analytics/geo', authMiddleware, BlogController.analyticsGeo);
 blogRouter.get(
     '/analytics/post/:postId',
     authMiddleware,

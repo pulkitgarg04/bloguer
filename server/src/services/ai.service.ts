@@ -6,7 +6,6 @@ export async function generateArticle(title: string, category: string) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const prompt = `Write a comprehensive, engaging blog article with the title "${title}" in the category "${category}".
-
 Requirements:
 - Write in a professional yet conversational tone
 - Include an introduction, main content with 3-4 sections, and a conclusion
@@ -18,11 +17,13 @@ Requirements:
 
 Please format the response as clean HTML that can be directly used in a rich text editor.`;
     const result = await model.generateContent(prompt);
+    console.log('AI Generation Result:', result); 
     const response = await result.response;
     const generatedContent = response.text();
     const cleanedContent = generatedContent
         .replace(/```html/g, '')
         .replace(/```/g, '')
         .trim();
+
     return { content: cleanedContent };
 }

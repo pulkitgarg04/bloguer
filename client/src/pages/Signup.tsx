@@ -106,14 +106,33 @@ export default function Signup() {
     };
 
     useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        const token = params.get('token');
+        const handleOAuthCallback = async () => {
+            const params = new URLSearchParams(location.search);
+            const token = params.get('token');
+            const error = params.get('error');
 
-        if (token) {
-            localStorage.setItem('token', token);
-            checkAuth();
-            navigate('/');
-        }
+            if (error) {
+                toast.error(`Google sign-in failed: ${error}`);
+                navigate('/signup', { replace: true });
+
+                return;
+            }
+
+            if (token) {
+                localStorage.setItem('token', token);
+                
+                // Call checkAuth and wait for it to complete
+                await checkAuth();
+                
+                // Give a tiny delay to ensure state propagates
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                toast.success('Signup Successful!');
+                navigate('/', { replace: true });
+            }
+        };
+
+        handleOAuthCallback();
     }, [location.search, checkAuth, navigate]);
 
     return (

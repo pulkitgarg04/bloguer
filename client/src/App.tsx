@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Toaster, toast } from 'react-hot-toast';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -19,19 +19,48 @@ import ForgotPassword from './pages/ForgotPassword';
 
 import { useAuthStore } from './store/authStore';
 
-function App() {
+function AppShell() {
     const { checkAuth } = useAuthStore();
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const handleOAuthParams = async () => {
+            const params = new URLSearchParams(location.search);
+            const token = params.get('token');
+            const error = params.get('error');
+
+            if (error) {
+                toast.error(`Google sign-in failed: ${error}`);
+
+                navigate(location.pathname, { replace: true });
+
+                return;
+            }
+
+            if (token) {
+                localStorage.setItem('token', token);
+                await checkAuth();
+
+                await new Promise((r) => setTimeout(r, 100));
+
+                navigate(location.pathname, { replace: true });
+            }
+        };
+
+        handleOAuthParams();
+    }, [location.search, location.pathname, checkAuth, navigate]);
 
     useEffect(() => {
         checkAuth();
     }, [checkAuth]);
 
     return (
-        <BrowserRouter>
+        <>
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/blogs" element={<ForYou />} />
-                <Route path="/:username/:postId" element={<BlogPage />} />
+                <Route path=":username/:postId" element={<BlogPage />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
 
@@ -47,6 +76,14 @@ function App() {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
             </Routes>
             <Toaster />
+        </>
+    );
+}
+
+function App() {
+    return (
+        <BrowserRouter>
+            <AppShell />
         </BrowserRouter>
     );
 }

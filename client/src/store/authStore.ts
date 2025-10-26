@@ -9,6 +9,7 @@ const handleError = (error: unknown): string => {
     if (axios.isAxiosError(error)) {
         return error.response?.data?.message || 'An unexpected error occurred.';
     }
+
     return (error as Error).message || 'An unexpected error occurred.';
 };
 
@@ -61,6 +62,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             });
 
             const { jwt } = response.data;
+
             localStorage.setItem('token', jwt);
 
             set({
@@ -73,6 +75,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             return true;
         } catch (error) {
             const errorMessage = handleError(error);
+
             set({ error: errorMessage, isLoading: false });
             throw new Error(errorMessage);
         }
@@ -99,6 +102,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             return true;
         } catch (error) {
             const errorMessage = handleError(error);
+
             set({ error: errorMessage, isLoading: false });
             throw new Error(errorMessage);
         }
@@ -121,6 +125,7 @@ export const useAuthStore = create<AuthState>((set) => ({
                 user: null,
                 error: null,
             });
+
             return;
         }
 
@@ -141,6 +146,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             });
         } catch (error) {
             const errorMessage = handleError(error);
+
             set({
                 error: errorMessage,
                 isCheckingAuth: false,
