@@ -1,6 +1,10 @@
 import { getCache, setCache, delCache, delPattern } from '../utils/cache';
 import { lookupCountry } from '../utils/geo';
 import {
+    createBlogInput,
+    updateBlogInput,
+} from '@pulkitgarg04/bloguer-validations';
+import {
     createPost,
     updatePost,
     deletePost,
@@ -37,6 +41,12 @@ export async function createPostService(
     userId: string,
     body: { title: string; content: string; category: string }
 ) {
+    const parsed = createBlogInput.safeParse(body);
+    if (!parsed.success) {
+        const firstError = parsed.error.issues[0];
+        throw new Error(firstError.message);
+    }
+
     const post = await createPost({
         title: body.title,
         content: body.content,
@@ -61,6 +71,17 @@ export async function updatePostService(
         published: boolean;
     }>
 ) {
+    if (data.title || data.content || data.category) {
+        const parsed = updateBlogInput.safeParse({
+            postId,
+            ...data,
+        });
+        if (!parsed.success) {
+            const firstError = parsed.error.issues[0];
+            throw new Error(firstError.message);
+        }
+    }
+
     const post = await updatePost(postId, data);
     await delCache(`blog:post:${post.id}`);
     await delPattern('blog:bulk:*');

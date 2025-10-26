@@ -1,6 +1,13 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { signinInput, signupInput } from '@pulkitgarg04/bloguer-validations';
+import {
+    signinInput,
+    signupInput,
+    forgotPasswordInput,
+    resetPasswordInput,
+    verifyEmailInput,
+    resendVerificationInput,
+} from '@pulkitgarg04/bloguer-validations';
 import {
     createUser,
     createUserFromGoogle,
@@ -124,6 +131,12 @@ async function findUserProfile(username: string) {
 }
 
 export async function verifyEmailService(token: string) {
+    const parsed = verifyEmailInput.safeParse({ token });
+    if (!parsed.success) {
+        const firstError = parsed.error.issues[0];
+        return { error: firstError.message };
+    }
+
     console.log('Verifying email with token:', token);
     const user = await findUserByVerificationToken(token);
     console.log('User found:', user ? 'Yes' : 'No');
@@ -147,6 +160,12 @@ export async function verifyEmailService(token: string) {
 }
 
 export async function resendVerificationService(email: string) {
+    const parsed = resendVerificationInput.safeParse({ email });
+    if (!parsed.success) {
+        const firstError = parsed.error.issues[0];
+        return { error: firstError.message };
+    }
+
     const user = await findUserByEmail(email);
     if (!user) return { error: 'User not found' };
     if ((user as any).emailVerifiedAt)
@@ -184,6 +203,12 @@ export async function googleOAuthService(credential: string) {
 }
 
 export async function forgotPasswordService(email: string) {
+    const parsed = forgotPasswordInput.safeParse({ email });
+    if (!parsed.success) {
+        const firstError = parsed.error.issues[0];
+        return { error: firstError.message };
+    }
+
     const user = await findUserByEmail(email);
     if (!user) {
         return { ok: true };
@@ -206,6 +231,12 @@ export async function forgotPasswordService(email: string) {
 }
 
 export async function resetPasswordService(token: string, newPassword: string) {
+    const parsed = resetPasswordInput.safeParse({ token, newPassword });
+    if (!parsed.success) {
+        const firstError = parsed.error.issues[0];
+        return { error: firstError.message };
+    }
+
     const user = await findUserByResetToken(token);
     if (!user) {
         return { error: 'Invalid or expired reset token' };

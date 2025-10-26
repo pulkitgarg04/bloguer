@@ -1,4 +1,7 @@
 import {
+    createCommentInput,
+} from '@pulkitgarg04/bloguer-validations';
+import {
     createComment,
     deleteComment,
     findCommentById,
@@ -11,6 +14,12 @@ export async function createCommentService(
     postId: string,
     content: string
 ) {
+    const parsed = createCommentInput.safeParse({ content });
+    if (!parsed.success) {
+        const firstError = parsed.error.issues[0];
+        throw new Error(firstError.message);
+    }
+
     return createComment({ content, authorId: userId, postId });
 }
 
@@ -23,6 +32,12 @@ export async function updateCommentService(
     commentId: string,
     content: string
 ) {
+    const parsed = createCommentInput.safeParse({ content });
+    if (!parsed.success) {
+        const firstError = parsed.error.issues[0];
+        throw new Error(firstError.message);
+    }
+
     const existing = await findCommentById(commentId);
     if (!existing) return { notFound: true };
 
