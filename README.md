@@ -12,10 +12,82 @@
 
 The platform supports rich text formatting, image uploads, user authentication, and dynamic content delivery, ensuring a superior blogging experience.
 
+### System Architecture:
+```mermaid
+flowchart TD
+    User[User] -->|Accesses as| GuestUser[Guest User]
+    User -->|Accesses as| RegisteredUser[Registered User]
+
+    subgraph GuestUser[Guest User Access]
+        direction TB
+        GU_Browse[Browse Blog Posts] --> GU_Read[Read Published Posts]
+        GU_Read --> GU_View[View Analytics/Stats]
+        GU_Browse --> GU_Search[Search Posts]
+    end
+
+    subgraph RegisteredUser[Registered User Access]
+        direction TB
+        RU_Auth[Authentication] --> RU_Verify{Email Verified?}
+        RU_Verify -->|No| RU_VerifyEmail[Email Verification Required]
+        RU_Verify -->|Yes| RU_Access[Full Access]
+        
+        RU_Access --> RU_CreatePost[Create Blog Post]
+        RU_Access --> RU_EditPost[Edit/Delete Posts]
+        RU_Access --> RU_Comment[Add Comments]
+        RU_Access --> RU_Bookmark[Bookmark Posts]
+        RU_Access --> RU_Follow[Follow Authors]
+        RU_Access --> RU_Analytics[View Detailed Analytics]
+        RU_Access --> RU_AIAssist[AI Content Assistance]
+    end
+
+    GuestUser --> Frontend
+    RegisteredUser --> Frontend
+
+    Frontend[React Frontend] --> Router[React Router]
+    Router --> PublicPages[Public Pages]
+    Router --> ProtectedPages[Protected Pages]
+
+    PublicPages --> API
+    ProtectedPages --> |JWT Token| API
+
+    API[Express Backend API] --> Auth[Authentication Layer]
+    Auth --> |Validates| JWT[JWT Tokens]
+    Auth --> |Verifies| EmailVerification[Email Verification]
+    
+    API --> Cache{Redis Cache?}
+    Cache -->|Hit| CachedData[Return Cached Data]
+    Cache -->|Miss| Services[Service Layer]
+    
+    Services --> BlogService[Blog Service]
+    Services --> UserService[User Service]
+    Services --> CommentService[Comment Service]
+    Services --> AIService[AI Service]
+    
+    BlogService --> Validation[Zod Validation]
+    UserService --> Validation
+    CommentService --> Validation
+    
+    Validation --> Repository[Repository Layer]
+    Repository --> Prisma[Prisma ORM]
+    Prisma --> Database[(PostgreSQL Database)]
+    
+    AIService --> GoogleAI[Google Gemini AI]
+    
+    Services --> Email[Email Service]
+    Email --> Nodemailer[Nodemailer]
+    Nodemailer --> SMTP[Gmail SMTP]
+    
+    BlogService --> Analytics[Analytics Tracking]
+    Analytics --> GeoIP[IP Geolocation]
+    Analytics --> Metrics[Metrics Collection]
+    Metrics --> Database
+```
+
+**[View System Architecture & Flow Diagrams](SYSTEM_OVERVIEW.md)**
+
 ### Setup and Installation
 #### Pre-Requisites
 - Node.js (v16 or above)
-- Cloudflare Workers CLI (Wrangler)
 - PostgreSQL Database
 - npm or bun or yarn for package management
 
@@ -53,42 +125,30 @@ npm run dev
 ```
 
 ### Environment Variables
-The project relies on several environment variables. Create a .env file in the client directory with the following variables:
 
-#### For Client:
-```env
-VITE_BACKEND_URL=https://your-cloudflare-worker-url
-```
+The project relies on several environment variables. Create a `.env` file in both the client and server directories based on the provided examples:
 
-#### For Server:
-- Add the environment variables to the `wrangler.toml` file.
-```env
-DATABASE_URL=your_postgresql_connection_string  
-JWT_SECRET=your_jwt_secret
-GEMINI_API_KEY=your_gemini_api_key_here
-```
+- **Server**: See [server/.env.example](server/.env.example) for required backend configuration
+- **Client**: See [client/.env.example](client/.env.example) for required frontend configuration
+
+#### Key Environment Variables:
+
+**Server (.env):**
+- `DATABASE_URL` - PostgreSQL connection string
+- `JWT_SECRET` - Secret key for JWT token generation
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` - Email configuration for Nodemailer
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` - Google OAuth credentials
+- `GEMINI_API_KEY` - Google Gemini AI API key
+- `REDIS_URL` - Redis connection string for caching
+- `PORT` - Server port (default: 4000)
+
+**Client (.env):**
+- `VITE_BACKEND_URL` - Backend API URL
+- `VITE_GOOGLE_CLIENT_ID` - Google OAuth Client ID
 
 **Note**: To use the AI-powered article writing feature, you'll need to:
-1. Get a Google Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Add it to your server's `wrangler.toml` file as `GEMINI_API_KEY`
+- Get a Google Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 
-### Tech Stack
-#### Frontend
-- **React**: For building a responsive and dynamic user interface.
-- **React Router**: For handling routing in the single-page application.
-- **Zustand**: Lightweight state management to handle user and session data.
-- **Tailwind CSS**: For styling the application with a focus on customization and a responsive layout.
-- **React Hot Toast**: For displaying user-friendly notifications.
-- **TypeScript**: Ensures type safety and better developer experience.
-- **Axios**: For API requests and client-server communication.
-
-#### Backend
-- **Hono**: Ultra-fast web framework for building the serverless API.
-- **PostgreSQL**: Relational database for managing user and blog data.
-- **Prisma**: ORM for seamless database integration with PostgreSQL.
-- **JWT (JSON Web Tokens)**: For secure user authentication and session management.
-- **Cloudflare Workers**: Serverless platform for deploying the backend globally.
-- **Generative AI**: For AI-powered article content generation (secure backend integration).
 
 ### Features
 - **Blog Management**: Create, edit, and delete blog posts.
