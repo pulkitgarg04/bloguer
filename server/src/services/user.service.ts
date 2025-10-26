@@ -3,13 +3,21 @@ import jwt from 'jsonwebtoken';
 import { signinInput, signupInput } from '@pulkitgarg04/bloguer-validations';
 import {
     createUser,
+    createUserFromGoogle,
     findPostsByAuthor,
     findUserBasicById,
     findUserByEmail,
+    findUserByGoogleId,
     findUserByUsername,
     follow,
     unfollow,
+    setVerificationToken,
+    findUserByVerificationToken,
+    markEmailVerified,
 } from '../repositories/user.repository';
+import { sendVerificationEmail } from '../utils/email';
+import crypto from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
 
 export function generateJWT(id: string) {
     const secret = process.env.JWT_SECRET || '';
@@ -33,8 +41,15 @@ export async function signupService(body: any) {
         JoinedDate: new Date(),
     });
 
-    const token = generateJWT(user.id);
-    return { user, token };
+    // Email verification token (24h)
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await setVerificationToken((user as any).id, verifyToken, expires);
+    // Fire and forget (don't block signup)
+    sendVerificationEmail(body.email, body.name, verifyToken).catch(() => {});
+
+    const jwtToken = generateJWT(user.id);
+    return { user, token: jwtToken };
 }
 
 export async function loginService(body: any) {
@@ -89,4 +104,51 @@ async function findUserProfile(username: string) {
     return await (
         await import('../repositories/user.repository')
     ).findUserProfile(username);
+}
+
+export async function verifyEmailService(token: string) {
+    const user = await findUserByVerificationToken(token);
+    if (!user) return { error: 'Invalid or expired verification token' };
+    const exp = (user as any).verificationTokenExpires as Date | null;
+    if (!exp || exp.getTime() < Date.now())
+        return { error: 'Verification token has expired' };
+    await markEmailVerified((user as any).id);
+    return { ok: true };
+}
+
+export async function resendVerificationService(email: string) {
+    const user = await findUserByEmail(email);
+    if (!user) return { error: 'User not found' };
+    if ((user as any).emailVerifiedAt)
+        return { error: 'Email is already verified' };
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await setVerificationToken((user as any).id, token, expires);
+    await sendVerificationEmail(email, (user as any).name || '', token);
+    return { ok: true };
+}
+
+export async function googleOAuthService(credential: string) {
+    const clientId = process.env.GOOGLE_CLIENT_ID || '';
+    const client = new OAuth2Client(clientId);
+    const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: clientId,
+    });
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email)
+        return { error: 'Invalid Google token' };
+
+    const googleId = payload.sub as string;
+    let user = await findUserByGoogleId(googleId);
+    if (!user) {
+        user = await createUserFromGoogle({
+            name: payload.name || payload.email.split('@')[0],
+            email: payload.email,
+            avatar: payload.picture,
+            googleId,
+        });
+    }
+    const token = generateJWT((user as any).id);
+    return { user, token };
 }

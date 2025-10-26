@@ -6,6 +6,9 @@ export const userRouter = Router();
 
 userRouter.post('/signup', UserController.signup);
 userRouter.post('/login', UserController.login);
+userRouter.get('/verify-email', UserController.verifyEmail);
+userRouter.post('/resend-verification', UserController.resendVerification);
+userRouter.post('/oauth/google', UserController.googleOAuth);
 userRouter.get('/checkAuth', authMiddleware, UserController.checkAuth);
 userRouter.get('/profile/:username', UserController.profile);
 userRouter.get(

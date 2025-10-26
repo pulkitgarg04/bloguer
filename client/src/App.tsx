@@ -14,6 +14,8 @@ import Profile from './pages/Profile';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Analytics from './pages/Analytics';
+import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './pages/ForgotPassword';
 
 import { useAuthStore } from './store/authStore';
 
@@ -41,6 +43,8 @@ function App() {
                 <Route path="/write" element={<WritePost />} />
                 <Route path="/edit/:username/:postId" element={<EditPost />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
             </Routes>
             <Toaster />
         </BrowserRouter>

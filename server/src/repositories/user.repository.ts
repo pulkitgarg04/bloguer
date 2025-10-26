@@ -22,6 +22,27 @@ export async function createUser(data: {
     return prisma.user.create({ data });
 }
 
+export async function createUserFromGoogle(data: {
+    name: string;
+    email: string;
+    avatar?: string;
+    googleId: string;
+}) {
+    return (prisma as any).user.create({
+        data: {
+            name: data.name,
+            username: data.email.split('@')[0],
+            email: data.email,
+            password: 'GOOGLE',
+            avatar: data.avatar,
+            JoinedDate: new Date(),
+            provider: 'GOOGLE',
+            googleId: data.googleId,
+            emailVerifiedAt: new Date(),
+        },
+    });
+}
+
 export async function findUserProfile(username: string) {
     return prisma.user.findUnique({
         where: { username: username.toLowerCase() },
@@ -103,4 +124,36 @@ export async function isFollowing(userId: string, targetId: string) {
         },
     });
     return !!user?.following?.length;
+}
+
+export async function setVerificationToken(
+    userId: string,
+    token: string,
+    expiresAt: Date
+) {
+    return (prisma as any).user.update({
+        where: { id: userId },
+        data: { verificationToken: token, verificationTokenExpires: expiresAt },
+        select: { id: true },
+    });
+}
+
+export async function findUserByVerificationToken(token: string) {
+    return (prisma as any).user.findFirst({ where: { verificationToken: token } });
+}
+
+export async function markEmailVerified(userId: string) {
+    return (prisma as any).user.update({
+        where: { id: userId },
+        data: {
+            emailVerifiedAt: new Date(),
+            verificationToken: null,
+            verificationTokenExpires: null,
+        },
+        select: { id: true, emailVerifiedAt: true },
+    });
+}
+
+export async function findUserByGoogleId(googleId: string) {
+    return (prisma as any).user.findFirst({ where: { googleId } });
 }

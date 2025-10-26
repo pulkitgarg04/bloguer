@@ -6,6 +6,9 @@ import {
     profileService,
     followersFollowingCountService,
     followOrUnfollowService,
+    verifyEmailService,
+    resendVerificationService,
+    googleOAuthService,
 } from '../services/user.service';
 
 export const UserController = {
@@ -106,6 +109,59 @@ export const UserController = {
                 .status(200)
                 .json({ message: `Successfully ${action}ed` });
         } catch (error) {
+            return res.status(500).json({ message: 'Server error' });
+        }
+    },
+
+    verifyEmail: async (req: Request, res: Response) => {
+        try {
+            const { token } = req.query as any;
+            if (!token)
+                return res
+                    .status(400)
+                    .json({ message: 'Verification token is required' });
+            const result = await verifyEmailService(token as string);
+            if ((result as any).error)
+                return res.status(400).json({ message: (result as any).error });
+            return res.status(200).json({ message: 'Email verified' });
+        } catch (e) {
+            return res.status(500).json({ message: 'Server error' });
+        }
+    },
+
+    resendVerification: async (req: Request, res: Response) => {
+        try {
+            const { email } = req.body as any;
+            if (!email)
+                return res
+                    .status(400)
+                    .json({ message: 'Email is required' });
+            const result = await resendVerificationService(email);
+            if ((result as any).error)
+                return res.status(400).json({ message: (result as any).error });
+            return res
+                .status(200)
+                .json({ message: 'Verification email sent' });
+        } catch (e) {
+            return res.status(500).json({ message: 'Server error' });
+        }
+    },
+
+    googleOAuth: async (req: Request, res: Response) => {
+        try {
+            const { credential } = req.body as any;
+            if (!credential)
+                return res
+                    .status(400)
+                    .json({ message: 'Missing Google credential' });
+            const result = await googleOAuthService(credential);
+            if ((result as any).error)
+                return res.status(400).json({ message: (result as any).error });
+            return res.status(200).json({
+                jwt: (result as any).token,
+                user: (result as any).user,
+            });
+        } catch (e) {
             return res.status(500).json({ message: 'Server error' });
         }
     },

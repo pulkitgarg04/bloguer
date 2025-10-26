@@ -10,7 +10,9 @@ import {
     aiRouter,
     commentRouter,
     healthRouter,
+    authRouter,
 } from './routes/index.route';
+import passport from './config/passport';
 
 const app = express();
 
@@ -30,6 +32,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(passport.initialize());
 
 app.get('/', (req, res) => {
     console.log(req.url);
@@ -37,6 +40,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/v1/health', healthRouter);
+app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/blog', blogRouter);
 app.use('/api/v1/ai', aiRouter);

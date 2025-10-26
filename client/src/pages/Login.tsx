@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
 
 export default function Login() {
-    const { login, isLoading } = useAuthStore();
+    const { login, isLoading, checkAuth } = useAuthStore();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [formData, setFormData] = useState<{
         email: string;
@@ -18,6 +19,7 @@ export default function Login() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
+
         setFormData((prevData) => ({ ...prevData, [id]: value }));
     };
 
@@ -25,16 +27,24 @@ export default function Login() {
         setShowPassword((prev) => !prev);
     };
 
+    const handleGoogleClick = () => {
+        const redirect = window.location.origin;
+
+        window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/google?redirect=${encodeURIComponent(redirect)}`;
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (!formData.email || !formData.password) {
             toast.error('Please fill out all fields.');
+
             return;
         }
 
         try {
             const loginSuccess = await login(formData.email, formData.password);
+
             if (loginSuccess) {
                 toast.dismiss();
                 toast.success('Login Successful!');
@@ -53,7 +63,9 @@ export default function Login() {
                     const message =
                         errorResponse?.message ||
                         'Forbidden: Invalid email or password.';
+
                     toast.error(message);
+
                     return;
                 }
 
@@ -68,33 +80,61 @@ export default function Login() {
         }
     };
 
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const token = params.get('token');
+
+        if (token) {
+            localStorage.setItem('token', token);
+            checkAuth();
+            navigate('/');
+        }
+    }, [location.search, checkAuth, navigate]);
+
     return (
         <div className="min-h-screen bg-gray-100 text-gray-900 flex font-inter">
             <div className="flex-1 bg-indigo-100 hidden lg:flex items-center justify-center">
                 <img
-                    className="h-80"
+                    className="h-96"
                     src="https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg"
                     alt="Signup illustration"
                 />
             </div>
 
-            <div className="flex flex-col justify-center items-center flex-1 px-4">
-                <div className="text-4xl font-bold text-gray-800 flex mb-5">
+            <div className="flex flex-col justify-center items-center flex-1 px-4 py-8">
+                <div className="text-4xl font-bold text-gray-800 flex mb-6 tracking-tight">
                     BLOG<span className="text-red-500">UER</span>
                 </div>
-                <div className="w-full max-w-sm space-y-6">
-                    <h1 className="text-2xl xl:text-3xl font-bold text-center mb-6">
+                <div className="w-full max-w-md space-y-6 md:space-y-7">
+                    <h1 className="text-2xl xl:text-3xl font-bold text-center">
                         Login
                     </h1>
-                    <p className="text-center">
+                    <p className="text-center text-gray-600 max-w-md mx-auto">
                         Welcome Back to Bloguer Roger! You are just a few steps
                         to login.
                     </p>
+                    <div className="flex justify-center">
+                        <button
+                            type="button"
+                            onClick={handleGoogleClick}
+                            className="mt-3 mb-2 w-full inline-flex items-center justify-center gap-2 h-11 rounded-lg border border-gray-300 bg-white text-sm text-gray-700 hover:shadow-sm"
+                        >
+                            <img
+                                src="/logo/google.webp"
+                                alt="Google"
+                                className="w-5 h-5"
+                            />
+                            Continue with Google
+                        </button>
+                    </div>
 
-                    <form
-                        onSubmit={handleSubmit}
-                        className="mx-auto max-w-xs space-y-5"
-                    >
+                    <div className="flex items-center justify-center gap-2 my-3">
+                        <hr className="w-full border-gray-300" />
+                        <span className="text-gray-500">or</span>
+                        <hr className="w-full border-gray-300" />
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-5">
                         <label
                             htmlFor="email"
                             className="relative block rounded-md border border-gray-200 shadow-sm"
@@ -104,7 +144,7 @@ export default function Login() {
                                 id="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 py-2 px-4 w-full text-lg"
+                                className="peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 h-11 px-4 w-full text-base"
                                 placeholder="Email"
                             />
                             <span className="pointer-events-none absolute left-2.5 top-0 -translate-y-1/2 bg-gray-100 px-1 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">
@@ -121,7 +161,7 @@ export default function Login() {
                                 id="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                className="peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 py-2 px-4 w-full text-lg"
+                                className="peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 h-11 px-4 w-full text-base"
                                 placeholder="Password"
                             />
                             <span className="pointer-events-none absolute left-2.5 top-0 -translate-y-1/2 bg-gray-100 px-1 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">
@@ -143,7 +183,7 @@ export default function Login() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className={`py-2 rounded-lg flex gap-2 justify-center items-center w-full ${
+                            className={`h-11 rounded-lg flex gap-2 justify-center items-center w-full font-medium ${
                                 isLoading
                                     ? 'bg-gray-400 cursor-not-allowed'
                                     : 'bg-gray-800 text-white hover:bg-gray-700'
@@ -153,7 +193,16 @@ export default function Login() {
                             <p>{isLoading ? 'Loading...' : 'Login'}</p>
                         </button>
 
-                        <div className="text-sm text-center">
+                        <div className="w-full flex justify-end">
+                            <Link
+                                to="/forgot-password"
+                                className="text-sm text-gray-700 hover:text-gray-900 underline"
+                            >
+                                Forgot password?
+                            </Link>
+                        </div>
+
+                        <div className="text-sm text-center mt-3">
                             Don't have an account?{' '}
                             <Link
                                 to="/signup"
