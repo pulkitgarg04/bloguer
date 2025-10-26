@@ -16,6 +16,7 @@ import Contact from './pages/Contact';
 import Analytics from './pages/Analytics';
 import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 import { useAuthStore } from './store/authStore';
 
@@ -30,7 +31,10 @@ function AppShell() {
             const token = params.get('token');
             const error = params.get('error');
 
-            if (error) {
+            // Only handle OAuth tokens, not reset password or verification tokens
+            const isOAuthCallback = location.pathname === '/login' || location.pathname === '/signup';
+            
+            if (error && isOAuthCallback) {
                 toast.error(`Google sign-in failed: ${error}`);
 
                 navigate(location.pathname, { replace: true });
@@ -38,7 +42,7 @@ function AppShell() {
                 return;
             }
 
-            if (token) {
+            if (token && isOAuthCallback) {
                 localStorage.setItem('token', token);
                 await checkAuth();
 
@@ -74,6 +78,7 @@ function AppShell() {
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
             </Routes>
             <Toaster />
         </>

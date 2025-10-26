@@ -157,3 +157,31 @@ export async function markEmailVerified(userId: string) {
 export async function findUserByGoogleId(googleId: string) {
     return (prisma as any).user.findFirst({ where: { googleId } });
 }
+
+export async function setPasswordResetToken(
+    userId: string,
+    token: string,
+    expiresAt: Date
+) {
+    return (prisma as any).user.update({
+        where: { id: userId },
+        data: { resetPasswordToken: token, resetPasswordTokenExpires: expiresAt },
+        select: { id: true },
+    });
+}
+
+export async function findUserByResetToken(token: string) {
+    return (prisma as any).user.findFirst({ where: { resetPasswordToken: token } });
+}
+
+export async function updatePassword(userId: string, hashedPassword: string) {
+    return (prisma as any).user.update({
+        where: { id: userId },
+        data: {
+            password: hashedPassword,
+            resetPasswordToken: null,
+            resetPasswordTokenExpires: null,
+        },
+        select: { id: true },
+    });
+}

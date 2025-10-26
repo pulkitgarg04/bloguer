@@ -9,6 +9,8 @@ import {
     verifyEmailService,
     resendVerificationService,
     googleOAuthService,
+    forgotPasswordService,
+    resetPasswordService,
 } from '../services/user.service';
 
 export const UserController = {
@@ -116,15 +118,22 @@ export const UserController = {
     verifyEmail: async (req: Request, res: Response) => {
         try {
             const { token } = req.query as any;
+            console.log('Verification attempt with token:', token ? 'present' : 'missing');
+            
             if (!token)
                 return res
                     .status(400)
                     .json({ message: 'Verification token is required' });
+            
             const result = await verifyEmailService(token as string);
+            console.log('Verification result:', result);
+            
             if ((result as any).error)
                 return res.status(400).json({ message: (result as any).error });
-            return res.status(200).json({ message: 'Email verified' });
+            
+            return res.status(200).json({ message: 'Email verified successfully' });
         } catch (e) {
+            console.error('Verification error:', e);
             return res.status(500).json({ message: 'Server error' });
         }
     },
@@ -162,6 +171,48 @@ export const UserController = {
                 user: (result as any).user,
             });
         } catch (e) {
+            return res.status(500).json({ message: 'Server error' });
+        }
+    },
+
+    forgotPassword: async (req: Request, res: Response) => {
+        try {
+            const { email } = req.body as any;
+            if (!email)
+                return res
+                    .status(400)
+                    .json({ message: 'Email is required' });
+            
+            const result = await forgotPasswordService(email);
+            if ((result as any).error)
+                return res.status(400).json({ message: (result as any).error });
+            
+            return res
+                .status(200)
+                .json({ message: 'Password reset email sent. Please check your inbox.' });
+        } catch (e) {
+            console.error('Forgot password error:', e);
+            return res.status(500).json({ message: 'Server error' });
+        }
+    },
+
+    resetPassword: async (req: Request, res: Response) => {
+        try {
+            const { token, newPassword } = req.body as any;
+            if (!token || !newPassword)
+                return res
+                    .status(400)
+                    .json({ message: 'Token and new password are required' });
+            
+            const result = await resetPasswordService(token, newPassword);
+            if ((result as any).error)
+                return res.status(400).json({ message: (result as any).error });
+            
+            return res
+                .status(200)
+                .json({ message: 'Password reset successfully' });
+        } catch (e) {
+            console.error('Reset password error:', e);
             return res.status(500).json({ message: 'Server error' });
         }
     },

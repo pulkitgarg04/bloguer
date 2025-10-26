@@ -26,6 +26,8 @@ model User {
   emailVerifiedAt DateTime?
   verificationToken String? @unique
   verificationTokenExpires DateTime?
+  resetPasswordToken String? @unique
+  resetPasswordTokenExpires DateTime?
   provider   AuthProvider @default(CREDENTIALS)
   googleId   String? @unique
   posts      Post[]

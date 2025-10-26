@@ -53,9 +53,17 @@ export default function Login() {
                 }, 1000);
             }
         } catch (error: unknown) {
-            // The authStore already extracts and throws the backend error message
             if (error instanceof Error) {
-                toast.error(error.message);
+                const errorMessage = error.message;
+                
+                if (errorMessage.includes('verify your email')) {
+                    toast.error(errorMessage);
+                    setTimeout(() => {
+                        navigate('/verify-email');
+                    }, 1500);
+                } else {
+                    toast.error(errorMessage);
+                }
             } else {
                 toast.error('An unexpected error occurred.');
             }
@@ -78,10 +86,8 @@ export default function Login() {
             if (token) {
                 localStorage.setItem('token', token);
                 
-                // Call checkAuth and wait for it to complete
                 await checkAuth();
                 
-                // Give a tiny delay to ensure state propagates
                 await new Promise(resolve => setTimeout(resolve, 100));
                 
                 toast.success('Login Successful!');

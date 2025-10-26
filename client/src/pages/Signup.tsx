@@ -71,37 +71,22 @@ export default function Signup() {
 
             if (signupSuccess) {
                 toast.dismiss();
-                toast.success('Signup successful!');
+                toast.success('Signup successful! Please check your email to verify your account.');
                 // signup(formData);
 
                 setTimeout(() => {
-                    navigate('/');
-                }, 1000);
+                    navigate('/verify-email');
+                }, 1500);
             }
         } catch (error: unknown) {
-            console.log('Error occurred: ', error);
-
+            let errorMessage = 'An unexpected error occurred.';
             if (axios.isAxiosError(error)) {
-                const errorResponse = error.response?.data;
-
-                if (error.response?.status === 403) {
-                    const message =
-                        errorResponse?.message ||
-                        'Forbidden: Invalid email or password.';
-
-                    toast.error(message);
-
-                    return;
-                }
-
-                if (Array.isArray(errorResponse) && errorResponse[0]?.message) {
-                    toast.error(errorResponse[0].message);
-                } else {
-                    toast.error('Invalid Inputs');
-                }
-            } else {
-                toast.error('An unexpected error occurred.');
+                errorMessage = error.response?.data?.message || error.message || errorMessage;
             }
+            else if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            toast.error(errorMessage);
         }
     };
 
@@ -121,10 +106,8 @@ export default function Signup() {
             if (token) {
                 localStorage.setItem('token', token);
                 
-                // Call checkAuth and wait for it to complete
                 await checkAuth();
                 
-                // Give a tiny delay to ensure state propagates
                 await new Promise(resolve => setTimeout(resolve, 100));
                 
                 toast.success('Signup Successful!');
