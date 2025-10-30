@@ -181,12 +181,15 @@ export default function BlogPage() {
     const handleBookmarkToggle = async () => {
         if (user) {
             try {
+                const token = localStorage.getItem('token');
                 const response = await axios.post(
                     `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/bookmark`,
-                    { userId: user.id, postId }
+                    { postId },
+                    { headers: { Authorization: `Bearer ${token}` } }
                 );
                 setIsBookmarked((prev) => !prev);
-                toast.success(response.data.message);
+                const msg = response.data.bookmarked ? 'Bookmarked' : 'Removed from bookmarks';
+                toast.success(msg);
             } catch (error) {
                 toast.error('Failed to toggle bookmark');
                 console.error(error);

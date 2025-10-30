@@ -204,4 +204,59 @@ export const BlogController = {
                 .json({ message: 'Failed to load geo analytics' });
         }
     },
+
+    engagement: async (req: Request, res: Response) => {
+        try {
+            const { postId, visitorId, durationSec, scrollDepth } = req.body as any;
+            if (!postId) return res.status(400).json({ message: 'postId is required' });
+
+            const ipHeader = (req.headers['x-forwarded-for'] as string) || '';
+            const ip = ipHeader ? ipHeader.split(',')[0]?.trim() : (req.socket.remoteAddress as string | undefined);
+            const userAgent = req.headers['user-agent'] as string | undefined;
+            const ref = ((req.headers['referer'] as string) || (req.headers['referrer'] as string) || '') as string;
+            const userId = (req as any).userId as string | undefined;
+
+            const result = await (await import('../services/blog.service')).createEngagementService({
+                postId,
+                visitorId,
+                durationSec,
+                scrollDepth,
+                userId,
+                ip,
+                userAgent,
+                referrer: ref,
+            });
+
+            if ((result as any).error) return res.status(500).json({ message: (result as any).error });
+            return res.json({ ok: true });
+        } catch (err: any) {
+            console.error('Engagement handler error', err);
+            return res.status(500).json({ message: 'Failed to record engagement' });
+        }
+    },
+
+    toggleBookmark: async (req: Request, res: Response) => {
+        try {
+            const userId = (req as any).userId as string | undefined;
+            if (!userId)
+                return res.status(401).json({ message: 'Unauthorized' });
+            const { postId } = req.body as any;
+            if (!postId) return res.status(400).json({ message: 'postId is required' });
+            const result = await (await import('../services/blog.service')).toggleBookmarkService(userId, postId);
+            return res.json(result);
+        } catch (err: any) {
+            return res.status(500).json({ message: 'Failed to toggle bookmark' });
+        }
+    },
+
+    getBookmarks: async (req: Request, res: Response) => {
+        try {
+            const { userId } = req.params as any;
+            if (!userId) return res.status(400).json({ message: 'userId is required' });
+            const data = await (await import('../services/blog.service')).getBookmarksService(userId);
+            return res.json(data);
+        } catch (err: any) {
+            return res.status(500).json({ message: 'Failed to fetch bookmarks' });
+        }
+    },
 };

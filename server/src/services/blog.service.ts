@@ -23,6 +23,10 @@ import {
     countComments,
     countBookmarks,
     createPostView,
+    createBookmark,
+    deleteBookmark,
+    findBookmarksByUser,
+    findBookmark,
 } from '../repositories/blog.repository';
 
 const TTL_BULK = 600; // 10 minutes
@@ -35,6 +39,35 @@ function readingTime(content: string) {
     const words = content.split(/\s+/).length;
     const minutes = Math.ceil(words / wordsPerMinute);
     return `${minutes} Min Read`;
+}
+
+export async function toggleBookmarkService(userId: string, postId: string) {
+    // check existing
+    const existing = await findBookmark(userId, postId);
+    if (existing) {
+        // remove
+        await deleteBookmark(userId, postId);
+        return { bookmarked: false };
+    }
+
+    // create
+    await createBookmark(userId, postId);
+    return { bookmarked: true };
+}
+
+export async function getBookmarksService(userId: string) {
+    const rows = await findBookmarksByUser(userId);
+    // transform to posts array expected by client
+    const posts = rows.map((r: any) => ({
+        id: r.post.id,
+        title: r.post.title,
+        author: r.post.author,
+        readTime: r.post.readTime,
+        featuredImage: r.post.featuredImage,
+        category: r.post.category,
+        Date: r.post.Date,
+    }));
+    return { posts };
 }
 
 export async function createPostService(
@@ -421,4 +454,34 @@ function classifySource(ref?: string) {
     if (/linkedin\.com/i.test(ref)) return 'social';
     if (/google\.|bing\.|duckduckgo\.|yahoo\./i.test(ref)) return 'search';
     return 'referral';
+}
+
+export async function createEngagementService(data: {
+    postId: string;
+    visitorId?: string;
+    durationSec?: number;
+    scrollDepth?: number;
+    userId?: string;
+    ip?: string;
+    userAgent?: string;
+    referrer?: string;
+}) {
+    try {
+        await createPostView({
+            postId: data.postId,
+            visitorId: data.visitorId,
+            durationSec: data.durationSec,
+            scrollDepth: data.scrollDepth,
+            userId: data.userId,
+            ip: data.ip,
+            userAgent: data.userAgent,
+            referrer: data.referrer,
+            source: classifySource(data.referrer),
+            country: undefined,
+        });
+        return { ok: true };
+    } catch (err) {
+        console.error('Failed to create engagement event', err);
+        return { error: 'Failed to record engagement' };
+    }
 }

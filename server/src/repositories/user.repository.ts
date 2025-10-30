@@ -5,8 +5,13 @@ export async function findUserByEmail(email: string) {
 }
 
 export async function findUserByUsername(username: string) {
-    return prisma.user.findUnique({
-        where: { username: username.toLowerCase() },
+    return prisma.user.findFirst({
+        where: {
+            username: {
+                equals: username,
+                mode: 'insensitive',
+            },
+        },
         include: { followers: true, following: true },
     });
 }
@@ -44,8 +49,8 @@ export async function createUserFromGoogle(data: {
 }
 
 export async function findUserProfile(username: string) {
-    return prisma.user.findUnique({
-        where: { username: username.toLowerCase() },
+    return prisma.user.findFirst({
+        where: { username: { equals: username, mode: 'insensitive' } },
         select: {
             id: true,
             name: true,
@@ -62,7 +67,9 @@ export async function findUserProfile(username: string) {
 
 export async function findPostsByAuthor(authorId: string) {
     return prisma.post.findMany({
-        where: { authorId },
+        where: {
+            authorId
+        },
         select: {
             id: true,
             title: true,
@@ -139,7 +146,9 @@ export async function setVerificationToken(
 }
 
 export async function findUserByVerificationToken(token: string) {
-    return (prisma as any).user.findFirst({ where: { verificationToken: token } });
+    return (prisma as any).user.findFirst({
+        where: { verificationToken: token },
+    });
 }
 
 export async function markEmailVerified(userId: string) {
@@ -165,13 +174,18 @@ export async function setPasswordResetToken(
 ) {
     return (prisma as any).user.update({
         where: { id: userId },
-        data: { resetPasswordToken: token, resetPasswordTokenExpires: expiresAt },
+        data: {
+            resetPasswordToken: token,
+            resetPasswordTokenExpires: expiresAt,
+        },
         select: { id: true },
     });
 }
 
 export async function findUserByResetToken(token: string) {
-    return (prisma as any).user.findFirst({ where: { resetPasswordToken: token } });
+    return (prisma as any).user.findFirst({
+        where: { resetPasswordToken: token },
+    });
 }
 
 export async function updatePassword(userId: string, hashedPassword: string) {

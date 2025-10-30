@@ -72,6 +72,7 @@ export default function Profile() {
     const [isFollowing, setIsFollowing] = useState(false);
     const [followersCount, setFollowersCount] = useState(0);
     const [followingCount, setFollowingCount] = useState(0);
+    const [followLoading, setFollowLoading] = useState(false);
     const userId = user?.id;
 
     useEffect(() => {
@@ -187,10 +188,15 @@ export default function Profile() {
     }
 
     const handleFollowToggle = async () => {
-        try {
-            const action = isFollowing ? 'unfollow' : 'follow';
-            const token = localStorage.getItem('token');
+        if (!username) return;
+        const action = isFollowing ? 'unfollow' : 'follow';
+        const token = localStorage.getItem('token');
 
+        setFollowLoading(true);
+        setIsFollowing((prev) => !prev);
+        setFollowersCount((prev) => (isFollowing ? Math.max(0, prev - 1) : prev + 1));
+
+        try {
             const response = await axios.post(
                 `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/followOrUnfollow`,
                 {
@@ -205,20 +211,28 @@ export default function Profile() {
                 }
             );
 
-            if (response.status === 200) {
-                setIsFollowing(!isFollowing);
-
-                const countResponse = await axios.get(
-                    `${
-                        import.meta.env.VITE_BACKEND_URL
-                    }/api/v1/user/followersFollowingCount/${username}`
-                );
-
-                setFollowersCount(countResponse.data.followersCount);
-                setFollowingCount(countResponse.data.followingCount);
+            if (response.status !== 200) {
+                setIsFollowing((prev) => !prev);
+                setFollowersCount((prev) => (isFollowing ? prev + 1 : Math.max(0, prev - 1)));
+                toast.error('Failed to update follow status');
+            } else {
+                try {
+                    const countResponse = await axios.get(
+                        `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/followersFollowingCount/${username}`
+                    );
+                    setFollowersCount(countResponse.data.followersCount);
+                    setFollowingCount(countResponse.data.followingCount);
+                } catch {
+                    console.error('Failed to refresh follower counts');
+                }
             }
         } catch (error) {
+            setIsFollowing((prev) => !prev);
+            setFollowersCount((prev) => (isFollowing ? prev + 1 : Math.max(0, prev - 1)));
             console.error('Error toggling follow status:', error);
+            toast.error('Failed to update follow status');
+        } finally {
+            setFollowLoading(false);
         }
     };
 
@@ -296,10 +310,22 @@ export default function Profile() {
                     <div className="flex flex-col space-y-4">
                         {user && username !== user.username && (
                             <button
-                                className="bg-gray-800 rounded-lg text-white p-2"
+                                className={`rounded-lg text-white p-2 transition-colors duration-150 ${isFollowing ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-800 hover:bg-gray-700'}`}
                                 onClick={handleFollowToggle}
+                                disabled={followLoading}
+                                aria-busy={followLoading}
                             >
-                                {isFollowing ? 'Unfollow' : 'Follow'}
+                                {followLoading ? (
+                                    <span className="flex items-center gap-2">
+                                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                        </svg>
+                                        Processing...
+                                    </span>
+                                ) : (
+                                    <>{isFollowing ? 'Unfollow' : 'Follow'}</>
+                                )}
                             </button>
                         )}
                         <div className="flex justify-center items-center gap-4">

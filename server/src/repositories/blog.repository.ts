@@ -234,3 +234,23 @@ export async function createPostView(data: any) {
         return await (prisma as any).postView.create({ data: fallback });
     }
 }
+
+export async function createBookmark(userId: string, postId: string) {
+    return prisma.bookmark.create({ data: { userId, postId } });
+}
+
+export async function deleteBookmark(userId: string, postId: string) {
+    return prisma.bookmark.deleteMany({ where: { userId, postId } });
+}
+
+export async function findBookmarksByUser(userId: string) {
+    return prisma.bookmark.findMany({
+        where: { userId },
+        include: { post: { include: { author: { select: { name: true, username: true, avatar: true } } } } },
+        orderBy: { id: 'desc' },
+    });
+}
+
+export async function findBookmark(userId: string, postId: string) {
+    return prisma.bookmark.findFirst({ where: { userId, postId } });
+}
