@@ -24,6 +24,7 @@ export const BlogController = {
                 title: string;
                 content: string;
                 category: string;
+                featuredImage?: string;
             };
             const post = await createPostService(userId, body);
             return res.status(200).json({ id: post.id });
@@ -34,7 +35,7 @@ export const BlogController = {
 
     update: async (req: Request, res: Response) => {
         try {
-            const { postId, title, content, category, published } =
+            const { postId, title, content, category, published, featuredImage } =
                 req.body as any;
             if (!postId)
                 return res.status(400).json({ message: 'postId is required' });
@@ -43,6 +44,7 @@ export const BlogController = {
                 content,
                 category,
                 published,
+                featuredImage,
             });
             return res.json({
                 message: 'Blog updated successfully',

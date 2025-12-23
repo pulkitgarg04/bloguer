@@ -24,6 +24,7 @@ import {
     setPasswordResetToken,
     findUserByResetToken,
     updatePassword,
+    updateUserProfile,
 } from '../repositories/user.repository';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/email';
 import crypto from 'crypto';
@@ -251,4 +252,11 @@ export async function resetPasswordService(token: string, newPassword: string) {
     await updatePassword((user as any).id, hashedPassword);
 
     return { ok: true };
+}
+
+export async function updateProfileService(
+    userId: string,
+    data: { name?: string; bio?: string; location?: string }
+) {
+    return await updateUserProfile(userId, data);
 }

@@ -9,3 +9,9 @@ aiRouter.post(
     authMiddleware,
     AIController.generateArticle
 );
+
+aiRouter.post(
+    '/refine-article',
+    authMiddleware,
+    AIController.refineArticle
+);

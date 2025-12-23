@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { generateArticle } from '../services/ai.service';
+import { generateArticle, refineArticle } from '../services/ai.service';
 
 export const AIController = {
     generateArticle: async (req: Request, res: Response) => {
@@ -54,6 +54,62 @@ export const AIController = {
                     success: false,
                     message:
                         'Failed to generate article. Please try again later.',
+                });
+            }
+        }
+    },
+    refineArticle: async (req: Request, res: Response) => {
+        try {
+            const userId = (req as any).userId as string | undefined;
+            if (!userId)
+                return res
+                    .status(401)
+                    .json({ message: 'Unauthorized. No user ID found.' });
+            const { content, title } = req.body as any;
+            if (!content || !title)
+                return res
+                    .status(400)
+                    .json({ message: 'Content and title are required.' });
+            const result = await refineArticle(content, title);
+            if ((result as any).error)
+                return res
+                    .status(500)
+                    .json({ success: false, message: (result as any).error });
+            return res.status(200).json({
+                success: true,
+                content: (result as any).content,
+                message: 'Article refined successfully',
+            });
+        } catch (error: any) {
+            if (
+                error.message?.includes('overloaded') ||
+                error.message?.includes('503')
+            ) {
+                return res.status(503).json({
+                    success: false,
+                    message:
+                        'AI service is temporarily busy. Please try again in a few minutes.',
+                });
+            } else if (
+                error.message?.includes('API key') ||
+                error.message?.includes('401')
+            ) {
+                return res.status(500).json({
+                    success: false,
+                    message:
+                        'AI service configuration error. Please contact support.',
+                });
+            } else if (error.message?.includes('quota')) {
+                return res.status(429).json({
+                    success: false,
+                    message:
+                        'AI service quota exceeded. Please try again later.',
+                });
+            } else {
+                return res.status(500).json({
+                    success: false,
+                    message:
+                        'Failed to refine article. Please try again later.',
                 });
             }
         }

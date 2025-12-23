@@ -42,22 +42,18 @@ function readingTime(content: string) {
 }
 
 export async function toggleBookmarkService(userId: string, postId: string) {
-    // check existing
     const existing = await findBookmark(userId, postId);
     if (existing) {
-        // remove
         await deleteBookmark(userId, postId);
         return { bookmarked: false };
     }
 
-    // create
     await createBookmark(userId, postId);
     return { bookmarked: true };
 }
 
 export async function getBookmarksService(userId: string) {
     const rows = await findBookmarksByUser(userId);
-    // transform to posts array expected by client
     const posts = rows.map((r: any) => ({
         id: r.post.id,
         title: r.post.title,
@@ -72,7 +68,7 @@ export async function getBookmarksService(userId: string) {
 
 export async function createPostService(
     userId: string,
-    body: { title: string; content: string; category: string }
+    body: { title: string; content: string; category: string; featuredImage?: string }
 ) {
     const parsed = createBlogInput.safeParse(body);
     if (!parsed.success) {
@@ -84,7 +80,7 @@ export async function createPostService(
         title: body.title,
         content: body.content,
         authorId: userId,
-        featuredImage: `/thumbnails/${body.category}.webp`,
+        featuredImage: body.featuredImage || `/thumbnails/${body.category}.webp`,
         category: body.category,
         readTime: readingTime(body.content),
         Date: new Date(),
@@ -102,6 +98,7 @@ export async function updatePostService(
         content: string;
         category: string;
         published: boolean;
+        featuredImage: string;
     }>
 ) {
     if (data.title || data.content || data.category) {

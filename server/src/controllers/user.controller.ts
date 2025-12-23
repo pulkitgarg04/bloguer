@@ -11,6 +11,7 @@ import {
     googleOAuthService,
     forgotPasswordService,
     resetPasswordService,
+    updateProfileService,
 } from '../services/user.service';
 
 export const UserController = {
@@ -213,6 +214,26 @@ export const UserController = {
                 .json({ message: 'Password reset successfully' });
         } catch (e) {
             console.error('Reset password error:', e);
+            return res.status(500).json({ message: 'Server error' });
+        }
+    },
+
+    updateProfile: async (req: Request, res: Response) => {
+        try {
+            const userId = (req as any).userId as string | undefined;
+            if (!userId)
+                return res.status(401).json({ message: 'Unauthorized' });
+
+            const { name, bio, location } = req.body as any;
+            const updatedUser = await updateProfileService(userId, {
+                name,
+                bio,
+                location,
+            });
+
+            return res.status(200).json(updatedUser);
+        } catch (e) {
+            console.error('Update profile error:', e);
             return res.status(500).json({ message: 'Server error' });
         }
     },

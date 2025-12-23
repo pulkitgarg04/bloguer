@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { toast } from 'react-hot-toast';
@@ -6,6 +6,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ImagePlus } from 'lucide-react';
 
 const SkeletonLoader = () => (
     <div className="animate-pulse space-y-4">
@@ -24,8 +25,145 @@ export default function EditPost() {
     const [category, setCategory] = useState<string>('Uncategorized');
     const [loading, setLoading] = useState(false);
     const [updating, setUpdating] = useState(false);
+    const [featuredImage, setFeaturedImage] = useState<string>('');
+    const [featuredImagePreview, setFeaturedImagePreview] = useState<string>('');
+    const [featuredImageFile, setFeaturedImageFile] = useState<File | null>(null);
+    const [pendingImages, setPendingImages] = useState<Map<string, File>>(new Map());
+    const quillRef = useRef<any>(null);
 
     const navigate = useNavigate();
+
+    const handleImageUpload = async (file: File) => {
+        const formData = new FormData();
+        formData.append('image', file);
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/upload-image`,
+                formData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            );
+
+            if (response.data.url) {
+                return response.data.url;
+            }
+        } catch (error) {
+            toast.error('Failed to upload image');
+            return null;
+        }
+    };
+
+    const handleFeaturedImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setFeaturedImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFeaturedImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const imageHandler = () => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+
+        input.onchange = async () => {
+            const file = input.files?.[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const localUrl = reader.result as string;
+                    const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                    
+                    setPendingImages(prev => new Map(prev).set(tempId, file));
+                    
+                    if (quillRef.current) {
+                        const quill = quillRef.current.getEditor();
+                        const range = quill.getSelection();
+                        const index = range?.index || 0;
+                        
+                        quill.insertEmbed(index, 'image', localUrl);
+                        quill.setSelection(index + 1);
+                        
+                        setTimeout(() => {
+                            const imgElements = quill.root.querySelectorAll('img');
+                            const lastImg = imgElements[imgElements.length - 1];
+                            if (lastImg && lastImg.src === localUrl) {
+                                lastImg.setAttribute('data-temp-id', tempId);
+                                lastImg.style.maxWidth = '100%';
+                                lastImg.style.height = 'auto';
+                                lastImg.style.display = 'block';
+                                lastImg.style.margin = '10px auto';
+                            }
+                        }, 10);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+    };
+
+    const modules = useMemo(
+        () => ({
+            toolbar: {
+                container: [
+                    [{ header: [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ list: 'ordered' }, { list: 'bullet' }],
+                    ['blockquote', 'code-block'],
+                    [{ color: [] }, { background: [] }],
+                    ['link', 'image'],
+                    ['clean'],
+                ],
+                handlers: {
+                    image: imageHandler,
+                },
+            },
+        }),
+        []
+    );
+
+    const uploadAllPendingImages = async () => {
+        if (pendingImages.size === 0) return content;
+        
+        let updatedContent = content;
+        const uploadPromises: Promise<{tempId: string, url: string | null}>[] = [];
+        
+        for (const [tempId, file] of pendingImages.entries()) {
+            uploadPromises.push(
+                handleImageUpload(file).then(url => ({ tempId, url }))
+            );
+        }
+        
+        const results = await Promise.all(uploadPromises);
+        
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = updatedContent;
+        
+        results.forEach(({ tempId, url }) => {
+            if (url) {
+                const img = tempDiv.querySelector(`img[data-temp-id="${tempId}"]`);
+                if (img) {
+                    img.setAttribute('src', url);
+                    img.removeAttribute('data-temp-id');
+                }
+            }
+        });
+        
+        updatedContent = tempDiv.innerHTML;
+        setPendingImages(new Map());
+        return updatedContent;
+    };
 
     const handleUpdate = async () => {
         if (!title || !content) {
@@ -33,16 +171,37 @@ export default function EditPost() {
             return;
         }
 
-        const formData = {
-            postId: postId,
-            title: title,
-            content: content,
-            category: category,
-        };
-
         try {
             setUpdating(true);
             const token = localStorage.getItem('token');
+
+            let finalContent = content;
+            if (pendingImages.size > 0) {
+                toast.loading('Uploading images...');
+                finalContent = await uploadAllPendingImages();
+                toast.dismiss();
+            }
+
+            let uploadedFeaturedImage = featuredImage;
+            if (featuredImageFile) {
+                toast.loading('Uploading featured image...');
+                const newImageUrl = await handleImageUpload(featuredImageFile);
+                toast.dismiss();
+                if (!newImageUrl) {
+                    toast.error('Failed to upload featured image');
+                    setUpdating(false);
+                    return;
+                }
+                uploadedFeaturedImage = newImageUrl;
+            }
+
+            const formData = {
+                postId: postId,
+                title: title,
+                content: finalContent,
+                category: category,
+                featuredImage: uploadedFeaturedImage || undefined,
+            };
 
             const response = await axios.put(
                 `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/post`,
@@ -80,6 +239,8 @@ export default function EditPost() {
                 setTitle(data.post.title);
                 setContent(data.post.content);
                 setCategory(data.post.category);
+                setFeaturedImage(data.post.featuredImage || '');
+                setFeaturedImagePreview(data.post.featuredImage || '');
             } catch (error) {
                 toast.error(`Error fetching blog data: ${error}`);
             } finally {
@@ -107,12 +268,62 @@ export default function EditPost() {
 
     return (
         <div className="min-h-screen font-inter">
+            <style>
+                {`
+                    .ql-editor img {
+                        max-width: 100% !important;
+                        height: auto !important;
+                        display: block !important;
+                        margin: 10px auto !important;
+                    }
+                `}
+            </style>
             <Navbar activeTab="Home" />
 
             <section className="p-10">
                 <h1 className="text-3xl font-semibold mb-4">
                     Edit Your Article
                 </h1>
+
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Featured Image (Optional)
+                    </label>
+                    <div className="flex items-center gap-4">
+                        {featuredImagePreview ? (
+                            <div className="relative">
+                                <img
+                                    src={featuredImagePreview}
+                                    alt="Featured Preview"
+                                    className="w-40 h-24 object-cover rounded-lg"
+                                />
+                                <button
+                                    onClick={() => {
+                                        setFeaturedImagePreview('');
+                                        setFeaturedImageFile(null);
+                                        setFeaturedImage('');
+                                    }}
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        ) : (
+                            <label className="cursor-pointer">
+                                <div className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition">
+                                    <ImagePlus size={20} />
+                                    <span>Select Featured Image</span>
+                                </div>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleFeaturedImageSelect}
+                                />
+                            </label>
+                        )}
+                    </div>
+                </div>
 
                 <div className="flex justify-center items-center gap-2 my-5">
                     <label htmlFor="title" className="text-2xl font-medium">
@@ -183,8 +394,10 @@ export default function EditPost() {
                 </div>
 
                 <ReactQuill
+                    ref={quillRef}
                     value={content}
                     onChange={setContent}
+                    modules={modules}
                     className="h-96 mt-10 mb-20"
                     placeholder="Write your article here..."
                 />

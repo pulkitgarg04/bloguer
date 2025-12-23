@@ -1,5 +1,13 @@
 import prisma from './prisma';
 
+export async function updateUserAvatar(userId: string, avatarUrl: string) {
+    return prisma.user.update({
+        where: { id: userId },
+        data: { avatar: avatarUrl },
+        select: { id: true, avatar: true },
+    });
+}
+
 export async function findUserByEmail(email: string) {
     return prisma.user.findFirst({ where: { email } });
 }
@@ -68,7 +76,7 @@ export async function findUserProfile(username: string) {
 export async function findPostsByAuthor(authorId: string) {
     return prisma.post.findMany({
         where: {
-            authorId
+            authorId,
         },
         select: {
             id: true,
@@ -197,5 +205,24 @@ export async function updatePassword(userId: string, hashedPassword: string) {
             resetPasswordTokenExpires: null,
         },
         select: { id: true },
+    });
+}
+
+export async function updateUserProfile(
+    userId: string,
+    data: { name?: string; bio?: string; location?: string }
+) {
+    return prisma.user.update({
+        where: { id: userId },
+        data,
+        select: {
+            id: true,
+            name: true,
+            bio: true,
+            location: true,
+            username: true,
+            email: true,
+            avatar: true,
+        },
     });
 }

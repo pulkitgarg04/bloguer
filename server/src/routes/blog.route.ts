@@ -1,9 +1,12 @@
 import { Router } from 'express';
 import authMiddleware from '../middlewares/authMiddleware';
 import { BlogController } from '../controllers/blog.controller';
+import upload from '../utils/multer';
+import { uploadImageController } from '../controllers/uploadImage.controller';
 
 export const blogRouter = Router();
 
+blogRouter.post('/upload-image', authMiddleware, upload.single('image'), uploadImageController);
 blogRouter.post('/post', authMiddleware, BlogController.create);
 blogRouter.put('/post', authMiddleware, BlogController.update);
 blogRouter.delete('/post/:postId', authMiddleware, BlogController.delete);
