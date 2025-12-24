@@ -14,7 +14,7 @@ export async function createCommentService(
     postId: string,
     content: string
 ) {
-    const parsed = createCommentInput.safeParse({ content });
+    const parsed = createCommentInput.safeParse({ postId, content });
     if (!parsed.success) {
         const firstError = parsed.error.issues[0];
         throw new Error(firstError.message);

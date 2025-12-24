@@ -165,6 +165,47 @@ export default function EditPost() {
         return updatedContent;
     };
 
+    const convertBase64ImagesInContent = async (htmlContent: string) => {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        
+        const images = tempDiv.querySelectorAll('img[src^="data:"]');
+        
+        if (images.length === 0) return htmlContent;
+        
+        const uploadPromises: Promise<{element: Element, url: string | null}>[] = [];
+        
+        images.forEach((img) => {
+            const base64Data = img.getAttribute('src');
+            if (base64Data?.startsWith('data:')) {
+                // Convert base64 to file
+                const arr = base64Data.split(',');
+                const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png';
+                const bstr = atob(arr[1]);
+                const n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                for (let i = 0; i < n; i++) {
+                    u8arr[i] = bstr.charCodeAt(i);
+                }
+                const file = new File([u8arr], `image_${Date.now()}.png`, { type: mime });
+                
+                uploadPromises.push(
+                    handleImageUpload(file).then(url => ({ element: img, url }))
+                );
+            }
+        });
+        
+        const results = await Promise.all(uploadPromises);
+        
+        results.forEach(({ element, url }) => {
+            if (url) {
+                element.setAttribute('src', url);
+            }
+        });
+        
+        return tempDiv.innerHTML;
+    };
+
     const handleUpdate = async () => {
         if (!title || !content) {
             toast.error('Title or content cannot be empty!');
@@ -181,6 +222,11 @@ export default function EditPost() {
                 finalContent = await uploadAllPendingImages();
                 toast.dismiss();
             }
+
+            // Convert any remaining base64 images to Cloudinary URLs
+            toast.loading('Processing images...');
+            finalContent = await convertBase64ImagesInContent(finalContent);
+            toast.dismiss();
 
             let uploadedFeaturedImage = featuredImage;
             if (featuredImageFile) {
@@ -253,9 +299,9 @@ export default function EditPost() {
 
     if (loading) {
         return (
-            <div className="min-h-screen font-inter">
+            <div className="min-h-screen font-inter flex flex-col">
                 <Navbar activeTab="Home" />
-                <section className="p-10">
+                <section className="p-10 flex-1">
                     <h1 className="text-3xl font-semibold mb-4">
                         Edit Your Article
                     </h1>
@@ -267,7 +313,7 @@ export default function EditPost() {
     }
 
     return (
-        <div className="min-h-screen font-inter">
+        <div className="min-h-screen font-inter flex flex-col">
             <style>
                 {`
                     .ql-editor img {
@@ -280,7 +326,7 @@ export default function EditPost() {
             </style>
             <Navbar activeTab="Home" />
 
-            <section className="p-10">
+            <section className="p-10 flex-1">
                 <h1 className="text-3xl font-semibold mb-4">
                     Edit Your Article
                 </h1>

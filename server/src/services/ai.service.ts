@@ -10,11 +10,14 @@ export async function generateArticle(title: string, category: string) {
 The article should feel personal, warm, and thoughtfully written rather than templated.
 
 Guidelines:
+- Don't add a title or the category in the output
 - Choose a natural structure (classic, story-led, problem - solution, or guide-style)
 - Use between 2 and 5 main sections as appropriate
 - Vary the introduction style (question, story, insight, or conversational opening)
 - Maintain a professional tone with natural voice variation
 - Use HTML formatting (<h2>, <h3>, <p>, <ul>, <li>) organically
+- Incorporate relevant keywords naturally for SEO
+- Add links to authoritative sources where appropriate
 - Include real-world examples or practical insights where relevant
 - Vary paragraph and section lengths
 - Avoid formulaic transitions or repetitive phrasing

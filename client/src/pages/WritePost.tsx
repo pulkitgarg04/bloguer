@@ -154,6 +154,46 @@ export default function WritePost() {
         return updatedContent;
     };
 
+    const convertBase64ImagesInContent = async (htmlContent: string) => {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        
+        const images = tempDiv.querySelectorAll('img[src^="data:"]');
+        
+        if (images.length === 0) return htmlContent;
+        
+        const uploadPromises: Promise<{element: Element, url: string | null}>[] = [];
+        
+        images.forEach((img) => {
+            const base64Data = img.getAttribute('src');
+            if (base64Data?.startsWith('data:')) {
+                const arr = base64Data.split(',');
+                const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png';
+                const bstr = atob(arr[1]);
+                const n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                for (let i = 0; i < n; i++) {
+                    u8arr[i] = bstr.charCodeAt(i);
+                }
+                const file = new File([u8arr], `image_${Date.now()}.png`, { type: mime });
+                
+                uploadPromises.push(
+                    handleImageUpload(file).then(url => ({ element: img, url }))
+                );
+            }
+        });
+        
+        const results = await Promise.all(uploadPromises);
+        
+        results.forEach(({ element, url }) => {
+            if (url) {
+                element.setAttribute('src', url);
+            }
+        });
+        
+        return tempDiv.innerHTML;
+    };
+
     const handlePublish = async () => {
         if (!title || !content) {
             toast.error('Title or content cannot be empty!');
@@ -170,6 +210,10 @@ export default function WritePost() {
                 finalContent = await uploadAllPendingImages();
                 toast.dismiss();
             }
+
+            toast.loading('Processing images...');
+            finalContent = await convertBase64ImagesInContent(finalContent);
+            toast.dismiss();
 
             let uploadedFeaturedImage = undefined;
             if (featuredImageFile) {
@@ -422,18 +466,28 @@ export default function WritePost() {
                                 </button>
                             </div>
                         ) : (
-                            <label className="cursor-pointer">
-                                <div className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition">
-                                    <ImagePlus size={20} />
-                                    <span>Select Featured Image</span>
+                            <div className="flex flex-col gap-3">
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-2">Default thumbnail for {category}:</p>
+                                    <img
+                                        src={`/thumbnails/${category}.webp`}
+                                        alt={`${category} thumbnail`}
+                                        className="w-40 h-24 object-cover rounded-lg border border-gray-300"
+                                    />
                                 </div>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={handleFeaturedImageSelect}
-                                />
-                            </label>
+                                <label className="cursor-pointer">
+                                    <div className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition w-fit">
+                                        <ImagePlus size={20} />
+                                        <span>Select Featured Image</span>
+                                    </div>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleFeaturedImageSelect}
+                                    />
+                                </label>
+                            </div>
                         )}
                     </div>
                 </div>

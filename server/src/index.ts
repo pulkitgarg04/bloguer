@@ -11,6 +11,8 @@ import {
     commentRouter,
     healthRouter,
     authRouter,
+    newsletterRouter,
+    contactRouter,
 } from './routes/index.route';
 import passport from './config/passport';
 
@@ -31,7 +33,8 @@ app.use(
     })
 );
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(passport.initialize());
 
 app.get('/', (req, res) => {
@@ -45,6 +48,8 @@ app.use('/api/v1/user', userRouter);
 app.use('/api/v1/blog', blogRouter);
 app.use('/api/v1/ai', aiRouter);
 app.use('/api/v1/comment', commentRouter);
+app.use('/api/v1/newsletter', newsletterRouter);
+app.use('/api/v1/contact', contactRouter);
 
 const PORT = process.env.PORT || 4000;
 if (require.main === module) {

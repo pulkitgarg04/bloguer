@@ -1,19 +1,34 @@
 import { Mails } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
 
 export default function Newsletter() {
     const [email, setEmail] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubscribe = () => {
+    const handleSubscribe = async () => {
         if (email === '') {
             toast.error(
                 'Please enter your email to subscribe to the newsletter!'
             );
             return;
         }
-        setEmail('');
-        toast.success("You are subscribed to Bloguer's Newsletter");
+
+        setIsLoading(true);
+        try {
+            await axios.post(
+                `${import.meta.env.VITE_BACKEND_URL}/api/v1/newsletter/subscribe`,
+                { email }
+            );
+            setEmail('');
+            toast.success("You are subscribed to Bloguer's Newsletter");
+        } catch (error: any) {
+            const message = error.response?.data?.message || 'Failed to subscribe';
+            toast.error(message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -40,10 +55,11 @@ export default function Newsletter() {
                             />
                         </div>
                         <button
-                            className="ml-4 bg-red-500 text-white font-medium py-2 px-6 rounded-lg hover:bg-red-600 transition duration-200 h-full"
+                            className="ml-4 bg-red-500 text-white font-medium py-2 px-6 rounded-lg hover:bg-red-600 transition duration-200 h-full disabled:bg-red-300 disabled:cursor-not-allowed"
                             onClick={handleSubscribe}
+                            disabled={isLoading}
                         >
-                            Subscribe
+                            {isLoading ? 'Subscribing...' : 'Subscribe'}
                         </button>
                     </div>
                 </div>
