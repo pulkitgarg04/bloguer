@@ -99,7 +99,6 @@ export default function BlogPage() {
                 const data = await response.data;
                 setBlog(data.post);
                 setSimilarBlogs(data.similarPosts);
-                // fetch comments
                 try {
                     const resp = await axios.get(
                         `${import.meta.env.VITE_BACKEND_URL}/api/v1/comment/post/${postId}`
@@ -116,7 +115,6 @@ export default function BlogPage() {
         fetchBlogData();
     }, [postId]);
 
-    // Engagement tracking: time-on-page and max scroll depth
     useEffect(() => {
         const start = Date.now();
         let maxScroll = 0;
@@ -329,9 +327,9 @@ export default function BlogPage() {
                 <div className="flex justify-center items-center">
                     <Link to={`/profile/${blog.author.username}`}>
                         <img
-                            src={blog.author.avatar}
+                            src={blog.author.avatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`}
                             alt={blog.author.name}
-                            className="h-10 w-10"
+                            className="h-10 w-10 rounded-3xl"
                         />
                     </Link>
                     <div className="text-lg pl-3 flex">
@@ -385,7 +383,7 @@ export default function BlogPage() {
                     <Link to={`/profile/${blog.author.username}`}>
                         <div className="flex gap-5 items-center">
                             <img
-                                src={blog.author.avatar}
+                                src={blog.author.avatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`}
                                 alt="avatar"
                                 className="h-16 w-16 rounded-full object-cover"
                             />
@@ -533,7 +531,7 @@ export default function BlogPage() {
                                         />
                                         <div className="mt-4 flex items-center space-x-4 text-gray-500">
                                             <img
-                                                src={similarPost.author.avatar}
+                                                src={similarPost.author.avatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(similarPost.author.name)}&size=128`}
                                                 alt={similarPost.author.name}
                                                 className="w-8 h-8 rounded-full object-cover"
                                             />

@@ -96,7 +96,7 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
                             <img
                                 src={
                                     user.avatar ||
-                                    'https://avatar.iran.liara.run/public/44'
+                                    `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(user.name)}&size=128`
                                 }
                                 className="h-10 w-10"
                                 alt="Avatar"

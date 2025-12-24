@@ -60,7 +60,7 @@ export default function CommentCard({
         <div className="bg-white border border-gray-100 shadow-sm p-4 rounded-lg">
             <div className="flex items-start gap-3">
                 <img
-                    src={author.avatar || ''}
+                    src={author.avatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(author.name)}&size=128`}
                     alt={author.name}
                     className="w-10 h-10 rounded-full object-cover"
                 />

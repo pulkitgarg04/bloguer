@@ -289,6 +289,11 @@ export default function Analytics() {
                                     <h3 className="text-lg font-semibold mb-4">
                                         Engagement Distribution
                                     </h3>
+                                    {items.reduce((sum, item) => sum + item.comments + item.bookmarks, 0) === 0 ? (
+                                        <div className="h-[300px] flex items-center justify-center text-gray-500">
+                                            <p>No engagement data yet. Comments and bookmarks will appear here.</p>
+                                        </div>
+                                    ) : (
                                     <ResponsiveContainer width="100%" height={300}>
                                         <PieChart>
                                             <Pie
@@ -309,7 +314,7 @@ export default function Analytics() {
                                                             0
                                                         ),
                                                     },
-                                                ]}
+                                                ].filter(item => item.value > 0)}
                                                 cx="50%"
                                                 cy="50%"
                                                 labelLine={false}
@@ -326,6 +331,7 @@ export default function Analytics() {
                                             <Tooltip />
                                         </PieChart>
                                     </ResponsiveContainer>
+                                    )}
                                 </div>
                             </div>
                         )}

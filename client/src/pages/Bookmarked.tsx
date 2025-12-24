@@ -125,7 +125,7 @@ export default function Bookmarked() {
                                             />
                                             <div className="mt-4 flex items-center space-x-4 text-gray-500">
                                                 <img
-                                                    src={blog.author.avatar}
+                                                    src={blog.author.avatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`}
                                                     alt={blog.author.name}
                                                     className="w-8 h-8 rounded-full object-cover"
                                                 />

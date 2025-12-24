@@ -65,7 +65,7 @@ export default function BlogCard({
                         </h2>
                         <div className="mt-4 flex items-center space-x-4 text-gray-500">
                             <img
-                                src={author.avatar}
+                                src={author.avatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(author.name)}&size=128`}
                                 alt={author.name}
                                 className="w-10 h-10 rounded-full object-cover"
                             />
@@ -98,7 +98,7 @@ export default function BlogCard({
                     </h3>
                     <div className="mt-4 flex items-center space-x-4 text-gray-500">
                         <img
-                            src={author.avatar}
+                            src={author.avatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(author.name)}&size=128`}
                             alt={author.name}
                             className="w-8 h-8 rounded-full object-cover"
                         />

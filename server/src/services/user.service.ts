@@ -51,7 +51,7 @@ export async function signupService(body: any) {
         username: body.username,
         email: body.email,
         password: hashedPassword,
-        avatar: `https://avatar.iran.liara.run/username?username=${body.name}`,
+        avatar: `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(body.name)}&size=128`,
         JoinedDate: new Date(),
     });
 

@@ -35,7 +35,7 @@ passport.use(
                     user = await createUserFromGoogle({
                         name: profile.displayName || email.split('@')[0],
                         email,
-                        avatar: `https://avatar.iran.liara.run/username?username=${encodeURIComponent(profile.displayName || email.split('@')[0])}`,
+                        avatar: profile.photos && profile.photos[0]?.value,
                         googleId,
                     });
                 }
