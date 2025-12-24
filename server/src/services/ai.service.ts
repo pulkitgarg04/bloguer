@@ -48,6 +48,7 @@ Original content:
 ${content}
 
 Guidelines:
+- Don't add a title or the category in the output
 - Improve clarity, flow, and readability
 - Fix grammar and spelling errors
 - Enhance sentence structure and word choice

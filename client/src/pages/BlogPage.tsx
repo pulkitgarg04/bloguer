@@ -19,6 +19,7 @@ import {
 import DOMPurify from 'dompurify';
 import { toast } from 'react-hot-toast';
 import { getVisitorId } from '../utils/visitor';
+import { optimizeCloudinaryUrl, optimizeContentImages } from '../utils/imageOptimizer';
 
 interface FormatDateFunction {
     (dateString: string): string;
@@ -327,9 +328,10 @@ export default function BlogPage() {
                 <div className="flex justify-center items-center">
                     <Link to={`/profile/${blog.author.username}`}>
                         <img
-                            src={blog.author.avatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`}
+                            src={optimizeCloudinaryUrl(blog.author.avatar, 128) || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`}
                             alt={blog.author.name}
                             className="h-10 w-10 rounded-3xl"
+                            loading="eager"
                         />
                     </Link>
                     <div className="text-lg pl-3 flex">
@@ -361,16 +363,17 @@ export default function BlogPage() {
             <section className="py-10">
                 <div className="flex justify-center">
                     <img
-                        src={blog.featuredImage}
+                        src={optimizeCloudinaryUrl(blog.featuredImage, 800)}
                         alt={blog.title}
                         className="h-96 max-w-3xl object-cover rounded-lg"
+                        loading="eager"
                     />
                 </div>
                 <div className="max-w-3xl mx-auto px-4 py-6">
                     <div
                         className="text-lg text-gray-700 prose"
                         dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(blog.content),
+                            __html: DOMPurify.sanitize(optimizeContentImages(blog.content)),
                         }}
                     />
                 </div>
@@ -383,9 +386,10 @@ export default function BlogPage() {
                     <Link to={`/profile/${blog.author.username}`}>
                         <div className="flex gap-5 items-center">
                             <img
-                                src={blog.author.avatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`}
+                                src={optimizeCloudinaryUrl(blog.author.avatar, 128) || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`}
                                 alt="avatar"
                                 className="h-16 w-16 rounded-full object-cover"
+                                loading="lazy"
                             />
                             <div className="flex flex-col justify-center">
                                 <p className="text-gray-700">Written by:</p>
@@ -510,9 +514,10 @@ export default function BlogPage() {
                             >
                                 <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
                                     <img
-                                        src={similarPost.featuredImage}
+                                        src={optimizeCloudinaryUrl(similarPost.featuredImage, 400)}
                                         alt={similarPost.title}
                                         className="w-full h-48 object-cover"
+                                        loading="lazy"
                                     />
                                     <div className="p-4 flex flex-col flex-grow">
                                         <div className="text-sm text-red-500 font-medium">
@@ -531,9 +536,10 @@ export default function BlogPage() {
                                         />
                                         <div className="mt-4 flex items-center space-x-4 text-gray-500">
                                             <img
-                                                src={similarPost.author.avatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(similarPost.author.name)}&size=128`}
+                                                src={optimizeCloudinaryUrl(similarPost.author.avatar, 64) || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(similarPost.author.name)}&size=128`}
                                                 alt={similarPost.author.name}
                                                 className="w-8 h-8 rounded-full object-cover"
+                                                loading="lazy"
                                             />
                                             <div>
                                                 <p className="font-medium text-sm">

@@ -8,6 +8,7 @@ import { Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
+import { optimizeCloudinaryUrl } from '../utils/imageOptimizer';
 
 type FormatDateFunction = (dateString: string) => string;
 
@@ -104,9 +105,10 @@ export default function Bookmarked() {
                                 >
                                     <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
                                         <img
-                                            src={blog.featuredImage}
+                                            src={optimizeCloudinaryUrl(blog.featuredImage, 400)}
                                             alt={blog.title}
                                             className="w-full h-48 object-cover"
+                                            loading="lazy"
                                         />
                                         <div className="p-4 flex flex-col flex-grow">
                                             <div className="text-sm text-red-500 font-medium">
@@ -125,9 +127,10 @@ export default function Bookmarked() {
                                             />
                                             <div className="mt-4 flex items-center space-x-4 text-gray-500">
                                                 <img
-                                                    src={blog.author.avatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`}
+                                                    src={optimizeCloudinaryUrl(blog.author.avatar, 64) || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`}
                                                     alt={blog.author.name}
                                                     className="w-8 h-8 rounded-full object-cover"
+                                                    loading="lazy"
                                                 />
                                                 <div>
                                                     <p className="font-medium text-sm">

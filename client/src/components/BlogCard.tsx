@@ -41,13 +41,22 @@ export default function BlogCard({
     const linkTo = `/${author.username}/${id}`;
 
     if (variant === 'featured') {
+        // Optimize Cloudinary images with transformations
+        const optimizedFeaturedImage = featuredImage?.includes('cloudinary.com')
+            ? featuredImage.replace('/upload/', '/upload/f_auto,q_auto,w_600/')
+            : featuredImage;
+        const optimizedAvatar = author.avatar?.includes('cloudinary.com')
+            ? author.avatar.replace('/upload/', '/upload/f_auto,q_auto,w_128/')
+            : author.avatar;
+
         return (
             <Link to={linkTo}>
                 <div className="w-full overflow-hidden mb-10 flex justify-center">
                     <img
-                        src={featuredImage}
+                        src={optimizedFeaturedImage}
                         alt={title}
                         className="w-1/3 h-80 object-cover rounded-lg shadow-sm"
+                        loading="lazy"
                     />
                     <div className="p-8 flex flex-col justify-center">
                         <div className="text-sm text-red-500 font-medium flex items-center">
@@ -65,9 +74,10 @@ export default function BlogCard({
                         </h2>
                         <div className="mt-4 flex items-center space-x-4 text-gray-500">
                             <img
-                                src={author.avatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(author.name)}&size=128`}
+                                src={optimizedAvatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(author.name)}&size=128`}
                                 alt={author.name}
                                 className="w-10 h-10 rounded-full object-cover"
+                                loading="lazy"
                             />
                             <div>
                                 <p className="font-medium">
@@ -81,13 +91,22 @@ export default function BlogCard({
         );
     }
 
+    // Optimize Cloudinary images with transformations
+    const optimizedFeaturedImage = featuredImage?.includes('cloudinary.com')
+        ? featuredImage.replace('/upload/', '/upload/f_auto,q_auto,w_400/')
+        : featuredImage;
+    const optimizedAvatar = author.avatar?.includes('cloudinary.com')
+        ? author.avatar.replace('/upload/', '/upload/f_auto,q_auto,w_64/')
+        : author.avatar;
+
     return (
         <Link to={linkTo}>
             <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
                 <img
-                    src={featuredImage}
+                    src={optimizedFeaturedImage}
                     alt={title}
                     className="w-full h-48 object-cover"
+                    loading="lazy"
                 />
                 <div className="p-4 flex flex-col flex-grow">
                     <div className="text-sm text-red-500 font-medium">
@@ -98,9 +117,10 @@ export default function BlogCard({
                     </h3>
                     <div className="mt-4 flex items-center space-x-4 text-gray-500">
                         <img
-                            src={author.avatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(author.name)}&size=128`}
+                            src={optimizedAvatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(author.name)}&size=128`}
                             alt={author.name}
                             className="w-8 h-8 rounded-full object-cover"
+                            loading="lazy"
                         />
                         <div>
                             <p className="font-medium text-sm">

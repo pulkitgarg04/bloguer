@@ -29,18 +29,18 @@ export default function Blog() {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [limit] = useState(10);
 
     useEffect(() => {
         const fetchBlogs = async () => {
             try {
                 setLoading(true);
+                const pageLimit = currentPage === 1 ? 10 : 9;
                 const response = await axios.get(
                     `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/bulk`,
                     {
                         params: {
                             page: currentPage,
-                            limit,
+                            limit: pageLimit,
                             search: searchTerm,
                         },
                     }
@@ -58,7 +58,7 @@ export default function Blog() {
         };
 
         fetchBlogs();
-    }, [currentPage, searchTerm, limit]);
+    }, [currentPage, searchTerm]);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);

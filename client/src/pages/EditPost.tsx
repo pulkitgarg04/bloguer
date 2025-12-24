@@ -25,6 +25,7 @@ export default function EditPost() {
     const [category, setCategory] = useState<string>('Uncategorized');
     const [loading, setLoading] = useState(false);
     const [updating, setUpdating] = useState(false);
+    const [refining, setRefining] = useState(false);
     const [featuredImage, setFeaturedImage] = useState<string>('');
     const [featuredImagePreview, setFeaturedImagePreview] = useState<string>('');
     const [featuredImageFile, setFeaturedImageFile] = useState<File | null>(null);
@@ -206,6 +207,57 @@ export default function EditPost() {
         return tempDiv.innerHTML;
     };
 
+    const handleRefineAI = async () => {
+        if (!content) {
+            toast.error('Please write some content first to refine.');
+            return;
+        }
+
+        if (!title) {
+            toast.error('Please enter a title first.');
+            return;
+        }
+
+        try {
+            setRefining(true);
+            const token = localStorage.getItem('token');
+
+            const res = await axios.post(
+                `${import.meta.env.VITE_BACKEND_URL}/api/v1/ai/refine-article`,
+                { content, title },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (res?.data?.success && res.data.content) {
+                setContent(res.data.content);
+                toast.success('Article refined successfully!');
+            } else {
+                const msg = res?.data?.message || 'Failed to refine article.';
+                toast.error(msg);
+            }
+        } catch (err: unknown) {
+            console.error('AI refinement error:', err);
+            const e = err as {
+                response?: { data?: { message?: string } };
+                code?: string;
+            };
+            if (e?.response?.data?.message) {
+                toast.error(e.response.data.message);
+            } else if (e?.code === 'ECONNABORTED') {
+                toast.error('Refinement timed out. Try again.');
+            } else {
+                toast.error('Error refining article. Try again in a moment.');
+            }
+        } finally {
+            setRefining(false);
+        }
+    };
+
     const handleUpdate = async () => {
         if (!title || !content) {
             toast.error('Title or content cannot be empty!');
@@ -327,9 +379,36 @@ export default function EditPost() {
             <Navbar activeTab="Home" />
 
             <section className="p-10 flex-1">
-                <h1 className="text-3xl font-semibold mb-4">
-                    Edit Your Article
-                </h1>
+                <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-3xl font-semibold">
+                        Edit Your Article
+                    </h1>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={handleRefineAI}
+                            disabled={refining || !content}
+                            className={`py-2 px-4 rounded-md ${
+                                refining || !content
+                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                            }`}
+                            title="Refine article with AI"
+                        >
+                            {refining ? 'Refining...' : 'Refine with AI'}
+                        </button>
+                        <button
+                            className={`py-2 px-4 rounded-md ${
+                                updating
+                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                    : 'bg-red-500 text-white hover:bg-red-600'
+                            }`}
+                            onClick={handleUpdate}
+                            disabled={updating}
+                        >
+                            {updating ? 'Updating...' : 'Update'}
+                        </button>
+                    </div>
+                </div>
 
                 <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -426,17 +505,6 @@ export default function EditPost() {
                             Lifestyle
                         </option>
                     </select>
-                    <button
-                        className={`py-2 px-4 rounded-md ${
-                            updating
-                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                : 'bg-gray-800 text-white hover:bg-gray-700'
-                        }`}
-                        onClick={handleUpdate}
-                        disabled={updating}
-                    >
-                        {updating ? 'Updating...' : 'Update'}
-                    </button>
                 </div>
 
                 <ReactQuill
