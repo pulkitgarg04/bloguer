@@ -13,6 +13,7 @@ import {
     authRouter,
     newsletterRouter,
     contactRouter,
+    adminRouter,
 } from './routes/index.route';
 import passport from './config/passport';
 
@@ -50,6 +51,7 @@ app.use('/api/v1/ai', aiRouter);
 app.use('/api/v1/comment', commentRouter);
 app.use('/api/v1/newsletter', newsletterRouter);
 app.use('/api/v1/contact', contactRouter);
+app.use('/api/v1/admin', adminRouter);
 
 const PORT = process.env.PORT || 4000;
 if (require.main === module) {

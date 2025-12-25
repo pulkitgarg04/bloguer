@@ -6,5 +6,6 @@ import { authRouter } from './auth.route';
 import { commentRouter } from './comment.route';
 import { newsletterRouter } from './newsletter.route';
 import { contactRouter } from './contact.route';
+import { adminRouter } from './admin.route';
 
-export { blogRouter, userRouter, aiRouter, healthRouter, commentRouter, authRouter, newsletterRouter, contactRouter };
+export { blogRouter, userRouter, aiRouter, healthRouter, commentRouter, authRouter, newsletterRouter, contactRouter, adminRouter };

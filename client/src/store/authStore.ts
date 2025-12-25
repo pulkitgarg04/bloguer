@@ -20,6 +20,7 @@ interface AuthState {
         name: string;
         username: string;
         avatar: string;
+        isAdmin?: boolean;
     } | null;
     isAuthenticated: boolean;
     error: string | null;

@@ -119,7 +119,7 @@ export async function unfollow(userId: string, targetId: string) {
 }
 
 export async function findUserBasicById(id: string) {
-    return prisma.user.findUnique({
+    return (prisma as any).user.findUnique({
         where: { id },
         select: {
             id: true,
@@ -127,6 +127,7 @@ export async function findUserBasicById(id: string) {
             username: true,
             email: true,
             avatar: true,
+            isAdmin: true,
         },
     });
 }

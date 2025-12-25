@@ -17,6 +17,16 @@ import Analytics from './pages/Analytics';
 import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import { Analytics as VAnalytics } from "@vercel/analytics/react"
+
+// Admin Pages
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminPosts from './pages/admin/AdminPosts';
+import AdminComments from './pages/admin/AdminComments';
+import AdminSubscribers from './pages/admin/AdminSubscribers';
+import AdminMessages from './pages/admin/AdminMessages';
 
 import { useAuthStore } from './store/authStore';
 
@@ -64,7 +74,6 @@ function AppShell() {
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/blogs" element={<ForYou />} />
-                <Route path=":username/:postId" element={<BlogPage />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
 
@@ -79,6 +88,16 @@ function AppShell() {
                 <Route path="/verify-email" element={<VerifyEmail />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+
+                <Route path="/admin" element={<AdminLogin />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+                <Route path="/admin/posts" element={<AdminPosts />} />
+                <Route path="/admin/comments" element={<AdminComments />} />
+                <Route path="/admin/subscribers" element={<AdminSubscribers />} />
+                <Route path="/admin/messages" element={<AdminMessages />} />
+
+                <Route path="/:username/:postId" element={<BlogPage />} />
             </Routes>
             <Toaster />
         </>
@@ -89,6 +108,7 @@ function App() {
     return (
         <BrowserRouter>
             <AppShell />
+            <VAnalytics />
         </BrowserRouter>
     );
 }
