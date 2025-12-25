@@ -56,8 +56,12 @@ export default function Footer() {
                     rights reserved.
                 </p>
                 <ul className="flex gap-5 text-sm md:text-base">
-                    <li className="hover:text-white cursor-pointer">Privacy Policy</li>
-                    <li className="hover:text-white cursor-pointer">Terms and Conditions</li>
+                    <Link to="/privacy-policy">
+                        <li className="hover:text-white cursor-pointer">Privacy Policy</li>
+                    </Link>
+                    <Link to="/terms-of-service">
+                        <li className="hover:text-white cursor-pointer">Terms and Conditions</li>
+                    </Link>
                 </ul>
             </div>
         </div>

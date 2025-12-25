@@ -26,11 +26,11 @@ export default function Login() {
         setShowPassword((prev) => !prev);
     };
 
-    const handleGoogleClick = () => {
-        const redirect = window.location.origin;
+    // const handleGoogleClick = () => {
+    //     const redirect = window.location.origin;
 
-        window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/google?redirect=${encodeURIComponent(redirect)}`;
-    };
+    //     window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/google?redirect=${encodeURIComponent(redirect)}`;
+    // };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -120,7 +120,7 @@ export default function Login() {
                         Welcome Back to Bloguer Roger! You are just a few steps
                         to login.
                     </p>
-                    <div className="flex justify-center">
+                    {/* <div className="flex justify-center">
                         <button
                             type="button"
                             onClick={handleGoogleClick}
@@ -133,13 +133,13 @@ export default function Login() {
                             />
                             Continue with Google
                         </button>
-                    </div>
+                    </div> */}
 
-                    <div className="flex items-center justify-center gap-2 my-3">
+                    {/* <div className="flex items-center justify-center gap-2 my-3">
                         <hr className="w-full border-gray-300" />
                         <span className="text-gray-500">or</span>
                         <hr className="w-full border-gray-300" />
-                    </div>
+                    </div> */}
 
                     <form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-5">
                         <label

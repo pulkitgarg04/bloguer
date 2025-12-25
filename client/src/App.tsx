@@ -17,6 +17,8 @@ import Analytics from './pages/Analytics';
 import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 import { Analytics as VAnalytics } from "@vercel/analytics/react"
 
 // Admin Pages
@@ -76,6 +78,8 @@ function AppShell() {
                 <Route path="/blogs" element={<ForYou />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-service" element={<TermsOfService />} />
 
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/login" element={<Login />} />
