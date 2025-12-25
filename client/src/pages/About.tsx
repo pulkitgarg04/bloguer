@@ -6,30 +6,30 @@ export default function About() {
     return (
         <div className="min-h-screen font-inter">
             <Navbar activeTab="About Us" />
-            <section className="py-24 relative">
+            <section className="py-12 md:py-24 relative">
                 <div className="w-full max-w-7xl px-4 md:px-5 lg:px-5 mx-auto">
-                    <div className="w-full justify-start items-center gap-12 grid lg:grid-cols-2 grid-cols-1">
+                    <div className="w-full justify-start items-center gap-8 md:gap-12 grid lg:grid-cols-2 grid-cols-1">
                         <div className="w-full justify-center items-start gap-6 grid sm:grid-cols-2 grid-cols-1 lg:order-first order-last">
-                            <div className="pt-24 lg:justify-center sm:justify-end justify-start items-start gap-2.5 flex">
+                            <div className="pt-12 md:pt-24 lg:justify-center sm:justify-end justify-start items-start gap-2.5 flex">
                                 <img
-                                    className="rounded-xl object-cover"
+                                    className="rounded-xl object-cover w-full"
                                     src="/about/blogging-2.webp"
                                     alt="About Us"
                                 />
                             </div>
                             <img
-                                className="sm:ml-0 ml-auto rounded-xl object-cover"
+                                className="sm:ml-0 ml-auto rounded-xl object-cover w-full"
                                 src="/about/blogging.webp"
                                 alt="Our Mission"
                             />
                         </div>
-                        <div className="w-full flex-col justify-center lg:items-start items-center gap-10 inline-flex">
-                            <div className="w-full flex-col justify-center items-start gap-8 flex">
+                        <div className="w-full flex-col justify-center lg:items-start items-center gap-6 md:gap-10 inline-flex">
+                            <div className="w-full flex-col justify-center items-start gap-6 md:gap-8 flex">
                                 <div className="w-full flex-col justify-start lg:items-start items-center gap-3 flex">
-                                    <h2 className="text-gray-900 text-4xl font-bold font-manrope leading-normal lg:text-start text-center">
+                                    <h2 className="text-gray-900 text-2xl md:text-4xl font-bold font-manrope leading-normal lg:text-start text-center">
                                         Empowering Voices Through Blogging
                                     </h2>
-                                    <p className="text-gray-500 text-base font-normal leading-relaxed lg:text-start text-center">
+                                    <p className="text-gray-500 text-sm md:text-base font-normal leading-relaxed lg:text-start text-center">
                                         <b>Bloguer</b> is more than just a
                                         platform; it's a community where
                                         creativity meets purpose. Our journey is
@@ -39,28 +39,28 @@ export default function About() {
                                         effortless and impactful for all.
                                     </p>
                                 </div>
-                                <div className="w-full lg:justify-start justify-center items-center sm:gap-10 gap-5 inline-flex">
-                                    <div className="flex-col justify-start items-start inline-flex">
-                                        <h3 className="text-gray-900 text-4xl font-bold font-manrope leading-normal">
+                                <div className="w-full lg:justify-start justify-center items-center sm:gap-10 gap-4 inline-flex flex-wrap">
+                                    <div className="flex-col justify-start items-center sm:items-start inline-flex">
+                                        <h3 className="text-gray-900 text-2xl md:text-4xl font-bold font-manrope leading-normal">
                                             500+
                                         </h3>
-                                        <h6 className="text-gray-500 text-base font-normal leading-relaxed">
+                                        <h6 className="text-gray-500 text-sm md:text-base font-normal leading-relaxed">
                                             Blogs Published
                                         </h6>
                                     </div>
-                                    <div className="flex-col justify-start items-start inline-flex">
-                                        <h4 className="text-gray-900 text-4xl font-bold font-manrope leading-normal">
+                                    <div className="flex-col justify-start items-center sm:items-start inline-flex">
+                                        <h4 className="text-gray-900 text-2xl md:text-4xl font-bold font-manrope leading-normal">
                                             100+
                                         </h4>
-                                        <h6 className="text-gray-500 text-base font-normal leading-relaxed">
+                                        <h6 className="text-gray-500 text-sm md:text-base font-normal leading-relaxed">
                                             Active Users
                                         </h6>
                                     </div>
-                                    <div className="flex-col justify-start items-start inline-flex">
-                                        <h4 className="text-gray-900 text-4xl font-bold font-manrope leading-normal">
+                                    <div className="flex-col justify-start items-center sm:items-start inline-flex">
+                                        <h4 className="text-gray-900 text-2xl md:text-4xl font-bold font-manrope leading-normal">
                                             1K+
                                         </h4>
-                                        <h6 className="text-gray-500 text-base font-normal leading-relaxed">
+                                        <h6 className="text-gray-500 text-sm md:text-base font-normal leading-relaxed">
                                             Monthly Readers
                                         </h6>
                                     </div>

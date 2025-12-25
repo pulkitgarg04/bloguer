@@ -73,10 +73,10 @@ export default function Bookmarked() {
             <Navbar activeTab="Blogs" />
 
             <section className="flex flex-col items-center space-y-5 px-4">
-                <h3 className="mt-10 text-3xl font-semibold text-gray-800">
+                <h3 className="mt-6 md:mt-10 text-2xl md:text-3xl font-semibold text-gray-800 text-center">
                     Your Bookmarked Blogs
                 </h3>
-                <p className="text-gray-600 text-center">
+                <p className="text-gray-600 text-center text-sm md:text-base">
                     Explore insightful articles, trending topics, and deep dives
                     into the world of blogging.
                 </p>
@@ -95,9 +95,9 @@ export default function Bookmarked() {
             {loading ? (
                 <Skeleton />
             ) : (
-                <section className="mt-16 px-4">
+                <section className="mt-8 md:mt-16 px-4">
                     {filteredBlogs.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-10 pb-10">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 px-2 md:px-10 pb-10">
                             {filteredBlogs.map((blog) => (
                                 <Link
                                     key={blog.id}

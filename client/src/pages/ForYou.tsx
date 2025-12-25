@@ -103,13 +103,13 @@ const ForYou: React.FC = () => {
     <div className="min-h-screen font-inter bg-gray-50">
             <Navbar activeTab="Blogs" />
 
-            <section className="flex flex-col items-center space-y-5 px-5">
-                <div>
-                    <h3 className="text-2xl font-semibold text-gray-800 text-center my-10">
+            <section className="flex flex-col items-center space-y-5 px-4 md:px-5">
+                <div className="w-full">
+                    <h3 className="text-xl md:text-2xl font-semibold text-gray-800 text-center my-6 md:my-10">
                         Most Popular Articles
                     </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-10 pb-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 px-2 md:px-10 pb-10">
                         {popularPosts.map((post) => (
                             <BlogCard
                                 key={post.id}
@@ -126,11 +126,11 @@ const ForYou: React.FC = () => {
                 </div>
 
                 {followingBlogs.length > 0 && isAuthenticated && (
-                    <div>
-                        <h3 className="text-2xl font-semibold text-gray-800 text-center my-10">
+                    <div className="w-full">
+                        <h3 className="text-xl md:text-2xl font-semibold text-gray-800 text-center my-6 md:my-10">
                             Following
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-16 pb-10">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 px-2 md:px-16 pb-10">
                             {followingBlogs.map((post) => (
                                 <BlogCard
                                     key={post.id}

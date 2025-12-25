@@ -316,16 +316,16 @@ export default function BlogPage() {
         <div className="min-h-screen font-inter">
             <Navbar activeTab={'Blogs'} />
 
-            <section className="p-10 bg-gray-100">
-                <p className="text-center">
+            <section className="p-4 md:p-10 bg-gray-100">
+                <p className="text-center text-sm md:text-base">
                     {blog.category} • {blog.readTime}
                 </p>
-                <div className="flex justify-center items-center py-6">
-                    <h1 className="text-center text-4xl w-2/3 font-semibold">
+                <div className="flex justify-center items-center py-4 md:py-6">
+                    <h1 className="text-center text-2xl md:text-4xl w-full md:w-2/3 font-semibold px-2">
                         {blog.title}
                     </h1>
                 </div>
-                <div className="flex justify-center items-center">
+                <div className="flex flex-col md:flex-row justify-center items-center gap-3 md:gap-0">
                     <Link to={`/profile/${blog.author.username}`}>
                         <img
                             src={optimizeCloudinaryUrl(blog.author.avatar, 128) || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`}
@@ -334,20 +334,20 @@ export default function BlogPage() {
                             loading="eager"
                         />
                     </Link>
-                    <div className="text-lg pl-3 flex">
+                    <div className="text-sm md:text-lg pl-0 md:pl-3 flex flex-wrap justify-center items-center gap-2 md:gap-0">
                         <Link to={`/profile/${blog.author.username}`}>
                             <p>{blog.author.name}</p>
                         </Link>
-                        <p className="flex gap-2 justify-center items-center ml-8 mx-4">
+                        <p className="flex gap-2 justify-center items-center md:ml-8 mx-2 md:mx-4">
                             <Calendar1 size={15} />{' '}
                             <span>{formatDate(blog.Date)}</span>
                         </p>
-                        <p className="flex gap-2 justify-center items-center mx-4">
+                        <p className="flex gap-2 justify-center items-center mx-2 md:mx-4">
                             <Eye size={15} /> <span>{blog.views} views</span>
                         </p>
                         <button
                             onClick={handleBookmarkToggle}
-                            className={`flex gap-2 justify-center items-center mx-4 px-2 rounded-md ${
+                            className={`flex gap-2 justify-center items-center mx-2 md:mx-4 px-2 rounded-md ${
                                 isBookmarked
                                     ? 'bg-gray-300 text-blue-600'
                                     : 'hover:bg-gray-300'
@@ -360,18 +360,18 @@ export default function BlogPage() {
                 </div>
             </section>
 
-            <section className="py-10">
-                <div className="flex justify-center">
+            <section className="py-6 md:py-10">
+                <div className="flex justify-center px-4">
                     <img
                         src={optimizeCloudinaryUrl(blog.featuredImage, 800)}
                         alt={blog.title}
-                        className="h-96 max-w-3xl object-cover rounded-lg"
+                        className="w-full h-48 md:h-96 max-w-3xl object-cover rounded-lg"
                         loading="eager"
                     />
                 </div>
                 <div className="max-w-3xl mx-auto px-4 py-6">
                     <div
-                        className="text-lg text-gray-700 prose"
+                        className="text-base md:text-lg text-gray-700 prose prose-sm md:prose-base max-w-none"
                         dangerouslySetInnerHTML={{
                             __html: DOMPurify.sanitize(optimizeContentImages(blog.content)),
                         }}
@@ -381,30 +381,30 @@ export default function BlogPage() {
 
             <div className="inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-gradient-to-r from-transparent via-gray-500 to-transparent opacity-75"></div>
 
-            <section className="px-4 py-8">
-                <div className="max-w-3xl mx-auto flex justify-between items-center">
+            <section className="px-4 py-6 md:py-8">
+                <div className="max-w-3xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 md:gap-0">
                     <Link to={`/profile/${blog.author.username}`}>
-                        <div className="flex gap-5 items-center">
+                        <div className="flex gap-4 md:gap-5 items-center">
                             <img
                                 src={optimizeCloudinaryUrl(blog.author.avatar, 128) || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`}
                                 alt="avatar"
-                                className="h-16 w-16 rounded-full object-cover"
+                                className="h-12 w-12 md:h-16 md:w-16 rounded-full object-cover"
                                 loading="lazy"
                             />
                             <div className="flex flex-col justify-center">
-                                <p className="text-gray-700">Written by:</p>
-                                <p className="text-xl font-semibold">
+                                <p className="text-gray-700 text-sm md:text-base">Written by:</p>
+                                <p className="text-lg md:text-xl font-semibold">
                                     {blog.author.name}
                                 </p>
-                                <p className="text-sm">
+                                <p className="text-xs md:text-sm">
                                     @{blog.author.username}
                                 </p>
                             </div>
                         </div>
                     </Link>
 
-                    <div className="flex items-center">
-                        <p className="font-semibold mr-4">Share this blog:</p>
+                    <div className="flex flex-col md:flex-row items-center gap-2 md:gap-0">
+                        <p className="font-semibold mr-0 md:mr-4 text-sm md:text-base">Share this blog:</p>
                         <div className="flex gap-4">
                             <a
                                 href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
@@ -506,7 +506,7 @@ export default function BlogPage() {
                 </span>
 
                 {similarBlogs && similarBlogs.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-32 py-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 px-4 md:px-16 lg:px-32 py-6 md:py-10">
                         {similarBlogs.map((similarPost) => (
                             <Link
                                 key={similarPost.id}

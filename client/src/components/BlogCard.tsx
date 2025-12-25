@@ -51,36 +51,36 @@ export default function BlogCard({
 
         return (
             <Link to={linkTo}>
-                <div className="w-full overflow-hidden mb-10 flex justify-center">
+                <div className="w-full overflow-hidden mb-6 md:mb-10 flex flex-col md:flex-row justify-center items-center">
                     <img
                         src={optimizedFeaturedImage}
                         alt={title}
-                        className="w-1/3 h-80 object-cover rounded-lg shadow-sm"
+                        className="w-full md:w-1/3 h-48 md:h-80 object-cover rounded-lg shadow-sm"
                         loading="lazy"
                     />
-                    <div className="p-8 flex flex-col justify-center">
-                        <div className="text-sm text-red-500 font-medium flex items-center">
+                    <div className="p-4 md:p-8 flex flex-col justify-center">
+                        <div className="text-sm text-red-500 font-medium flex items-center flex-wrap">
                             <p>
                                 {category} • {readTime || '15 Min'}
                             </p>
                             {showLatestBadge && (
-                                <span className="mx-5 bg-red-200 px-2 py-1 rounded-xl text-xs text-red-600">
+                                <span className="ml-3 md:mx-5 bg-red-200 px-2 py-1 rounded-xl text-xs text-red-600">
                                     Latest
                                 </span>
                             )}
                         </div>
-                        <h2 className="text-3xl font-semibold mt-2 max-w-96">
+                        <h2 className="text-xl md:text-3xl font-semibold mt-2 max-w-full md:max-w-96">
                             {title}
                         </h2>
                         <div className="mt-4 flex items-center space-x-4 text-gray-500">
                             <img
                                 src={optimizedAvatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(author.name)}&size=128`}
                                 alt={author.name}
-                                className="w-10 h-10 rounded-full object-cover"
+                                className="w-8 md:w-10 h-8 md:h-10 rounded-full object-cover"
                                 loading="lazy"
                             />
                             <div>
-                                <p className="font-medium">
+                                <p className="font-medium text-sm md:text-base">
                                     {author.name} • {formatDate(date)}
                                 </p>
                             </div>

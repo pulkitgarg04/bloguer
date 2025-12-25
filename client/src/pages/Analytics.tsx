@@ -222,11 +222,11 @@ export default function Analytics() {
         <div className="min-h-screen font-inter">
             <Navbar activeTab="Profile" />
 
-            <section className="p-10">
-                <h1 className="text-3xl font-semibold mb-6">
+            <section className="p-4 md:p-10">
+                <h1 className="text-2xl md:text-3xl font-semibold mb-4 md:mb-6">
                     Analytics Dashboard
                 </h1>
-                <p className="text-gray-600 mb-8">
+                <p className="text-gray-600 mb-6 md:mb-8 text-sm md:text-base">
                     Insights for your posts. Click a row to view detailed
                     trends.
                 </p>

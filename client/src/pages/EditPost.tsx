@@ -353,8 +353,8 @@ export default function EditPost() {
         return (
             <div className="min-h-screen font-inter flex flex-col">
                 <Navbar activeTab="Home" />
-                <section className="p-10 flex-1">
-                    <h1 className="text-3xl font-semibold mb-4">
+                <section className="p-4 md:p-10 flex-1">
+                    <h1 className="text-2xl md:text-3xl font-semibold mb-4">
                         Edit Your Article
                     </h1>
                     <SkeletonLoader />
@@ -378,16 +378,16 @@ export default function EditPost() {
             </style>
             <Navbar activeTab="Home" />
 
-            <section className="p-10 flex-1">
-                <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-3xl font-semibold">
+            <section className="p-4 md:p-10 flex-1">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                    <h1 className="text-2xl md:text-3xl font-semibold">
                         Edit Your Article
                     </h1>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 w-full md:w-auto">
                         <button
                             onClick={handleRefineAI}
                             disabled={refining || !content}
-                            className={`py-2 px-4 rounded-md ${
+                            className={`py-2 px-3 md:px-4 rounded-md flex-1 md:flex-none text-sm md:text-base ${
                                 refining || !content
                                     ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                     : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
@@ -397,7 +397,7 @@ export default function EditPost() {
                             {refining ? 'Refining...' : 'Refine with AI'}
                         </button>
                         <button
-                            className={`py-2 px-4 rounded-md ${
+                            className={`py-2 px-3 md:px-4 rounded-md flex-1 md:flex-none text-sm md:text-base ${
                                 updating
                                     ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                     : 'bg-red-500 text-white hover:bg-red-600'
@@ -450,8 +450,8 @@ export default function EditPost() {
                     </div>
                 </div>
 
-                <div className="flex justify-center items-center gap-2 my-5">
-                    <label htmlFor="title" className="text-2xl font-medium">
+                <div className="flex flex-col md:flex-row justify-center items-start md:items-center gap-3 md:gap-2 my-5">
+                    <label htmlFor="title" className="text-xl md:text-2xl font-medium whitespace-nowrap">
                         Title:
                     </label>
                     <input
@@ -460,14 +460,14 @@ export default function EditPost() {
                         id="title"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full bg-gray-200 py-2 px-4 rounded-lg font-medium text-xl hover:outline-none focus:outline-none"
+                        className="w-full bg-gray-200 py-2 px-4 rounded-lg font-medium text-lg md:text-xl hover:outline-none focus:outline-none"
                         maxLength={100}
                         placeholder="Enter article title"
                     />
                     <select
                         name="category"
                         id="category"
-                        className="bg-gray-200 py-2 px-2 rounded-md"
+                        className="bg-gray-200 py-2 px-2 rounded-md w-full md:w-auto"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                     >
@@ -512,7 +512,7 @@ export default function EditPost() {
                     value={content}
                     onChange={setContent}
                     modules={modules}
-                    className="h-96 mt-10 mb-20"
+                    className="h-64 md:h-96 mt-6 md:mt-10 mb-16 md:mb-20"
                     placeholder="Write your article here..."
                 />
             </section>

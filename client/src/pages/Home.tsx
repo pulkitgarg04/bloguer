@@ -98,7 +98,7 @@ export default function Blog() {
             {loading ? (
                 <Skeleton />
             ) : (
-                <section className="mt-16 px-4">
+                <section className="mt-8 md:mt-16 px-4">
                     {searchTerm === '' &&
                         currentPage === 1 &&
                         blogs.length > 0 && (
@@ -115,7 +115,7 @@ export default function Blog() {
                             />
                         )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-10 pb-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 px-2 md:px-10 pb-10">
                         {blogs
                             .slice(
                                 searchTerm === '' && currentPage === 1 ? 1 : 0

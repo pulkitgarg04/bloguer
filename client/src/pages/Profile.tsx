@@ -176,34 +176,34 @@ export default function Profile() {
 
                 <div className="h-40 bg-gray-300 animate-pulse"></div>
 
-                <div className="px-40 py-2 flex flex-col gap-3 pb-6">
-                    <div className="h-28 w-28 rounded-full bg-gray-300 animate-pulse -mt-14 border-white"></div>
+                <div className="px-4 md:px-10 lg:px-40 py-2 flex flex-col gap-3 pb-6">
+                    <div className="h-20 w-20 md:h-28 md:w-28 rounded-full bg-gray-300 animate-pulse -mt-10 md:-mt-14 border-white"></div>
 
-                    <div className="flex justify-between items-center">
-                        <div className="py-4 flex flex-col gap-2 w-3/4">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="py-4 flex flex-col gap-2 w-full md:w-3/4">
                             <div className="h-6 bg-gray-300 animate-pulse w-1/2"></div>
                             <div className="h-4 bg-gray-300 animate-pulse w-3/4"></div>
-                            <div className="flex gap-4">
-                                <div className="h-4 bg-gray-300 animate-pulse w-1/3"></div>
-                                <div className="h-4 bg-gray-300 animate-pulse w-1/3"></div>
-                                <div className="h-4 bg-gray-300 animate-pulse w-1/3"></div>
+                            <div className="flex flex-wrap gap-2 md:gap-4">
+                                <div className="h-4 bg-gray-300 animate-pulse w-20 md:w-1/3"></div>
+                                <div className="h-4 bg-gray-300 animate-pulse w-20 md:w-1/3"></div>
+                                <div className="h-4 bg-gray-300 animate-pulse w-20 md:w-1/3"></div>
                             </div>
                         </div>
 
-                        <div className="flex flex-col space-y-4">
+                        <div className="flex flex-col space-y-4 w-full md:w-auto">
                             <div className="h-8 bg-gray-300 animate-pulse rounded-lg w-24"></div>
                             <div className="flex justify-center items-center gap-4">
-                                <div className="bg-gray-300 animate-pulse py-3 rounded-xl px-7 w-24"></div>
-                                <div className="bg-gray-300 animate-pulse py-3 rounded-xl px-7 w-24"></div>
+                                <div className="bg-gray-300 animate-pulse py-3 rounded-xl px-4 md:px-7 w-20 md:w-24"></div>
+                                <div className="bg-gray-300 animate-pulse py-3 rounded-xl px-4 md:px-7 w-20 md:w-24"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <section className="my-10">
-                    <h3 className="text-center text-2xl font-semibold mb-10 h-6 bg-gray-300 animate-pulse w-1/3 mx-auto"></h3>
+                <section className="my-6 md:my-10">
+                    <h3 className="text-center text-xl md:text-2xl font-semibold mb-6 md:mb-10 h-6 bg-gray-300 animate-pulse w-1/2 md:w-1/3 mx-auto"></h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-20 pb-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 px-4 md:px-10 lg:px-20 pb-10">
                         {Array(3)
                             .fill(0)
                             .map((_, index) => (
@@ -371,9 +371,9 @@ export default function Profile() {
     return (
         <div className="min-h-screen font-inter">
             <Navbar activeTab="Home" />
-            <div className="h-40 bg-gradient-to-r from-cyan-500 to-blue-500"></div>
-            <div className="px-40 py-2 flex flex-col gap-3 pb-6">
-                <div className="h-28 shadow-md w-28 rounded-full border-4 overflow-hidden -mt-14 border-white flex items-center justify-center bg-gray-100 relative group">
+            <div className="h-32 md:h-40 bg-gradient-to-r from-cyan-500 to-blue-500"></div>
+            <div className="px-4 md:px-10 lg:px-40 py-2 flex flex-col gap-3 pb-6">
+                <div className="h-20 w-20 md:h-28 md:w-28 shadow-md rounded-full border-4 overflow-hidden -mt-10 md:-mt-14 border-white flex items-center justify-center bg-gray-100 relative group">
                     {userData.avatar ? (
                         <img
                             src={userData.avatar}
@@ -432,13 +432,13 @@ export default function Profile() {
                         </div>
                     )}
                 </div>
-                <div className="flex justify-between items-center">
-                    <div className="py-4 flex flex-col gap-2">
-                        <p className="text-2xl font-semibold">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div className="py-2 md:py-4 flex flex-col gap-2">
+                        <p className="text-xl md:text-2xl font-semibold">
                             {userData.name}
                         </p>
-                        <p>{userData.bio || 'Hi There, I am using Bloguer!'}</p>
-                        <div className="flex gap-4">
+                        <p className="text-sm md:text-base">{userData.bio || 'Hi There, I am using Bloguer!'}</p>
+                        <div className="flex flex-wrap gap-2 md:gap-4 text-sm md:text-base">
                             <p>@{userData.username}</p>
                             <p className="flex gap-1 items-center">
                                 <MapPin size={15} />
@@ -448,7 +448,7 @@ export default function Profile() {
                             </p>
                             <p className="flex gap-1 items-center">
                                 <Calendar1 size={15} />
-                                <span>
+                                <span className="text-xs md:text-sm">
                                     {userData.JoinedDate
                                         ? `Joined: ${formatDate(userData.JoinedDate)}`
                                         : 'Joined Date not available'}
@@ -457,10 +457,10 @@ export default function Profile() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col space-y-4">
+                    <div className="flex flex-col space-y-4 w-full md:w-auto">
                         {user && username === user.username && (
                             <button
-                                className="rounded-lg bg-red-500 hover:bg-red-600 text-white px-4 py-2 transition-colors duration-150"
+                                className="rounded-lg bg-red-500 hover:bg-red-600 text-white px-4 py-2 transition-colors duration-150 w-full md:w-auto"
                                 onClick={() => setIsEditModalOpen(true)}
                             >
                                 Edit Profile
@@ -468,38 +468,38 @@ export default function Profile() {
                         )}
                         {user && username !== user.username && (
                             <button
-                                className={`rounded-lg text-white p-2 transition-colors duration-150 ${isFollowing ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-800 hover:bg-gray-700'} ${followLoading ? 'opacity-75' : ''}`}
+                                className={`rounded-lg text-white p-2 transition-colors duration-150 w-full md:w-auto ${isFollowing ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-800 hover:bg-gray-700'} ${followLoading ? 'opacity-75' : ''}`}
                                 onClick={handleFollowToggle}
                                 disabled={followLoading}
                             >
                                 {isFollowing ? 'Unfollow' : 'Follow'}
                             </button>
                         )}
-                        <div className="flex justify-center items-center gap-4">
-                            <div className="bg-indigo-200 py-3 rounded-xl px-7">
-                                <p className="text-xl text-indigo-800 font-medium">
+                        <div className="flex justify-center items-center gap-3 md:gap-4">
+                            <div className="bg-indigo-200 py-2 md:py-3 rounded-xl px-4 md:px-7">
+                                <p className="text-lg md:text-xl text-indigo-800 font-medium">
                                     {followersCount}
                                 </p>
-                                <p className="text-sm">Followers</p>
+                                <p className="text-xs md:text-sm">Followers</p>
                             </div>
-                            <div className="bg-green-200 py-3 rounded-xl px-7">
-                                <p className="text-xl text-green-800 font-medium">
+                            <div className="bg-green-200 py-2 md:py-3 rounded-xl px-4 md:px-7">
+                                <p className="text-lg md:text-xl text-green-800 font-medium">
                                     {followingCount}
                                 </p>
-                                <p className="text-sm">Following</p>
+                                <p className="text-xs md:text-sm">Following</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <section className="my-10">
-                <h3 className="text-center text-2xl font-semibold mb-10">
+            <section className="my-6 md:my-10">
+                <h3 className="text-center text-xl md:text-2xl font-semibold mb-6 md:mb-10 px-4">
                     {userData.name}'s Blogs
                 </h3>
 
                 {blogs && blogs.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-20 pb-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 px-4 md:px-10 lg:px-20 pb-10">
                         {blogs.map((blog) => (
                             <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
                                 <img

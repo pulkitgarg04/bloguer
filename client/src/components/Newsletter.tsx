@@ -32,18 +32,18 @@ export default function Newsletter() {
     };
 
     return (
-        <section className="flex justify-center items-center py-20">
-            <div className="bg-red-200 rounded-xl p-5 w-full max-w-4xl flex justify-around items-center">
-                <div>
-                    <h3 className="text-3xl font-bold text-red-600">
+        <section className="flex justify-center items-center py-10 md:py-20 px-4">
+            <div className="bg-red-200 rounded-xl p-5 md:p-8 w-full max-w-4xl flex flex-col md:flex-row justify-around items-center gap-6">
+                <div className="text-center md:text-left">
+                    <h3 className="text-2xl md:text-3xl font-bold text-red-600">
                         Weekly Newsletter
                     </h3>
                     <p className="font-medium text-gray-700 mt-2">
                         Get blog articles and offers via email
                     </p>
-                    <div className="flex items-center mt-6">
-                        <div className="flex items-center bg-white px-3 py-1 rounded-lg w-72">
-                            <Mails className="text-red-600 mr-2" />
+                    <div className="flex flex-col sm:flex-row items-center mt-6 gap-3">
+                        <div className="flex items-center bg-white px-3 py-1 rounded-lg w-full sm:w-72">
+                            <Mails className="text-red-600 mr-2 flex-shrink-0" />
                             <input
                                 type="email"
                                 name="email"
@@ -55,7 +55,7 @@ export default function Newsletter() {
                             />
                         </div>
                         <button
-                            className="ml-4 bg-red-500 text-white font-medium py-2 px-6 rounded-lg hover:bg-red-600 transition duration-200 h-full disabled:bg-red-300 disabled:cursor-not-allowed"
+                            className="w-full sm:w-auto bg-red-500 text-white font-medium py-2 px-6 rounded-lg hover:bg-red-600 transition duration-200 disabled:bg-red-300 disabled:cursor-not-allowed"
                             onClick={handleSubscribe}
                             disabled={isLoading}
                         >

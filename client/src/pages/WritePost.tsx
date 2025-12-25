@@ -412,14 +412,14 @@ export default function WritePost() {
             </style>
             <Navbar activeTab="Home" />
 
-            <section className="p-10">
-                <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-3xl font-semibold">
+            <section className="p-4 md:p-10">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                    <h1 className="text-2xl md:text-3xl font-semibold">
                         Write New Article
                     </h1>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 w-full md:w-auto">
                         <button
-                            className={`py-2 px-6 rounded-md ${
+                            className={`py-2 px-4 md:px-6 rounded-md flex-1 md:flex-none ${
                                 loading
                                     ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                     : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
@@ -430,7 +430,7 @@ export default function WritePost() {
                             Save Draft
                         </button>
                         <button
-                            className={`py-2 px-6 rounded-md ${
+                            className={`py-2 px-4 md:px-6 rounded-md flex-1 md:flex-none ${
                                 loading
                                     ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                     : 'bg-red-500 text-white hover:bg-red-600'
@@ -492,8 +492,8 @@ export default function WritePost() {
                     </div>
                 </div>
 
-                <div className="flex justify-center items-center gap-2 my-5">
-                    <label htmlFor="title" className="text-2xl font-medium">
+                <div className="flex flex-col md:flex-row justify-center items-start md:items-center gap-3 md:gap-2 my-5">
+                    <label htmlFor="title" className="text-xl md:text-2xl font-medium whitespace-nowrap">
                         Title:
                     </label>
                     <input
@@ -502,7 +502,7 @@ export default function WritePost() {
                         id="title"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full bg-gray-200 py-2 px-4 rounded-lg font-medium text-xl hover:outline-none focus:outline-none"
+                        className="w-full bg-gray-200 py-2 px-4 rounded-lg font-medium text-lg md:text-xl hover:outline-none focus:outline-none"
                         maxLength={100}
                         placeholder="Enter article title"
                     />
@@ -510,7 +510,7 @@ export default function WritePost() {
                     <select
                         name="category"
                         id="category"
-                        className="bg-gray-200 py-2 px-2 rounded-md"
+                        className="bg-gray-200 py-2 px-2 rounded-md w-full md:w-auto"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                     >
@@ -549,37 +549,39 @@ export default function WritePost() {
                         </option>
                     </select>
 
-                    <button
-                        onClick={handleGenerateAI}
-                        disabled={generateLoading}
-                        className={`inline-flex items-center whitespace-nowrap py-2 px-4 rounded-md ${
-                            generateLoading
-                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                : 'bg-gray-800 text-white hover:bg-gray-700'
-                        }`}
-                        title="Write with AI"
-                    >
-                        <span className="pointer-events-none">
-                            {generateLoading
-                                ? 'Generating...'
-                                : 'Write with AI'}
-                        </span>
-                    </button>
+                    <div className="flex gap-2 w-full md:w-auto">
+                        <button
+                            onClick={handleGenerateAI}
+                            disabled={generateLoading}
+                            className={`inline-flex items-center justify-center whitespace-nowrap py-2 px-3 md:px-4 rounded-md flex-1 md:flex-none text-sm md:text-base ${
+                                generateLoading
+                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                    : 'bg-gray-800 text-white hover:bg-gray-700'
+                            }`}
+                            title="Write with AI"
+                        >
+                            <span className="pointer-events-none">
+                                {generateLoading
+                                    ? 'Generating...'
+                                    : 'Write with AI'}
+                            </span>
+                        </button>
 
-                    <button
-                        onClick={handleRefineAI}
-                        disabled={refining || !content}
-                        className={`inline-flex items-center whitespace-nowrap py-2 px-4 rounded-md ${
-                            refining || !content
-                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                : 'bg-red-500 text-white hover:bg-red-600'
-                        }`}
-                        title="Refine article with AI"
-                    >
-                        <span className="pointer-events-none">
-                            {refining ? 'Refining...' : 'Refine with AI'}
-                        </span>
-                    </button>
+                        <button
+                            onClick={handleRefineAI}
+                            disabled={refining || !content}
+                            className={`inline-flex items-center justify-center whitespace-nowrap py-2 px-3 md:px-4 rounded-md flex-1 md:flex-none text-sm md:text-base ${
+                                refining || !content
+                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                    : 'bg-red-500 text-white hover:bg-red-600'
+                            }`}
+                            title="Refine article with AI"
+                        >
+                            <span className="pointer-events-none">
+                                {refining ? 'Refining...' : 'Refine with AI'}
+                            </span>
+                        </button>
+                    </div>
                 </div>
 
                 <ReactQuill
@@ -587,7 +589,7 @@ export default function WritePost() {
                     value={content}
                     onChange={setContent}
                     modules={modules}
-                    className="h-96 mt-10 mb-20"
+                    className="h-64 md:h-96 mt-6 md:mt-10 mb-16 md:mb-20"
                     placeholder="Write your article here..."
                 />
             </section>

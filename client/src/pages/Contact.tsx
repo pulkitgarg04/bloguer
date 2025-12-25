@@ -64,31 +64,31 @@ export default function Contact() {
         <div className="min-h-screen font-inter">
             <Navbar activeTab="Contact Us" />
 
-            <section className="pt-24">
+            <section className="pt-10 md:pt-24">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                        <div className="lg:mb-0 mb-10">
+                    <div className="grid lg:grid-cols-2 grid-cols-1 gap-6 lg:gap-0">
+                        <div className="lg:mb-0 mb-6 md:mb-10">
                             <div className="group w-full h-full">
                                 <div className="relative h-full">
                                     <img
                                         src="/about/desk.webp"
                                         alt="Contact Us"
-                                        className="w-full h-3/4 lg:rounded-l-2xl rounded-2xl bg-blend-multiply bg-red-700 object-cover"
+                                        className="w-full h-64 md:h-3/4 lg:rounded-l-2xl rounded-2xl bg-blend-multiply bg-red-700 object-cover"
                                     />
-                                    <h1 className="font-manrope text-white text-4xl font-bold leading-10 absolute top-11 left-11">
+                                    <h1 className="font-manrope text-white text-2xl md:text-4xl font-bold leading-10 absolute top-6 left-6 md:top-11 md:left-11">
                                         Contact us
                                     </h1>
-                                    <div className="absolute bottom-24 w-full lg:p-11 p-5">
-                                        <div className="bg-white rounded-lg border-2 p-6 block">
-                                            <div className="flex mb-4">
-                                                <Mail />
-                                                <h5 className="text-black text-base font-normal leading-6 ml-5">
+                                    <div className="absolute bottom-12 md:bottom-24 w-full lg:p-11 p-4 md:p-5">
+                                        <div className="bg-white rounded-lg border-2 p-4 md:p-6 block">
+                                            <div className="flex mb-3 md:mb-4 items-center">
+                                                <Mail size={18} className="flex-shrink-0" />
+                                                <h5 className="text-black text-sm md:text-base font-normal leading-6 ml-3 md:ml-5 break-all">
                                                     business.pulkitgarg@gmail.com
                                                 </h5>
                                             </div>
-                                            <div className="flex mt-4">
-                                                <MapPin />
-                                                <h5 className="text-black text-base font-normal leading-6 ml-5">
+                                            <div className="flex mt-3 md:mt-4 items-center">
+                                                <MapPin size={18} className="flex-shrink-0" />
+                                                <h5 className="text-black text-sm md:text-base font-normal leading-6 ml-3 md:ml-5">
                                                     Barnala, Punjab, India -
                                                     148101
                                                 </h5>
@@ -100,7 +100,7 @@ export default function Contact() {
                         </div>
 
                         <div className="bg-gray-50 p-5 lg:p-11 lg:rounded-r-2xl rounded-2xl">
-                            <h2 className="text-red-500 font-manrope text-4xl font-semibold leading-10 mb-11">
+                            <h2 className="text-red-500 font-manrope text-2xl md:text-4xl font-semibold leading-tight md:leading-10 mb-6 md:mb-11">
                                 Send Us A Message
                             </h2>
                             <form onSubmit={handleSubmit}>
