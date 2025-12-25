@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import Newsletter from '../components/Newsletter';
 import BlogCard from '../components/BlogCard';
 import Skeleton from '../components/Skeleton';
+import SEO from '../components/SEO';
 import { useAuthStore } from '../store/authStore';
 
 interface Author {
@@ -101,6 +102,12 @@ const ForYou: React.FC = () => {
 
     return (
     <div className="min-h-screen font-inter bg-gray-50">
+            <SEO
+                title="For You - Personalized Blogs"
+                description="Discover popular articles and personalized blog recommendations based on the authors you follow. Find trending stories and content curated just for you."
+                url="/blogs"
+                keywords="personalized blogs, popular articles, trending blogs, recommended articles"
+            />
             <Navbar activeTab="Blogs" />
 
             <section className="flex flex-col items-center space-y-5 px-4 md:px-5">

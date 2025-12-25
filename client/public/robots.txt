@@ -1,0 +1,23 @@
+# Bloguer Robots.txt
+User-agent: *
+Allow: /
+
+# Disallow admin pages
+Disallow: /admin
+Disallow: /admin/*
+
+# Disallow auth pages
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+
+# Disallow user-specific pages
+Disallow: /bookmarked
+Disallow: /write
+Disallow: /analytics
+Disallow: /edit/*
+
+# Sitemap locations
+Sitemap: https://bloguer.vercel.app/sitemap.xml

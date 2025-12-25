@@ -5,6 +5,7 @@ import Newsletter from '../components/Newsletter';
 import Footer from '../components/Footer';
 import BlogCard from '../components/BlogCard';
 import Skeleton from '../components/Skeleton';
+import SEO, { WebsiteSchema } from '../components/SEO';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -73,6 +74,13 @@ export default function Blog() {
 
     return (
         <div className="min-h-screen font-inter bg-gray-50">
+            <SEO
+                title="Home"
+                description="Explore insightful articles, trending topics, and deep dives into the world of blogging. Discover the latest blogs on technology, lifestyle, travel, and more."
+                url="/"
+                keywords="blog, articles, latest blogs, technology, lifestyle, travel, tutorials"
+            />
+            <WebsiteSchema />
             <Navbar activeTab="Home" />
 
             <section className="flex flex-col items-center space-y-5 px-4">

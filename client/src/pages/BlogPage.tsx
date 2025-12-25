@@ -6,6 +6,7 @@ import Newsletter from '../components/Newsletter';
 import Footer from '../components/Footer';
 import CommentCard from '../components/CommentCard';
 import CommentForm from '../components/CommentForm';
+import SEO, { ArticleSchema, BreadcrumbSchema } from '../components/SEO';
 import { useAuthStore } from '../store/authStore';
 import {
     Twitter,
@@ -272,6 +273,11 @@ export default function BlogPage() {
         }
     };
 
+    const getDescription = (html: string, maxLength: number = 160): string => {
+        const text = html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+        return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    };
+
     if (!blog) {
         return (
             <div className="min-h-screen font-inter">
@@ -314,6 +320,37 @@ export default function BlogPage() {
 
     return (
         <div className="min-h-screen font-inter">
+            <SEO
+                title={blog.title}
+                description={getDescription(blog.content)}
+                image={blog.featuredImage}
+                url={`/blog/${postId}`}
+                type="article"
+                author={blog.author.name}
+                publishedTime={blog.Date}
+                section={blog.category}
+                keywords={`${blog.category}, ${blog.title.split(' ').slice(0, 5).join(', ')}, blog, article`}
+            />
+            
+            <ArticleSchema
+                title={blog.title}
+                description={getDescription(blog.content)}
+                image={blog.featuredImage}
+                url={`/blog/${postId}`}
+                authorName={blog.author.name}
+                authorUrl={`/profile/${blog.author.username}`}
+                publishedTime={blog.Date}
+                category={blog.category}
+            />
+            
+            <BreadcrumbSchema
+                items={[
+                    { name: 'Home', url: '/' },
+                    { name: 'Blogs', url: '/blogs' },
+                    { name: blog.title, url: `/blog/${postId}` },
+                ]}
+            />
+
             <Navbar activeTab={'Blogs'} />
 
             <section className="p-4 md:p-10 bg-gray-100">

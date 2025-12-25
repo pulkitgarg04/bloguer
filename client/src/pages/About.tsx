@@ -1,10 +1,17 @@
 import Navbar from '../components/Navbar';
 import Newsletter from '../components/Newsletter';
 import Footer from '../components/Footer';
+import SEO from '../components/SEO';
 
 export default function About() {
     return (
         <div className="min-h-screen font-inter">
+            <SEO
+                title="About Us"
+                description="Learn about Bloguer - a community where creativity meets purpose. We empower storytellers, thinkers, and dreamers to share their perspectives with the world."
+                url="/about"
+                keywords="about bloguer, blogging platform, content creators, storytelling community"
+            />
             <Navbar activeTab="About Us" />
             <section className="py-12 md:py-24 relative">
                 <div className="w-full max-w-7xl px-4 md:px-5 lg:px-5 mx-auto">
