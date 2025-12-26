@@ -14,10 +14,9 @@ export default async function adminMiddleware(
     try {
         const user = await (prisma as any).user.findUnique({
             where: { id: userId },
-            select: { isAdmin: true },
         });
 
-        if (!user || !user.isAdmin) {
+        if (!user || !(user as any).isAdmin) {
             return res.status(403).json({ message: 'Admin access required' });
         }
 
