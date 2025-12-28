@@ -101,18 +101,29 @@ export async function updatePostService(
         featuredImage: string;
     }>
 ) {
-    if (data.title || data.content || data.category) {
-        const parsed = updateBlogInput.safeParse({
-            postId,
-            ...data,
-        });
+    if (data.title !== undefined || data.content !== undefined || data.category !== undefined || data.featuredImage !== undefined) {
+        const validationData: any = { postId };
+        if (data.title !== undefined) validationData.title = data.title;
+        if (data.content !== undefined) validationData.content = data.content;
+        if (data.category !== undefined) validationData.category = data.category;
+        
+        if (data.featuredImage !== undefined && !data.featuredImage.startsWith('/thumbnails/')) {
+            validationData.featuredImage = data.featuredImage;
+        }
+
+        const parsed = updateBlogInput.safeParse(validationData);
         if (!parsed.success) {
             const firstError = parsed.error.issues[0];
             throw new Error(firstError.message);
         }
     }
 
-    const post = await updatePost(postId, data);
+    const updateData: any = { ...data };
+    if (data.content) {
+        updateData.readTime = readingTime(data.content);
+    }
+
+    const post = await updatePost(postId, updateData);
     await delCache(`blog:post:${post.id}`);
     await delPattern('blog:bulk:*');
     await delCache('blog:popular');

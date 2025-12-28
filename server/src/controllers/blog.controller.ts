@@ -35,25 +35,36 @@ export const BlogController = {
 
     update: async (req: Request, res: Response) => {
         try {
-            const { postId, title, content, category, published, featuredImage } =
+            const { postId, title, content, category, published, featuredImage, useDefaultThumbnail } =
                 req.body as any;
             if (!postId)
                 return res.status(400).json({ message: 'postId is required' });
-            const post = await updatePostService(postId, {
-                title,
-                content,
-                category,
-                published,
-                featuredImage,
-            });
+            
+            // Build update data object, excluding undefined values
+            const updateData: any = {};
+            if (title !== undefined) updateData.title = title;
+            if (content !== undefined) updateData.content = content;
+            if (category !== undefined) updateData.category = category;
+            if (published !== undefined) updateData.published = published;
+            
+            // Handle featured image
+            if (featuredImage !== undefined) {
+                updateData.featuredImage = featuredImage;
+            } else if (useDefaultThumbnail && category) {
+                // User wants to use default thumbnail based on category
+                updateData.featuredImage = `/thumbnails/${category}.webp`;
+            }
+            
+            const post = await updatePostService(postId, updateData);
             return res.json({
                 message: 'Blog updated successfully',
                 id: post.id,
             });
-        } catch (err) {
+        } catch (err: any) {
+            console.error('Update post error:', err);
             return res
                 .status(500)
-                .json({ message: 'Failed to update blog post' });
+                .json({ message: err.message || 'Failed to update blog post' });
         }
     },
 

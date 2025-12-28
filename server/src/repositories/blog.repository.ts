@@ -19,6 +19,8 @@ export async function updatePost(
         content: string;
         category: string;
         published: boolean;
+        featuredImage: string;
+        readTime: string;
     }>
 ) {
     return prisma.post.update({ where: { id: postId }, data });

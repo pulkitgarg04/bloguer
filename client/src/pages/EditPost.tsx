@@ -293,13 +293,18 @@ export default function EditPost() {
                 uploadedFeaturedImage = newImageUrl;
             }
 
-            const formData = {
+            const formData: any = {
                 postId: postId,
                 title: title,
                 content: finalContent,
                 category: category,
-                featuredImage: uploadedFeaturedImage || undefined,
             };
+
+            if (uploadedFeaturedImage && uploadedFeaturedImage.trim() !== '') {
+                formData.featuredImage = uploadedFeaturedImage;
+            } else if (uploadedFeaturedImage === '' || !uploadedFeaturedImage) {
+                formData.useDefaultThumbnail = true;
+            }
 
             const response = await axios.put(
                 `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/post`,
@@ -434,18 +439,28 @@ export default function EditPost() {
                                 </button>
                             </div>
                         ) : (
-                            <label className="cursor-pointer">
-                                <div className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition">
-                                    <ImagePlus size={20} />
-                                    <span>Select Featured Image</span>
+                            <div className="flex flex-col gap-3">
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-2">Default thumbnail for {category}:</p>
+                                    <img
+                                        src={`/thumbnails/${category}.webp`}
+                                        alt={`${category} thumbnail`}
+                                        className="w-40 h-24 object-cover rounded-lg border border-gray-300"
+                                    />
                                 </div>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={handleFeaturedImageSelect}
-                                />
-                            </label>
+                                <label className="cursor-pointer">
+                                    <div className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition w-fit">
+                                        <ImagePlus size={20} />
+                                        <span>Select Featured Image</span>
+                                    </div>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleFeaturedImageSelect}
+                                    />
+                                </label>
+                            </div>
                         )}
                     </div>
                 </div>
