@@ -28,6 +28,8 @@ import {
     findBookmarksByUser,
     findBookmark,
 } from '../repositories/blog.repository';
+import { checkBookmarkExists } from '../repositories/blog.repository';
+
 
 const TTL_BULK = 600; // 10 minutes
 const TTL_POPULAR = 21600; // 6 hours
@@ -45,11 +47,25 @@ export async function toggleBookmarkService(userId: string, postId: string) {
     const existing = await findBookmark(userId, postId);
     if (existing) {
         await deleteBookmark(userId, postId);
+        await delCache(`bookmark:${userId}:${postId}`);
         return { bookmarked: false };
     }
 
     await createBookmark(userId, postId);
+    await delCache(`bookmark:${userId}:${postId}`);
     return { bookmarked: true };
+}
+
+export async function checkBookmarkService(userId: string, postId: string) {
+    const cacheKey = `bookmark:${userId}:${postId}`;
+    const cached = await getCache(cacheKey);
+    if (cached !== null) {
+        return { bookmarked: cached === 'true' };
+    }
+
+    const exists = await checkBookmarkExists(userId, postId);
+    await setCache(cacheKey, exists ? 'true' : 'false', 3600); // Cache for 1 hour
+    return { bookmarked: exists };
 }
 
 export async function getBookmarksService(userId: string) {

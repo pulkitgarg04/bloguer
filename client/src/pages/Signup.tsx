@@ -208,33 +208,45 @@ export default function Signup() {
                                 </span>
                             </label>
 
-                            <label
-                                htmlFor="password"
-                                className="relative rounded-md border border-gray-200 shadow-sm flex items-center"
-                            >
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    id="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    className="peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 h-11 px-4 w-full text-base"
-                                    placeholder="Password"
-                                />
-                                <span className="pointer-events-none absolute left-2.5 top-0 -translate-y-1/2 bg-gray-100 px-1 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">
-                                    Password
-                                </span>
-                                <button
-                                    type="button"
-                                    onClick={togglePasswordVisibility}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                            <div className="space-y-2">
+                                <label
+                                    htmlFor="password"
+                                    className="relative rounded-md border border-gray-200 shadow-sm flex items-center"
                                 >
-                                    {showPassword ? (
-                                        <EyeOff size={20} />
-                                    ) : (
-                                        <Eye size={20} />
-                                    )}
-                                </button>
-                            </label>
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        id="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        className="peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 h-11 px-4 w-full text-base"
+                                        placeholder="Password"
+                                    />
+                                    <span className="pointer-events-none absolute left-2.5 top-0 -translate-y-1/2 bg-gray-100 px-1 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">
+                                        Password
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={togglePasswordVisibility}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff size={20} />
+                                        ) : (
+                                            <Eye size={20} />
+                                        )}
+                                    </button>
+                                </label>
+                                <div className="text-xs text-gray-600 space-y-1 px-1">
+                                    <p className="font-medium text-gray-700">Password must contain:</p>
+                                    <ul className="list-disc list-inside space-y-0.5 ml-2">
+                                        <li>At least 8 characters</li>
+                                        <li>One uppercase letter (A-Z)</li>
+                                        <li>One lowercase letter (a-z)</li>
+                                        <li>One number (0-9)</li>
+                                        <li>One special character (@$!%*?&#)</li>
+                                    </ul>
+                                </div>
+                            </div>
 
                             <div className="flex items-center justify-start space-x-2">
                                 <input

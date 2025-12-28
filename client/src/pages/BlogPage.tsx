@@ -86,6 +86,7 @@ export default function BlogPage() {
     const [similarBlogs, setSimilarBlogs] = useState<SimilarBlog[]>([]);
 
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const [bookmarkLoading, setBookmarkLoading] = useState(false);
     const [comments, setComments] = useState<Comment[]>([]);
     const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
     const { user } = useAuthStore();
@@ -160,15 +161,12 @@ export default function BlogPage() {
         const checkBookmark = async () => {
             if (user) {
                 try {
+                    const token = localStorage.getItem('token');
                     const response = await axios.get(
-                        `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/bookmarks/${
-                            user.id
-                        }`
+                        `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/bookmark/${postId}`,
+                        { headers: { Authorization: `Bearer ${token}` } }
                     );
-                    const isAlreadyBookmarked = response.data.posts.some(
-                        (post: Blog) => post.id === postId
-                    );
-                    setIsBookmarked(isAlreadyBookmarked);
+                    setIsBookmarked(response.data.bookmarked);
                 } catch (error) {
                     console.error('Error fetching bookmark status:', error);
                 }
@@ -181,6 +179,7 @@ export default function BlogPage() {
     const handleBookmarkToggle = async () => {
         if (user) {
             try {
+                setBookmarkLoading(true);
                 const token = localStorage.getItem('token');
                 const response = await axios.post(
                     `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/bookmark`,
@@ -193,6 +192,8 @@ export default function BlogPage() {
             } catch (error) {
                 toast.error('Failed to toggle bookmark');
                 console.error(error);
+            } finally {
+                setBookmarkLoading(false);
             }
         } else {
             toast.error('You need to be login to bookmark this article.');
@@ -384,14 +385,19 @@ export default function BlogPage() {
                         </p>
                         <button
                             onClick={handleBookmarkToggle}
-                            className={`flex gap-2 justify-center items-center mx-2 md:mx-4 px-2 rounded-md ${
+                            disabled={bookmarkLoading}
+                            className={`flex gap-2 justify-center items-center mx-2 md:mx-4 px-2 rounded-md transition-colors ${
                                 isBookmarked
                                     ? 'bg-gray-300 text-blue-600'
                                     : 'hover:bg-gray-300'
-                            }`}
+                            } ${bookmarkLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                            <Bookmark size={15} />
-                            <p>{isBookmarked ? 'Bookmarked' : 'Bookmark'}</p>
+                            {bookmarkLoading ? (
+                                <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <Bookmark size={15} />
+                            )}
+                            <p>{bookmarkLoading ? 'Loading...' : (isBookmarked ? 'Bookmarked' : 'Bookmark')}</p>
                         </button>
                     </div>
                 </div>

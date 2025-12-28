@@ -256,3 +256,8 @@ export async function findBookmarksByUser(userId: string) {
 export async function findBookmark(userId: string, postId: string) {
     return prisma.bookmark.findFirst({ where: { userId, postId } });
 }
+
+export async function checkBookmarkExists(userId: string, postId: string): Promise<boolean> {
+    const count = await prisma.bookmark.count({ where: { userId, postId } });
+    return count > 0;
+}

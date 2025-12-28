@@ -11,6 +11,7 @@ blogRouter.post('/post', authMiddleware, BlogController.create);
 blogRouter.put('/post', authMiddleware, BlogController.update);
 blogRouter.delete('/post/:postId', authMiddleware, BlogController.delete);
 blogRouter.post('/bookmark', authMiddleware, BlogController.toggleBookmark);
+blogRouter.get('/bookmark/:postId', authMiddleware, BlogController.checkBookmark);
 blogRouter.get('/bookmarks/:userId', BlogController.getBookmarks);
 blogRouter.post('/analytics/engagement', BlogController.engagement);
 blogRouter.get('/bulk', BlogController.bulk);
