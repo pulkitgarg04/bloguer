@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { toast } from 'react-hot-toast';
@@ -19,8 +19,50 @@ export default function WritePost() {
     const [featuredImageFile, setFeaturedImageFile] = useState<File | null>(null);
     const [pendingImages, setPendingImages] = useState<Map<string, File>>(new Map());
     const quillRef = useRef<any>(null);
+    const [hasDraft, setHasDraft] = useState(false);
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const raw = localStorage.getItem('bloguer_draft');
+        setHasDraft(!!raw);
+
+        // Auto-offer restore when editor is empty
+        if (raw && !title && !content) {
+            try {
+                const draft = JSON.parse(raw);
+                if (confirm('A saved draft was found. Restore it?')) {
+                    setTitle(draft.title || '');
+                    setContent(draft.content || '');
+                    setCategory(draft.category || 'Uncategorized');
+                    setFeaturedImagePreview(draft.featuredImagePreview || '');
+                    setHasDraft(false);
+                    toast.success('Draft restored');
+                }
+            } catch {}
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleLoadDraft = () => {
+        const raw = localStorage.getItem('bloguer_draft');
+        if (!raw) {
+            toast.error('No draft found');
+            setHasDraft(false);
+            return;
+        }
+        try {
+            const draft = JSON.parse(raw);
+            setTitle(draft.title || '');
+            setContent(draft.content || '');
+            setCategory(draft.category || 'Uncategorized');
+            setFeaturedImagePreview(draft.featuredImagePreview || '');
+            setHasDraft(false);
+            toast.success('Draft restored');
+        } catch (e) {
+            toast.error('Failed to load draft');
+        }
+    };
 
     const handleImageUpload = async (file: File) => {
         const formData = new FormData();
@@ -34,7 +76,6 @@ export default function WritePost() {
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data',
                     },
                 }
             );
@@ -42,8 +83,10 @@ export default function WritePost() {
             if (response.data.url) {
                 return response.data.url;
             }
-        } catch (error) {
-            toast.error('Failed to upload image');
+        } catch (error: any) {
+            const msg = error?.response?.data?.message || 'Failed to upload image';
+            console.error('Image upload error:', error);
+            toast.error(msg);
             return null;
         }
     };
@@ -195,14 +238,33 @@ export default function WritePost() {
     };
 
     const handlePublish = async () => {
-        if (!title || !content) {
+        const titleTrimmed = title.trim();
+        const tmp = document.createElement('div');
+        tmp.innerHTML = content || '';
+        const textContent = tmp.textContent || tmp.innerText || '';
+        const textLength = textContent.trim().length;
+
+        if (!titleTrimmed || !content) {
             toast.error('Title or content cannot be empty!');
+            return;
+        }
+        if (titleTrimmed.length < 5) {
+            toast.error('Title must be at least 5 characters.');
+            return;
+        }
+        if (textLength < 20) {
+            toast.error('Content must be at least 20 characters.');
             return;
         }
 
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
+            if (!token) {
+                toast.error('You need to sign in to publish.');
+                setLoading(false);
+                return;
+            }
 
             let finalContent = content;
             if (pendingImages.size > 0) {
@@ -214,6 +276,8 @@ export default function WritePost() {
             toast.loading('Processing images...');
             finalContent = await convertBase64ImagesInContent(finalContent);
             toast.dismiss();
+
+            setContent(finalContent);
 
             let uploadedFeaturedImage = undefined;
             if (featuredImageFile) {
@@ -227,12 +291,15 @@ export default function WritePost() {
                 }
             }
 
-            const formData = {
+            const formData: any = {
                 title,
                 content: finalContent,
                 category,
-                featuredImage: uploadedFeaturedImage,
             };
+
+            if (uploadedFeaturedImage) {
+                formData.featuredImage = uploadedFeaturedImage;
+            }
 
             const response = await axios.post(
                 `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/post`,
@@ -250,11 +317,12 @@ export default function WritePost() {
                 localStorage.removeItem('bloguer_draft');
                 navigate('/');
             } else {
-                toast.error('Failed to publish article.');
+                toast.error(response.data?.message || 'Failed to publish article.');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error publishing article:', error);
-            toast.error('An error occurred while publishing the article.');
+            const serverMsg = error?.response?.data?.message;
+            toast.error(serverMsg || 'An error occurred while publishing the article.');
         } finally {
             setLoading(false);
         }
@@ -418,6 +486,20 @@ export default function WritePost() {
                         Write New Article
                     </h1>
                     <div className="flex gap-3 w-full md:w-auto">
+                        {hasDraft && (
+                            <button
+                                className={`py-2 px-4 md:px-6 rounded-md flex-1 md:flex-none ${
+                                    loading
+                                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                        : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                                }`}
+                                onClick={handleLoadDraft}
+                                disabled={loading}
+                                title="Load saved draft"
+                            >
+                                Load Draft
+                            </button>
+                        )}
                         <button
                             className={`py-2 px-4 md:px-6 rounded-md flex-1 md:flex-none ${
                                 loading

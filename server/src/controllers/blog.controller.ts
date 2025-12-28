@@ -28,8 +28,19 @@ export const BlogController = {
             };
             const post = await createPostService(userId, body);
             return res.status(200).json({ id: post.id });
-        } catch (err) {
-            return res.status(500).json({ message: 'Failed to create post' });
+        } catch (err: any) {
+            console.error('Create post error:', err);
+            const msg = err?.message || 'Failed to create post';
+            const isValidation =
+                typeof msg === 'string' &&
+                (
+                    msg.toLowerCase().includes('title') ||
+                    msg.toLowerCase().includes('content') ||
+                    msg.toLowerCase().includes('category') ||
+                    msg.toLowerCase().includes('featured image') ||
+                    msg.toLowerCase().includes('featuredimage')
+                );
+            return res.status(isValidation ? 400 : 500).json({ message: msg });
         }
     },
 
@@ -47,18 +58,15 @@ export const BlogController = {
             if (!postId)
                 return res.status(400).json({ message: 'postId is required' });
 
-            // Build update data object, excluding undefined values
             const updateData: any = {};
             if (title !== undefined) updateData.title = title;
             if (content !== undefined) updateData.content = content;
             if (category !== undefined) updateData.category = category;
             if (published !== undefined) updateData.published = published;
 
-            // Handle featured image
             if (featuredImage !== undefined) {
                 updateData.featuredImage = featuredImage;
             } else if (useDefaultThumbnail && category) {
-                // User wants to use default thumbnail based on category
                 updateData.featuredImage = `/thumbnails/${category}.webp`;
             }
 

@@ -46,7 +46,6 @@ export default function EditPost() {
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data',
                     },
                 }
             );
@@ -54,8 +53,10 @@ export default function EditPost() {
             if (response.data.url) {
                 return response.data.url;
             }
-        } catch (error) {
-            toast.error('Failed to upload image');
+        } catch (error: any) {
+            const msg = error?.response?.data?.message || 'Failed to upload image';
+            console.error('Image upload error:', error);
+            toast.error(msg);
             return null;
         }
     };
