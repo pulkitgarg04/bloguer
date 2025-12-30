@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import BlurImage from './BlurImage';
 
 interface BlogAuthor {
     name: string;
@@ -52,10 +53,11 @@ export default function BlogCard({
         return (
             <Link to={linkTo}>
                 <div className="w-full overflow-hidden mb-6 md:mb-10 flex flex-col md:flex-row justify-center items-center">
-                    <img
+                    <BlurImage
                         src={optimizedFeaturedImage}
                         alt={title}
-                        className="w-full md:w-1/3 h-48 md:h-80 object-cover rounded-lg shadow-sm"
+                        wrapperClassName="w-full md:w-1/3 h-48 md:h-80 rounded-lg shadow-sm"
+                        className="rounded-lg"
                         loading="lazy"
                     />
                     <div className="p-4 md:p-8 flex flex-col justify-center">
@@ -73,10 +75,14 @@ export default function BlogCard({
                             {title}
                         </h2>
                         <div className="mt-4 flex items-center space-x-4 text-gray-500">
-                            <img
-                                src={optimizedAvatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(author.name)}&size=128`}
+                            <BlurImage
+                                src={
+                                    optimizedAvatar ||
+                                    `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(author.name)}&size=128`
+                                }
                                 alt={author.name}
-                                className="w-8 md:w-10 h-8 md:h-10 rounded-full object-cover"
+                                wrapperClassName="w-8 md:w-10 h-8 md:h-10"
+                                className="rounded-full"
                                 loading="lazy"
                             />
                             <div>
@@ -91,7 +97,6 @@ export default function BlogCard({
         );
     }
 
-    // Optimize Cloudinary images with transformations
     const optimizedFeaturedImage = featuredImage?.includes('cloudinary.com')
         ? featuredImage.replace('/upload/', '/upload/f_auto,q_auto,w_400/')
         : featuredImage;
@@ -102,10 +107,10 @@ export default function BlogCard({
     return (
         <Link to={linkTo}>
             <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
-                <img
+                <BlurImage
                     src={optimizedFeaturedImage}
                     alt={title}
-                    className="w-full h-48 object-cover"
+                    wrapperClassName="w-full h-48"
                     loading="lazy"
                 />
                 <div className="p-4 flex flex-col flex-grow">
@@ -116,10 +121,14 @@ export default function BlogCard({
                         {title}
                     </h3>
                     <div className="mt-4 flex items-center space-x-4 text-gray-500">
-                        <img
-                            src={optimizedAvatar || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(author.name)}&size=128`}
+                        <BlurImage
+                            src={
+                                optimizedAvatar ||
+                                `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(author.name)}&size=128`
+                            }
                             alt={author.name}
-                            className="w-8 h-8 rounded-full object-cover"
+                            wrapperClassName="w-8 h-8"
+                            className="rounded-full"
                             loading="lazy"
                         />
                         <div>

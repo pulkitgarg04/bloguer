@@ -200,6 +200,32 @@ export async function findPostViewsAll(postIds: string[]) {
     });
 }
 
+export async function findPostViewExists(params: {
+    postId: string;
+    visitorId?: string;
+    ip?: string;
+    userAgent?: string;
+}) {
+    const { postId, visitorId, ip, userAgent } = params;
+    return (prisma as any).postView.findFirst({
+        where: {
+            postId,
+            OR: [
+                visitorId ? { visitorId } : undefined,
+                ip || userAgent
+                    ? {
+                          AND: [
+                              ip ? { ip } : undefined,
+                              userAgent ? { userAgent } : undefined,
+                          ].filter(Boolean) as any,
+                      }
+                    : undefined,
+            ].filter(Boolean) as any,
+        },
+        select: { id: true },
+    });
+}
+
 export async function findPostById(postId: string) {
     return prisma.post.findUnique({
         where: { id: postId },

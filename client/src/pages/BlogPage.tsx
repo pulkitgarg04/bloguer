@@ -6,6 +6,7 @@ import Newsletter from '../components/Newsletter';
 import Footer from '../components/Footer';
 import CommentCard from '../components/CommentCard';
 import CommentForm from '../components/CommentForm';
+import BlurImage from '../components/BlurImage';
 import SEO, { ArticleSchema, BreadcrumbSchema } from '../components/SEO';
 import { useAuthStore } from '../store/authStore';
 import {
@@ -365,10 +366,14 @@ export default function BlogPage() {
                 </div>
                 <div className="flex flex-col md:flex-row justify-center items-center gap-3 md:gap-0">
                     <Link to={`/profile/${blog.author.username}`}>
-                        <img
-                            src={optimizeCloudinaryUrl(blog.author.avatar, 128) || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`}
+                        <BlurImage
+                            src={
+                                optimizeCloudinaryUrl(blog.author.avatar, 128) ||
+                                `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`
+                            }
                             alt={blog.author.name}
-                            className="h-10 w-10 rounded-3xl"
+                            wrapperClassName="h-10 w-10"
+                            className="rounded-3xl"
                             loading="eager"
                         />
                     </Link>
@@ -405,10 +410,11 @@ export default function BlogPage() {
 
             <section className="py-6 md:py-10">
                 <div className="flex justify-center px-4">
-                    <img
-                        src={optimizeCloudinaryUrl(blog.featuredImage, 800)}
+                    <BlurImage
+                        src={optimizeCloudinaryUrl(blog.featuredImage, 1200)}
                         alt={blog.title}
-                        className="w-full h-48 md:h-96 max-w-3xl object-cover rounded-lg"
+                        wrapperClassName="w-full h-48 md:h-96 max-w-3xl rounded-lg"
+                        className="rounded-lg"
                         loading="eager"
                     />
                 </div>
@@ -428,10 +434,14 @@ export default function BlogPage() {
                 <div className="max-w-3xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 md:gap-0">
                     <Link to={`/profile/${blog.author.username}`}>
                         <div className="flex gap-4 md:gap-5 items-center">
-                            <img
-                                src={optimizeCloudinaryUrl(blog.author.avatar, 128) || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`}
+                            <BlurImage
+                                src={
+                                    optimizeCloudinaryUrl(blog.author.avatar, 128) ||
+                                    `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(blog.author.name)}&size=128`
+                                }
                                 alt="avatar"
-                                className="h-12 w-12 md:h-16 md:w-16 rounded-full object-cover"
+                                wrapperClassName="h-12 w-12 md:h-16 md:w-16"
+                                className="rounded-full"
                                 loading="lazy"
                             />
                             <div className="flex flex-col justify-center">
@@ -556,10 +566,10 @@ export default function BlogPage() {
                                 to={`/${similarPost.author.username}/${similarPost.id}`}
                             >
                                 <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
-                                    <img
-                                        src={optimizeCloudinaryUrl(similarPost.featuredImage, 400)}
+                                    <BlurImage
+                                        src={optimizeCloudinaryUrl(similarPost.featuredImage, 600)}
                                         alt={similarPost.title}
-                                        className="w-full h-48 object-cover"
+                                        wrapperClassName="w-full h-48"
                                         loading="lazy"
                                     />
                                     <div className="p-4 flex flex-col flex-grow">
@@ -578,10 +588,14 @@ export default function BlogPage() {
                                             }}
                                         />
                                         <div className="mt-4 flex items-center space-x-4 text-gray-500">
-                                            <img
-                                                src={optimizeCloudinaryUrl(similarPost.author.avatar, 64) || `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(similarPost.author.name)}&size=128`}
+                                            <BlurImage
+                                                src={
+                                                    optimizeCloudinaryUrl(similarPost.author.avatar, 64) ||
+                                                    `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(similarPost.author.name)}&size=128`
+                                                }
                                                 alt={similarPost.author.name}
-                                                className="w-8 h-8 rounded-full object-cover"
+                                                wrapperClassName="w-8 h-8"
+                                                className="rounded-full"
                                                 loading="lazy"
                                             />
                                             <div>

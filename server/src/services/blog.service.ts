@@ -27,6 +27,7 @@ import {
     deleteBookmark,
     findBookmarksByUser,
     findBookmark,
+    findPostViewExists,
 } from '../repositories/blog.repository';
 import { checkBookmarkExists } from '../repositories/blog.repository';
 
@@ -220,11 +221,14 @@ export async function getPostService(reqMeta: {
         try {
             const country = await lookupCountry(reqMeta.ip);
             let isReturning = false;
-            if (reqMeta.visitorId) {
-                const prev = await findPostViewsAll([id]);
-                isReturning = !!prev.find(
-                    (v: any) => v.visitorId === reqMeta.visitorId
-                );
+            if (reqMeta.visitorId || reqMeta.ip || reqMeta.userAgent) {
+                const prev = await findPostViewExists({
+                    postId: id,
+                    visitorId: reqMeta.visitorId,
+                    ip: reqMeta.ip,
+                    userAgent: reqMeta.userAgent,
+                });
+                isReturning = !!prev;
             }
             await createPostView({
                 postId: id,
@@ -248,11 +252,14 @@ export async function getPostService(reqMeta: {
     try {
         const country = await lookupCountry(reqMeta.ip);
         let isReturning = false;
-        if (reqMeta.visitorId) {
-            const prev = await findPostViewsAll([id]);
-            isReturning = !!prev.find(
-                (v: any) => v.visitorId === reqMeta.visitorId
-            );
+        if (reqMeta.visitorId || reqMeta.ip || reqMeta.userAgent) {
+            const prev = await findPostViewExists({
+                postId: id,
+                visitorId: reqMeta.visitorId,
+                ip: reqMeta.ip,
+                userAgent: reqMeta.userAgent,
+            });
+            isReturning = !!prev;
         }
         await createPostView({
             postId: id,
