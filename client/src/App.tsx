@@ -44,6 +44,12 @@ function AppShell() {
     const location = useLocation();
     const navigate = useNavigate();
 
+
+    // setting here for global usage 
+    useEffect(() => {
+        window.scrollTo(0, 0);  // reset on every route change
+    }, [location.pathname]);
+
     useEffect(() => {
         const handleOAuthParams = async () => {
             const params = new URLSearchParams(location.search);
