@@ -8,7 +8,6 @@ import {
     followOrUnfollowService,
     verifyEmailService,
     resendVerificationService,
-    googleOAuthService,
     forgotPasswordService,
     resetPasswordService,
     updateProfileService,
@@ -152,25 +151,6 @@ export const UserController = {
             return res
                 .status(200)
                 .json({ message: 'Verification email sent' });
-        } catch (e) {
-            return res.status(500).json({ message: 'Server error' });
-        }
-    },
-
-    googleOAuth: async (req: Request, res: Response) => {
-        try {
-            const { credential } = req.body as any;
-            if (!credential)
-                return res
-                    .status(400)
-                    .json({ message: 'Missing Google credential' });
-            const result = await googleOAuthService(credential);
-            if ((result as any).error)
-                return res.status(400).json({ message: (result as any).error });
-            return res.status(200).json({
-                jwt: (result as any).token,
-                user: (result as any).user,
-            });
         } catch (e) {
             return res.status(500).json({ message: 'Server error' });
         }

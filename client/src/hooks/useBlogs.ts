@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import { useEffect } from 'react';
 
 interface Blog {
     id: string;
@@ -19,27 +20,46 @@ interface Blog {
 interface BulkBlogsResponse {
     blogs: Blog[];
     totalPages: number;
+    currentPage: number;
 }
 
+const fetchBlogs = async (page: number, limit: number, search: string): Promise<BulkBlogsResponse> => {
+    const response = await axios.get<BulkBlogsResponse>(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/bulk`,
+        {
+            params: { page, limit, search },
+        }
+    );
+    return response.data;
+};
+
 export const useBlogs = (page: number, limit: number, search: string) => {
-    return useQuery({
+    const queryClient = useQueryClient();
+    
+    const query = useQuery({
         queryKey: ['blogs', page, limit, search],
-        queryFn: async () => {
+        queryFn: () => {
             const pageLimit = page === 1 ? 10 : 9;
-            const response = await axios.get<BulkBlogsResponse>(
-                `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/bulk`,
-                {
-                    params: {
-                        page,
-                        limit: pageLimit,
-                        search,
-                    },
-                }
-            );
-            return response.data;
+            return fetchBlogs(page, pageLimit, search);
         },
-        staleTime: 5 * 60 * 1000, // 5 minutes
+        staleTime: search ? 5 * 60 * 1000 : 30 * 60 * 1000, // 5 min for search, 30 min for homepage
+        gcTime: 60 * 60 * 1000, // Cached for 1 hour
+        placeholderData: (previousData) => previousData, // Keep showing old data while loading new
     });
+
+    useEffect(() => {
+        if (query.data && !search && page < query.data.totalPages) {
+            const nextPage = page + 1;
+            const nextLimit = nextPage === 1 ? 10 : 9;
+            queryClient.prefetchQuery({
+                queryKey: ['blogs', nextPage, nextLimit, search],
+                queryFn: () => fetchBlogs(nextPage, nextLimit, search),
+                staleTime: 30 * 60 * 1000,
+            });
+        }
+    }, [query.data, page, search, queryClient]);
+
+    return query;
 };
 
 interface PopularBlogsResponse {

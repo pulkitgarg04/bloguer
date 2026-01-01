@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Newsletter from '../components/Newsletter';
 import Footer from '../components/Footer';
@@ -8,58 +7,23 @@ import Skeleton from '../components/Skeleton';
 import SEO, { WebsiteSchema } from '../components/SEO';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useBlogs } from '../hooks/useBlogs';
 
 export default function Blog() {
-    interface Blog {
-        id: string;
-        featuredImage: string;
-        title: string;
-        category: string;
-        readTime: string;
-        author: {
-            name: string;
-            username: string;
-            avatar: string;
-        };
-        Date: string;
-        content?: string;
-    }
-
-    const [blogs, setBlogs] = useState<Blog[]>([]);
-    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    
+    const pageLimit = currentPage === 1 ? 10 : 9;
+    const { data, isLoading, error } = useBlogs(currentPage, pageLimit, searchTerm);
+
+    const blogs = data?.blogs || [];
+    const totalPages = data?.totalPages || 1;
 
     useEffect(() => {
-        const fetchBlogs = async () => {
-            try {
-                setLoading(true);
-                const pageLimit = currentPage === 1 ? 10 : 9;
-                const response = await axios.get(
-                    `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/bulk`,
-                    {
-                        params: {
-                            page: currentPage,
-                            limit: pageLimit,
-                            search: searchTerm,
-                        },
-                    }
-                );
-
-                console.log(response.data);
-                setTotalPages(response.data.totalPages);
-                setBlogs(response.data.blogs);
-            } catch (err) {
-                toast.error('Error fetching blogs');
-                console.log('Error: ', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchBlogs();
-    }, [currentPage, searchTerm]);
+        if (error) {
+            toast.error('Error fetching blogs');
+        }
+    }, [error]);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
@@ -103,7 +67,7 @@ export default function Blog() {
                 </div>
             </section>
 
-            {loading ? (
+            {isLoading ? (
                 <Skeleton />
             ) : (
                 <section className="mt-8 md:mt-16 px-4">
@@ -114,7 +78,7 @@ export default function Blog() {
                                 id={blogs[0].id}
                                 title={blogs[0].title}
                                 category={blogs[0].category}
-                                readTime={blogs[0].readTime}
+                                readTime={blogs[0].readTime ?? undefined}
                                 featuredImage={blogs[0].featuredImage}
                                 author={blogs[0].author}
                                 date={blogs[0].Date}
@@ -134,7 +98,7 @@ export default function Blog() {
                                     id={blog.id}
                                     title={blog.title}
                                     category={blog.category}
-                                    readTime={blog.readTime}
+                                    readTime={blog.readTime ?? undefined}
                                     featuredImage={blog.featuredImage}
                                     author={blog.author}
                                     date={blog.Date}

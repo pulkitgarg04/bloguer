@@ -1,6 +1,6 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { Toaster, toast } from 'react-hot-toast';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -42,46 +42,16 @@ const PageLoader = () => (
 function AppShell() {
     const { checkAuth } = useAuthStore();
     const location = useLocation();
-    const navigate = useNavigate();
 
 
-    // setting here for global usage 
     useEffect(() => {
-        window.scrollTo(0, 0);  // reset on every route change
+        window.scrollTo(0, 0);
     }, [location.pathname]);
 
     useEffect(() => {
-        const handleOAuthParams = async () => {
-            const params = new URLSearchParams(location.search);
-            const token = params.get('token');
-            const error = params.get('error');
-
-            const isOAuthCallback = location.pathname === '/login' || location.pathname === '/signup';
-            
-            if (error && isOAuthCallback) {
-                toast.error(`Google sign-in failed: ${error}`);
-
-                navigate(location.pathname, { replace: true });
-
-                return;
-            }
-
-            if (token && isOAuthCallback) {
-                localStorage.setItem('token', token);
-                await checkAuth();
-
-                await new Promise((r) => setTimeout(r, 100));
-
-                navigate(location.pathname, { replace: true });
-            }
-        };
-
-        handleOAuthParams();
-    }, [location.search, location.pathname, checkAuth, navigate]);
-
-    useEffect(() => {
         checkAuth();
-    }, [checkAuth]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <>

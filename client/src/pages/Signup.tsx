@@ -1,14 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
 
 export default function Signup() {
-    const { signup, isLoading, checkAuth } = useAuthStore();
+    const { signup, isLoading } = useAuthStore();
     const navigate = useNavigate();
-    const location = useLocation();
 
     const [formData, setFormData] = useState<{
         name: string;
@@ -34,12 +33,6 @@ export default function Signup() {
     const togglePasswordVisibility = () => {
         setShowPassword((prev) => !prev);
     };
-
-    // const handleGoogleClick = () => {
-    //     const redirect = window.location.origin;
-        
-    //     window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/google?redirect=${encodeURIComponent(redirect)}`;
-    // };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -90,34 +83,6 @@ export default function Signup() {
         }
     };
 
-    useEffect(() => {
-        const handleOAuthCallback = async () => {
-            const params = new URLSearchParams(location.search);
-            const token = params.get('token');
-            const error = params.get('error');
-
-            if (error) {
-                toast.error(`Google sign-in failed: ${error}`);
-                navigate('/signup', { replace: true });
-
-                return;
-            }
-
-            if (token) {
-                localStorage.setItem('token', token);
-                
-                await checkAuth();
-                
-                await new Promise(resolve => setTimeout(resolve, 100));
-                
-                toast.success('Signup Successful!');
-                navigate('/', { replace: true });
-            }
-        };
-
-        handleOAuthCallback();
-    }, [location.search, checkAuth, navigate]);
-
     return (
         <div className="min-h-screen bg-gray-100 text-gray-900 flex font-inter">
             <div className="flex flex-col justify-center items-center flex-1 px-4 py-8">
@@ -133,27 +98,6 @@ export default function Signup() {
                         Welcome to Bloguer Roger! You are just a few steps away
                         to signup.
                     </p>
-
-                    {/* <div className="flex justify-center">
-                        <button
-                            type="button"
-                            onClick={handleGoogleClick}
-                            className="mt-3 mb-2 w-full inline-flex items-center justify-center gap-2 h-11 rounded-lg border border-gray-300 bg-white text-sm text-gray-700 hover:shadow-sm"
-                        >
-                            <img
-                                src="/logo/google.webp"
-                                alt="Google"
-                                className="w-5 h-5"
-                            />
-                            Continue with Google
-                        </button>
-                    </div>
-
-                    <div className="flex items-center justify-center gap-2 my-3">
-                        <hr className="w-full border-gray-300" />
-                        <span className="text-gray-500">or</span>
-                        <hr className="w-full border-gray-300" />
-                    </div> */}
 
                     <form onSubmit={handleSubmit}>
                         <div className="mx-auto max-w-md space-y-4">

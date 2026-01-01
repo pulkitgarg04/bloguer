@@ -23,4 +23,8 @@ export default defineConfig({
     optimizeDeps: {
         include: ['react', 'react-dom', 'axios', 'zustand'],
     },
+    ssr: {
+        // Disable externalizing @tanstack/react-query to avoid double bundles on Vite 6
+        noExternal: ['@tanstack/react-query'],
+    },
 });

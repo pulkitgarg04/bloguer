@@ -27,6 +27,7 @@ interface AuthState {
     isLoading: boolean;
     isCheckingAuth: boolean;
     message: string | null;
+    lastAuthCheck: number | null;
     signup: (
         email: string,
         password: string,
@@ -35,16 +36,20 @@ interface AuthState {
     ) => Promise<boolean>;
     login: (email: string, password: string) => Promise<boolean>;
     logout: () => void;
-    checkAuth: () => void;
+    checkAuth: (force?: boolean) => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+let inFlightAuthPromise: Promise<void> | null = null;
+const AUTH_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+export const useAuthStore = create<AuthState>((set, get) => ({
     user: null,
     isAuthenticated: false,
     error: null,
     isLoading: false,
     isCheckingAuth: true,
     message: null,
+    lastAuthCheck: null,
 
     signup: async (
         email: string,
@@ -114,8 +119,8 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ user: null, isAuthenticated: false, error: null });
     },
 
-    checkAuth: async () => {
-        set({ isLoading: true });
+    checkAuth: async (force = false) => {
+        const state = get();
         const token = localStorage.getItem('token');
 
         if (!token) {
@@ -125,36 +130,60 @@ export const useAuthStore = create<AuthState>((set) => ({
                 isLoading: false,
                 user: null,
                 error: null,
+                lastAuthCheck: Date.now(),
             });
 
             return;
         }
 
-        set({ isCheckingAuth: true });
+        if (
+            !force &&
+            state.lastAuthCheck &&
+            state.user &&
+            Date.now() - state.lastAuthCheck < AUTH_CACHE_DURATION
+        ) {
+            set({ isCheckingAuth: false, isLoading: false });
 
-        try {
-            const response = await axios.get(`${API_URL}/checkAuth`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            set({
-                user: response.data || null,
-                isAuthenticated: true,
-                isCheckingAuth: false,
-                isLoading: false,
-            });
-        } catch (error) {
-            const errorMessage = handleError(error);
-
-            set({
-                error: errorMessage,
-                isCheckingAuth: false,
-                isAuthenticated: false,
-                isLoading: false,
-                user: null,
-            });
+            return;
         }
+
+        if (inFlightAuthPromise) {
+            return inFlightAuthPromise;
+        }
+
+        set({ isCheckingAuth: true, isLoading: true });
+
+        inFlightAuthPromise = (async () => {
+            try {
+                const response = await axios.get(`${API_URL}/checkAuth`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                set({
+                    user: response.data || null,
+                    isAuthenticated: true,
+                    isCheckingAuth: false,
+                    isLoading: false,
+                    lastAuthCheck: Date.now(),
+                });
+            } catch (error) {
+                const errorMessage = handleError(error);
+
+                set({
+                    error: errorMessage,
+                    isCheckingAuth: false,
+                    isAuthenticated: false,
+                    isLoading: false,
+                    user: null,
+                    lastAuthCheck: Date.now(),
+                });
+            } finally {
+                inFlightAuthPromise = null;
+            }
+        })();
+
+        return inFlightAuthPromise;
     },
 }));

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
@@ -29,6 +30,7 @@ interface FormatDateFunction {
 
 const formatDate: FormatDateFunction = (dateString) => {
     const date = new Date(dateString);
+
     return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -90,26 +92,54 @@ export default function BlogPage() {
     const [bookmarkLoading, setBookmarkLoading] = useState(false);
     const [comments, setComments] = useState<Comment[]>([]);
     const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
+    const [commentsLoaded, setCommentsLoaded] = useState(false);
     const { user } = useAuthStore();
 
+    const fetchedRef = useRef(false);
+    const bookmarkCheckedRef = useRef<string | null>(null);
+    const engagementSentRef = useRef(false);
+    const startTimeRef = useRef(Date.now());
+    const maxScrollRef = useRef(0);
+    const commentsSectionRef = useRef<HTMLElement>(null);
+
     useEffect(() => {
+        if (fetchedRef.current) return;
+        fetchedRef.current = true;
+
         const fetchBlogData = async () => {
             try {
                 const vid = getVisitorId();
-                const response = await axios.get(
+                const token = localStorage.getItem('token');
+
+                const blogPromise = axios.get(
                     `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/${postId}`,
                     { headers: { 'x-visitor-id': vid } }
                 );
-                const data = await response.data;
+
+                const shouldFetchBookmark = token && user && bookmarkCheckedRef.current !== postId;
+
+                const bookmarkPromise = shouldFetchBookmark
+                    ? axios
+                          .get(
+                              `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/bookmark/${postId}`,
+                              { headers: { Authorization: `Bearer ${token}` } }
+                          )
+                          .catch(() => null)
+                    : Promise.resolve(null);
+
+                const [blogResponse, bookmarkResponse] = await Promise.all([
+                    blogPromise,
+                    bookmarkPromise,
+                ]);
+
+                const data = blogResponse.data;
+
                 setBlog(data.post);
                 setSimilarBlogs(data.similarPosts);
-                try {
-                    const resp = await axios.get(
-                        `${import.meta.env.VITE_BACKEND_URL}/api/v1/comment/post/${postId}`
-                    );
-                    setComments(resp.data.comments || []);
-                } catch (err) {
-                    console.error('Failed to fetch comments', err);
+
+                if (bookmarkResponse && shouldFetchBookmark) {
+                    bookmarkCheckedRef.current = postId || null;
+                    setIsBookmarked(bookmarkResponse.data.bookmarked);
                 }
             } catch (error) {
                 toast.error(`Error fetching blog data: ${error}`);
@@ -117,65 +147,101 @@ export default function BlogPage() {
         };
 
         fetchBlogData();
-    }, [postId]);
+
+        return () => {
+            fetchedRef.current = false;
+            setCommentsLoaded(false);
+            setComments([]);
+        };
+    }, [postId, user]);
 
     useEffect(() => {
-        const start = Date.now();
-        let maxScroll = 0;
+        if (!blog || !postId) return;
+
+        engagementSentRef.current = false;
+        startTimeRef.current = Date.now();
+        maxScrollRef.current = 0;
+
         const onScroll = () => {
             const scrolled = window.scrollY + window.innerHeight;
             const total = document.documentElement.scrollHeight;
             const depth = Math.min(100, Math.round((scrolled / total) * 100));
-            if (depth > maxScroll) maxScroll = depth;
+            if (depth > maxScrollRef.current) maxScrollRef.current = depth;
         };
-        window.addEventListener('scroll', onScroll);
-        const send = () => {
-            const durationSec = Math.round((Date.now() - start) / 1000);
-            const vid = getVisitorId();
-            if (!postId) return;
-            axios
-                .post(
-                    `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/analytics/engagement`,
-                    {
-                        postId,
-                        visitorId: vid,
-                        durationSec,
-                        scrollDepth: maxScroll,
-                    }
-                )
-                .catch(() => {
-                    /* ignore */
-                });
-        };
-        const onHide = () => {
-            send();
-        };
-        document.addEventListener('visibilitychange', onHide);
-        return () => {
-            window.removeEventListener('scroll', onScroll);
-            document.removeEventListener('visibilitychange', onHide);
-            send();
-        };
-    }, [postId]);
 
-    useEffect(() => {
-        const checkBookmark = async () => {
-            if (user) {
-                try {
-                    const token = localStorage.getItem('token');
-                    const response = await axios.get(
-                        `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/bookmark/${postId}`,
-                        { headers: { Authorization: `Bearer ${token}` } }
-                    );
-                    setIsBookmarked(response.data.bookmarked);
-                } catch (error) {
-                    console.error('Error fetching bookmark status:', error);
-                }
+        const sendEngagement = () => {
+            if (engagementSentRef.current) return;
+            engagementSentRef.current = true;
+
+            const durationSec = Math.round((Date.now() - startTimeRef.current) / 1000);
+            const vid = getVisitorId();
+
+            const data = JSON.stringify({
+                postId,
+                visitorId: vid,
+                durationSec,
+                scrollDepth: maxScrollRef.current,
+            });
+
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(
+                    `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/analytics/engagement`,
+                    new Blob([data], { type: 'application/json' })
+                );
+            } else {
+                axios.post(
+                    `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/analytics/engagement`,
+                    JSON.parse(data)
+                ).catch(() => {});
             }
         };
 
-        checkBookmark();
-    }, [user, postId]);
+        const onVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                sendEngagement();
+            }
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        document.addEventListener('visibilitychange', onVisibilityChange);
+        window.addEventListener('beforeunload', sendEngagement);
+
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+            document.removeEventListener('visibilitychange', onVisibilityChange);
+            window.removeEventListener('beforeunload', sendEngagement);
+        };
+    }, [blog, postId]);
+
+    useEffect(() => {
+        if (!postId || !blog || commentsLoaded) return;
+
+        const section = commentsSectionRef.current;
+        if (!section) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    observer.disconnect();
+                    axios
+                        .get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/comment/post/${postId}`)
+                        .then((res) => {
+                            setComments(res.data.comments || []);
+                            setCommentsLoaded(true);
+                        })
+                        .catch((err) => {
+                            console.error('Failed to load comments:', err);
+                            setCommentsLoaded(true);
+                        });
+                }
+            },
+            { rootMargin: '200px' }
+        );
+
+        observer.observe(section);
+
+        return () => observer.disconnect();
+    }, [postId, blog, commentsLoaded]);
 
     const handleBookmarkToggle = async () => {
         if (user) {
@@ -187,7 +253,7 @@ export default function BlogPage() {
                     { postId },
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
-                setIsBookmarked((prev) => !prev);
+                setIsBookmarked(response.data.bookmarked);
                 const msg = response.data.bookmarked ? 'Bookmarked' : 'Removed from bookmarks';
                 toast.success(msg);
             } catch (error) {
@@ -411,7 +477,7 @@ export default function BlogPage() {
             <section className="py-6 md:py-10">
                 <div className="flex justify-center px-4">
                     <BlurImage
-                        src={optimizeCloudinaryUrl(blog.featuredImage, 1200)}
+                        src={optimizeCloudinaryUrl(blog.featuredImage, 960)}
                         alt={blog.title}
                         wrapperClassName="w-full h-48 md:h-96 max-w-3xl rounded-lg"
                         className="rounded-lg"
@@ -619,13 +685,17 @@ export default function BlogPage() {
                 )}
             </section>
 
-            <section className="max-w-3xl mx-auto px-4 py-6">
+            <section ref={commentsSectionRef} className="max-w-3xl mx-auto px-4 py-6">
                 <h3 className="text-xl font-semibold mb-4">Comments</h3>
 
                 <CommentForm user={user} onSubmit={handleAddComment} />
 
                 <div className="space-y-4">
-                    {comments.length === 0 ? (
+                    {!commentsLoaded ? (
+                        <div className="text-gray-500 animate-pulse">
+                            Loading comments...
+                        </div>
+                    ) : comments.length === 0 ? (
                         <div className="text-gray-500">
                             No comments yet. Be the first to comment!
                         </div>

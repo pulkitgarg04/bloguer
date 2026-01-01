@@ -59,6 +59,11 @@ model Post {
   comments      Comment[]
   viewsLog      PostView[]
   shares        PostShare[]
+
+  @@index([published, Date(sort: Desc)])
+  @@index([category, published])
+  @@index([authorId])
+  @@index([views(sort: Desc)])
 }
 
 model Bookmark {
@@ -81,6 +86,8 @@ model Comment {
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    String
   createdAt DateTime @default(now())
+
+  @@index([postId])
 }
 
 model PostView {
@@ -98,6 +105,11 @@ model PostView {
   durationSec Int?
   scrollDepth Int?
   createdAt  DateTime @default(now())
+
+  @@index([postId])
+  @@index([visitorId])
+  @@index([postId, visitorId])
+  @@index([postId, createdAt])
 }
 
 model PostShare {

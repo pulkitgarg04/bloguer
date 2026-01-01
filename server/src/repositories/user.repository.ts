@@ -35,27 +35,6 @@ export async function createUser(data: {
     return prisma.user.create({ data });
 }
 
-export async function createUserFromGoogle(data: {
-    name: string;
-    email: string;
-    avatar?: string;
-    googleId: string;
-}) {
-    return (prisma as any).user.create({
-        data: {
-            name: data.name,
-            username: data.email.split('@')[0],
-            email: data.email,
-            password: 'GOOGLE',
-            avatar: data.avatar,
-            JoinedDate: new Date(),
-            provider: 'GOOGLE',
-            googleId: data.googleId,
-            emailVerifiedAt: new Date(),
-        },
-    });
-}
-
 export async function findUserProfile(username: string) {
     return prisma.user.findFirst({
         where: { username: { equals: username, mode: 'insensitive' } },
@@ -170,10 +149,6 @@ export async function markEmailVerified(userId: string) {
         },
         select: { id: true, emailVerifiedAt: true },
     });
-}
-
-export async function findUserByGoogleId(googleId: string) {
-    return (prisma as any).user.findFirst({ where: { googleId } });
 }
 
 export async function setPasswordResetToken(

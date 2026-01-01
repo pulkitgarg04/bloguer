@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Newsletter from '../components/Newsletter';
@@ -7,87 +6,22 @@ import BlogCard from '../components/BlogCard';
 import Skeleton from '../components/Skeleton';
 import SEO from '../components/SEO';
 import { useAuthStore } from '../store/authStore';
-
-interface Author {
-    username: string;
-    name: string;
-    avatar: string;
-}
-
-interface Post {
-    id: string;
-    title: string;
-    content?: string;
-    featuredImage: string;
-    category: string;
-    readTime: string | null;
-    Date: string;
-    author: Author;
-}
-
-interface PopularBlogsResponse {
-    popularPosts: Post[];
-}
-
-interface FollowingBlogsResponse {
-    followingBlogs: { posts: Post[] }[];
-}
+import { usePopularBlogs, useFollowingBlogs } from '../hooks/useBlogs';
+import { toast } from 'react-hot-toast';
 
 const ForYou: React.FC = () => {
     const { user, isAuthenticated } = useAuthStore();
-    const [popularPosts, setPopularPosts] = useState<Post[]>([]);
-    const [followingBlogs, setFollowingBlogs] = useState<Post[]>([]);
-    const [loading, setLoading] = useState(true);
+    
+    const { data: popularPosts = [], isLoading: popularLoading, error: popularError } = usePopularBlogs();
+    const { data: followingBlogs = [], isLoading: followingLoading } = useFollowingBlogs(user?.id);
+    
+    const loading = popularLoading || followingLoading;
 
     useEffect(() => {
-        const fetchPopularBlogs = async () => {
-            try {
-                const response = await axios.get<PopularBlogsResponse>(
-                    `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/getPopularBlogs`
-                );
-
-                setPopularPosts(response.data.popularPosts);
-            } catch (error) {
-                console.error('Error fetching popular blogs:', error);
-            }
-        };
-
-        const fetchFollowingBlogs = async () => {
-            try {
-                if (user) {
-                    const userId = user?.id;
-                    const response = await axios.get<FollowingBlogsResponse>(
-                        `${import.meta.env.VITE_BACKEND_URL}/api/v1/blog/getFollowingBlogs`,
-                        { params: { userId } }
-                    );
-                    const blogs = response.data.followingBlogs.flatMap(
-                        (blog) => blog.posts
-                    );
-
-                    setFollowingBlogs(blogs);
-                }
-            } catch (error) {
-                console.error('Error fetching following blogs:', error);
-            }
-        };
-
-        const fetchData = async () => {
-            setLoading(true);
-
-            try {
-                await fetchPopularBlogs();
-
-                if (user) {
-                    await fetchFollowingBlogs();
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user?.id]);
+        if (popularError) {
+            toast.error('Error fetching popular blogs');
+        }
+    }, [popularError]);
 
     if (loading) {
         return (

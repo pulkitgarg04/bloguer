@@ -8,8 +8,8 @@ import App from './App.tsx';
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            staleTime: 5 * 60 * 1000, // 5 minutes
-            gcTime: 10 * 60 * 1000, // 10 minutes
+            staleTime: 10 * 60 * 1000, // 10 minutes [default]
+            gcTime: 30 * 60 * 1000, // 30 minutes [default]
             retry: 1,
             refetchOnWindowFocus: false,
             refetchOnReconnect: true,

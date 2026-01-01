@@ -33,6 +33,7 @@ import { checkBookmarkExists } from '../repositories/blog.repository';
 
 
 const TTL_BULK = 600; // 10 minutes
+const TTL_BULK_NO_SEARCH = 1800; // 30 minutes (homepage without any search query)
 const TTL_POPULAR = 21600; // 6 hours
 const TTL_FOLLOWING = 180; // 3 minutes
 const TTL_POST = 120; // 2 minutes
@@ -168,19 +169,48 @@ export async function deletePostService(postId: string, userId: string) {
 }
 
 export async function bulkService(page: number, limit: number, search: string) {
-    const cacheKey = `blog:bulk:${page}:${limit}:${String(search || '').toLowerCase()}`;
+    const normalizedSearch = String(search || '').toLowerCase().trim();
+    const cacheKey = `blog:bulk:${page}:${limit}:${normalizedSearch}`;
     const cached = await getCache(cacheKey);
     if (cached) return JSON.parse(cached);
 
-    const totalCount = await countPublishedPosts(search);
-    const posts = await findPublishedPosts(search, (page - 1) * limit, limit);
+    const [totalCount, posts] = await Promise.all([
+        countPublishedPosts(normalizedSearch),
+        findPublishedPosts(normalizedSearch, (page - 1) * limit, limit)
+    ]);
+    
     const payload = {
         blogs: posts,
         totalPages: Math.ceil(totalCount / limit),
         currentPage: page,
     };
-    await setCache(cacheKey, JSON.stringify(payload), TTL_BULK);
+    
+    const ttl = normalizedSearch === '' ? TTL_BULK_NO_SEARCH : TTL_BULK;
+    await setCache(cacheKey, JSON.stringify(payload), ttl);
+    
+    if (normalizedSearch === '' && page <= 3 && page < Math.ceil(totalCount / limit)) {
+        prefetchNextPage(page + 1, limit).catch(() => {});
+    }
+    
     return payload;
+}
+
+async function prefetchNextPage(page: number, limit: number) {
+    const cacheKey = `blog:bulk:${page}:${limit}:`;
+    const cached = await getCache(cacheKey);
+    if (cached) return;
+    
+    const [totalCount, posts] = await Promise.all([
+        countPublishedPosts(''),
+        findPublishedPosts('', (page - 1) * limit, limit)
+    ]);
+    
+    const payload = {
+        blogs: posts,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page,
+    };
+    await setCache(cacheKey, JSON.stringify(payload), TTL_BULK_NO_SEARCH);
 }
 
 export async function popularService() {

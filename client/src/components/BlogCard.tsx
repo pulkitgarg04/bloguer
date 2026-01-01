@@ -44,7 +44,7 @@ export default function BlogCard({
     if (variant === 'featured') {
         // Optimize Cloudinary images with transformations
         const optimizedFeaturedImage = featuredImage?.includes('cloudinary.com')
-            ? featuredImage.replace('/upload/', '/upload/f_auto,q_auto,w_600/')
+            ? featuredImage.replace('/upload/', '/upload/f_auto,q_auto,w_480/')
             : featuredImage;
         const optimizedAvatar = author.avatar?.includes('cloudinary.com')
             ? author.avatar.replace('/upload/', '/upload/f_auto,q_auto,w_128/')
@@ -98,7 +98,7 @@ export default function BlogCard({
     }
 
     const optimizedFeaturedImage = featuredImage?.includes('cloudinary.com')
-        ? featuredImage.replace('/upload/', '/upload/f_auto,q_auto,w_400/')
+        ? featuredImage.replace('/upload/', '/upload/f_auto,q_auto,w_360/')
         : featuredImage;
     const optimizedAvatar = author.avatar?.includes('cloudinary.com')
         ? author.avatar.replace('/upload/', '/upload/f_auto,q_auto,w_64/')

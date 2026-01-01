@@ -10,14 +10,15 @@ import {
     aiRouter,
     commentRouter,
     healthRouter,
-    authRouter,
     newsletterRouter,
     contactRouter,
     adminRouter,
 } from './routes/index.route';
-import passport from './config/passport';
+import { useCompression } from './middlewares/compressionMiddleware';
 
 const app = express();
+
+app.use(useCompression);
 
 const allowedOrigins = ['http://localhost:5173', 'https://bloguer.vercel.app'];
 
@@ -36,7 +37,6 @@ app.use(
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(passport.initialize());
 
 app.get('/', (req, res) => {
     console.log(req.url);
@@ -44,7 +44,6 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/v1/health', healthRouter);
-app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/blog', blogRouter);
 app.use('/api/v1/ai', aiRouter);

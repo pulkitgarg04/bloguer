@@ -10,11 +10,9 @@ import {
 } from '@pulkitgarg04/bloguer-validations';
 import {
     createUser,
-    createUserFromGoogle,
     findPostsByAuthor,
     findUserBasicById,
     findUserByEmail,
-    findUserByGoogleId,
     findUserByUsername,
     follow,
     unfollow,
@@ -28,7 +26,6 @@ import {
 } from '../repositories/user.repository';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/email';
 import crypto from 'crypto';
-import { OAuth2Client } from 'google-auth-library';
 
 export function generateJWT(id: string) {
     const secret = process.env.JWT_SECRET || '';
@@ -81,7 +78,7 @@ export async function loginService(body: any) {
     if (!user || !(await bcrypt.compare(body.password, (user as any).password)))
         return { error: 'Incorrect credentials' };
 
-    if (!(user as any).emailVerifiedAt && (user as any).provider !== 'GOOGLE') {
+    if (!(user as any).emailVerifiedAt) {
         return { error: 'Please verify your email before logging in.' };
     }
 
@@ -176,31 +173,6 @@ export async function resendVerificationService(email: string) {
     await setVerificationToken((user as any).id, token, expires);
     await sendVerificationEmail(email, (user as any).name || '', token);
     return { ok: true };
-}
-
-export async function googleOAuthService(credential: string) {
-    const clientId = process.env.GOOGLE_CLIENT_ID || '';
-    const client = new OAuth2Client(clientId);
-    const ticket = await client.verifyIdToken({
-        idToken: credential,
-        audience: clientId,
-    });
-    const payload = ticket.getPayload();
-    if (!payload || !payload.email)
-        return { error: 'Invalid Google token' };
-
-    const googleId = payload.sub as string;
-    let user = await findUserByGoogleId(googleId);
-    if (!user) {
-        user = await createUserFromGoogle({
-            name: payload.name || payload.email.split('@')[0],
-            email: payload.email,
-            avatar: payload.picture,
-            googleId,
-        });
-    }
-    const token = generateJWT((user as any).id);
-    return { user, token };
 }
 
 export async function forgotPasswordService(email: string) {
