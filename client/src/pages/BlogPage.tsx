@@ -92,12 +92,6 @@ export default function BlogPage() {
     const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
     const { user } = useAuthStore();
 
-
-    // for individual blog page 
-    // useEffect(() =>{
-    //     window.scrollTo(0,0);
-    // }, [postId])
-
     useEffect(() => {
         const fetchBlogData = async () => {
             try {
@@ -164,8 +158,6 @@ export default function BlogPage() {
         };
     }, [postId]);
 
-
-
     useEffect(() => {
         const checkBookmark = async () => {
             if (user) {
@@ -209,7 +201,6 @@ export default function BlogPage() {
         }
     };
 
-    // it hnadles adding comment to the blog post
     const handleAddComment = async (content: string) => {
         if (!user) {
             toast.error('You need to be logged in to comment.');
