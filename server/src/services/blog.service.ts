@@ -246,7 +246,7 @@ export async function getPostService(reqMeta: {
     const cached = await getCache(cacheKey);
     if (cached) {
         try {
-            await incrementViews(id);
+            incrementViews(id).catch(() => {});
         } catch {}
         try {
             const country = await lookupCountry(reqMeta.ip);
@@ -260,7 +260,7 @@ export async function getPostService(reqMeta: {
                 });
                 isReturning = !!prev;
             }
-            await createPostView({
+            createPostView({
                 postId: id,
                 userId: reqMeta.userId,
                 ip: reqMeta.ip,
@@ -270,14 +270,14 @@ export async function getPostService(reqMeta: {
                 source: classifySource(reqMeta.ref),
                 country,
                 isReturning,
-            });
+            }).catch(() => {});
         } catch {}
         return JSON.parse(cached);
     }
 
     const post = await findPostPublic(id);
     if (!post || !post.published) return null;
-    await incrementViews(id);
+    incrementViews(id).catch(() => {});
 
     try {
         const country = await lookupCountry(reqMeta.ip);
@@ -291,7 +291,7 @@ export async function getPostService(reqMeta: {
             });
             isReturning = !!prev;
         }
-        await createPostView({
+        createPostView({
             postId: id,
             userId: reqMeta.userId,
             ip: reqMeta.ip,
@@ -301,7 +301,7 @@ export async function getPostService(reqMeta: {
             source: classifySource(reqMeta.ref),
             country,
             isReturning,
-        });
+        }).catch(() => {});
     } catch {}
 
     const similarPosts = await findSimilarPosts(

@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
@@ -346,6 +346,11 @@ export default function BlogPage() {
         return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
     };
 
+    const sanitizedContent = useMemo(() => {
+        if (!blog?.content) return '';
+        return DOMPurify.sanitize(optimizeContentImages(blog.content));
+    }, [blog?.content]);
+
     if (!blog) {
         return (
             <div className="min-h-screen font-inter">
@@ -488,7 +493,7 @@ export default function BlogPage() {
                     <div
                         className="text-base md:text-lg text-gray-700 prose prose-sm md:prose-base max-w-none"
                         dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(optimizeContentImages(blog.content)),
+                            __html: sanitizedContent,
                         }}
                     />
                 </div>

@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { getCache, setCache, delCache } from '../utils/cache';
 import {
     signinInput,
     signupInput,
@@ -87,7 +88,15 @@ export async function loginService(body: any) {
 }
 
 export async function checkAuthService(userId: string) {
-    return findUserBasicById(userId);
+    const cacheKey = `user:auth:${userId}`;
+    const cached = await getCache(cacheKey);
+    if (cached) return JSON.parse(cached);
+
+    const user = await findUserBasicById(userId);
+    if (user) {
+        await setCache(cacheKey, JSON.stringify(user), 60);
+    }
+    return user;
 }
 
 export async function profileService(username: string) {
@@ -230,5 +239,6 @@ export async function updateProfileService(
     userId: string,
     data: { name?: string; bio?: string; location?: string }
 ) {
+    await delCache(`user:auth:${userId}`);
     return await updateUserProfile(userId, data);
 }

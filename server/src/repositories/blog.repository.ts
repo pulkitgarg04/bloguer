@@ -34,10 +34,7 @@ export async function countPublishedPosts(search: string) {
     return prisma.post.count({
         where: {
             published: true,
-            OR: [
-                { title: { contains: search, mode: 'insensitive' } },
-                { content: { contains: search, mode: 'insensitive' } },
-            ],
+            title: { contains: search, mode: 'insensitive' },
         },
     });
 }
@@ -50,10 +47,7 @@ export async function findPublishedPosts(
     return prisma.post.findMany({
         where: {
             published: true,
-            OR: [
-                { title: { contains: search, mode: 'insensitive' } },
-                { content: { contains: search, mode: 'insensitive' } },
-            ],
+            title: { contains: search, mode: 'insensitive' },
         },
         select: {
             id: true,
