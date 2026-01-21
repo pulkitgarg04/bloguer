@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { LogIn, Menu, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { motion } from 'framer-motion';
 
 export default function Navbar({ activeTab }: { activeTab: string }) {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -45,7 +46,9 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
         onClick?: () => void;
     }) => (
         <Link to={to} onClick={onClick}>
-            <li
+            <motion.li
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 className={`text-lg font-medium cursor-pointer px-2 py-1 ${
                     activeTab === tab
                         ? 'text-red-500 border-b-2 border-red-500'
@@ -53,7 +56,7 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
                 }`}
             >
                 {label}
-            </li>
+            </motion.li>
         </Link>
     );
 
@@ -156,9 +159,13 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
             </div>
 
             {mobileOpen && (
-                <div
+                <motion.div
                     ref={mobileRef}
-                    className="md:hidden border-t bg-white px-6 py-4 space-y-4"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="md:hidden border-t bg-white px-6 py-4 space-y-4 overflow-hidden"
                 >
                     <NavItem to="/" label="Home" tab="Home" onClick={() => setMobileOpen(false)} />
                     <NavItem to="/blogs" label="For You" tab="Blogs" onClick={() => setMobileOpen(false)} />
@@ -173,7 +180,7 @@ export default function Navbar({ activeTab }: { activeTab: string }) {
                             </button>
                         </Link>
                     )}
-                </div>
+                </motion.div>
             )}
         </nav>
     );

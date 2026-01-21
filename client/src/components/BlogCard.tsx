@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import BlurImage from './BlurImage';
 
 interface BlogAuthor {
@@ -52,7 +53,12 @@ export default function BlogCard({
 
         return (
             <Link to={linkTo}>
-                <div className="w-full overflow-hidden mb-6 md:mb-10 flex flex-col md:flex-row justify-center items-center">
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="w-full overflow-hidden mb-6 md:mb-10 flex flex-col md:flex-row justify-center items-center"
+                >
                     <BlurImage
                         src={optimizedFeaturedImage}
                         alt={title}
@@ -92,7 +98,7 @@ export default function BlogCard({
                             </div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </Link>
         );
     }
@@ -106,7 +112,12 @@ export default function BlogCard({
 
     return (
         <Link to={linkTo}>
-            <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full">
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full"
+            >
                 <BlurImage
                     src={optimizedFeaturedImage}
                     alt={title}
@@ -138,7 +149,7 @@ export default function BlogCard({
                         </div>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         </Link>
     );
 }

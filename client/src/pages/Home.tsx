@@ -8,6 +8,7 @@ import SEO, { WebsiteSchema } from '../components/SEO';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useBlogs } from '../hooks/useBlogs';
+import { motion } from 'framer-motion';
 
 export default function Blog() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -87,24 +88,59 @@ export default function Blog() {
                             />
                         )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 px-2 md:px-10 pb-10">
-                        {blogs
-                            .slice(
-                                searchTerm === '' && currentPage === 1 ? 1 : 0
-                            )
-                            .map((blog) => (
-                                <BlogCard
-                                    key={blog.id}
-                                    id={blog.id}
-                                    title={blog.title}
-                                    category={blog.category}
-                                    readTime={blog.readTime ?? undefined}
-                                    featuredImage={blog.featuredImage}
-                                    author={blog.author}
-                                    date={blog.Date}
-                                />
-                            ))}
-                    </div>
+                    {blogs.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                            <Search size={48} className="mb-4 text-gray-300" />
+                            <p className="text-xl font-medium">
+                                No articles found
+                                {searchTerm && ` matching "${searchTerm}"`}
+                            </p>
+                            <p className="text-sm mt-2">
+                                Try using different keywords or clear the search
+                            </p>
+                        </div>
+                    ) : (
+                        <motion.div
+                            initial="hidden"
+                            animate="visible"
+                            variants={{
+                                hidden: { opacity: 0 },
+                                visible: {
+                                    opacity: 1,
+                                    transition: {
+                                        staggerChildren: 0.1,
+                                    },
+                                },
+                            }}
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 px-2 md:px-10 pb-10"
+                        >
+                            {blogs
+                                .slice(
+                                    searchTerm === '' && currentPage === 1
+                                        ? 1
+                                        : 0
+                                )
+                                .map((blog) => (
+                                    <motion.div
+                                        key={blog.id}
+                                        variants={{
+                                            hidden: { opacity: 0, y: 20 },
+                                            visible: { opacity: 1, y: 0 },
+                                        }}
+                                    >
+                                        <BlogCard
+                                            id={blog.id}
+                                            title={blog.title}
+                                            category={blog.category}
+                                            readTime={blog.readTime ?? undefined}
+                                            featuredImage={blog.featuredImage}
+                                            author={blog.author}
+                                            date={blog.Date}
+                                        />
+                                    </motion.div>
+                                ))}
+                        </motion.div>
+                    )}
                 </section>
             )}
 

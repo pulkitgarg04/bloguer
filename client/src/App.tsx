@@ -1,7 +1,9 @@
-import { useEffect, lazy, Suspense } from 'react';
+import { useEffect, lazy, Suspense, useState } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 
+import SplashScreen from './components/SplashScreen';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -56,36 +58,38 @@ function AppShell() {
     return (
         <>
             <Suspense fallback={<PageLoader />}>
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/blogs" element={<ForYou />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                    <Route path="/terms-of-service" element={<TermsOfService />} />
+                <AnimatePresence mode="wait">
+                    <Routes location={location} key={location.pathname}>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/blogs" element={<ForYou />} />
+                        <Route path="/about" element={<About />} />
+                        <Route path="/contact" element={<Contact />} />
+                        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                        <Route path="/terms-of-service" element={<TermsOfService />} />
 
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/login" element={<Login />} />
+                        <Route path="/signup" element={<Signup />} />
+                        <Route path="/login" element={<Login />} />
 
-                    <Route path="/profile/:username" element={<Profile />} />
-                    <Route path="/bookmarked" element={<Bookmarked />} />
-                    <Route path="/write" element={<WritePost />} />
-                    <Route path="/edit/:username/:postId" element={<EditPost />} />
-                    <Route path="/analytics" element={<Analytics />} />
-                    <Route path="/verify-email" element={<VerifyEmail />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
+                        <Route path="/profile/:username" element={<Profile />} />
+                        <Route path="/bookmarked" element={<Bookmarked />} />
+                        <Route path="/write" element={<WritePost />} />
+                        <Route path="/edit/:username/:postId" element={<EditPost />} />
+                        <Route path="/analytics" element={<Analytics />} />
+                        <Route path="/verify-email" element={<VerifyEmail />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
 
-                    <Route path="/admin" element={<AdminLogin />} />
-                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                    <Route path="/admin/users" element={<AdminUsers />} />
-                    <Route path="/admin/posts" element={<AdminPosts />} />
-                    <Route path="/admin/comments" element={<AdminComments />} />
-                    <Route path="/admin/subscribers" element={<AdminSubscribers />} />
-                    <Route path="/admin/messages" element={<AdminMessages />} />
+                        <Route path="/admin" element={<AdminLogin />} />
+                        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                        <Route path="/admin/users" element={<AdminUsers />} />
+                        <Route path="/admin/posts" element={<AdminPosts />} />
+                        <Route path="/admin/comments" element={<AdminComments />} />
+                        <Route path="/admin/subscribers" element={<AdminSubscribers />} />
+                        <Route path="/admin/messages" element={<AdminMessages />} />
 
-                    <Route path="/:username/:postId" element={<BlogPage />} />
-                </Routes>
+                        <Route path="/:username/:postId" element={<BlogPage />} />
+                    </Routes>
+                </AnimatePresence>
             </Suspense>
             <Toaster />
         </>
@@ -93,10 +97,21 @@ function AppShell() {
 }
 
 function App() {
+    const [isLoading, setIsLoading] = useState(true);
+
     return (
         <BrowserRouter>
-            <AppShell />
-            <VAnalytics />
+            <AnimatePresence>
+                {isLoading && (
+                    <SplashScreen onComplete={() => setIsLoading(false)} />
+                )}
+            </AnimatePresence>
+            {!isLoading && (
+                <>
+                    <AppShell />
+                    <VAnalytics />
+                </>
+            )}
         </BrowserRouter>
     );
 }

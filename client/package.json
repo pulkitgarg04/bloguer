@@ -20,6 +20,7 @@
         "@vercel/analytics": "^1.6.1",
         "axios": "^1.7.9",
         "dompurify": "^3.2.3",
+        "framer-motion": "^12.27.5",
         "leaflet": "^1.9.4",
         "lucide-react": "^0.469.0",
         "react": "^18.3.1",
